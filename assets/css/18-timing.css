@@ -1,0 +1,437 @@
+/* ============================================================
+   18-timing.css —— 时间段推荐（0-24h 绝对坐标）
+   ============================================================ */
+
+/* ---------- 输入区 ---------- */
+.timing-input { margin-bottom: 10px; }
+.timing-input-title {
+    font-size: 0.82rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+.timing-label {
+    font-size: 0.85rem;
+    color: #444;
+    font-weight: 600;
+    display: block;
+    margin-bottom: 4px;
+}
+.timing-time-input {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.timing-time-input input[type="number"] {
+    width: 60px;
+    padding: 6px 8px;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-family: inherit;
+    text-align: center;
+}
+.timing-time-input input[type="number"]:focus {
+    outline: none;
+    border-color: #3f7e6b;
+    box-shadow: 0 0 0 3px rgba(63, 126, 107, 0.12);
+}
+
+.timing-input-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px dashed #eef1f4;
+}
+.timing-input-row:last-child { border-bottom: none; }
+.timing-input-label {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    flex: 1;
+    min-width: 0;
+}
+.timing-room-name {
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: #1a2a3a;
+}
+.timing-room-ops {
+    font-size: 0.72rem;
+    color: #888;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.timing-input-fields {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.85rem;
+    color: #555;
+    flex-shrink: 0;
+}
+.timing-input-fields input[type="number"] {
+    width: 56px;
+    padding: 5px 6px;
+    border: 1px solid #d0d7de;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    font-family: inherit;
+    text-align: center;
+}
+.timing-input-fields input[type="number"]:disabled {
+    background: #f5f5f5;
+    color: #aaa;
+    cursor: not-allowed;
+}
+
+/* ---------- 结果概览 ---------- */
+.timing-overview {
+    background: linear-gradient(135deg, #eef6f2, #f8fcfa);
+    border: 1px solid #b8d8cc;
+    border-radius: 10px;
+    padding: 12px 14px;
+    margin-bottom: 12px;
+}
+.timing-overview-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 4px 0;
+    font-size: 0.88rem;
+}
+.timing-tag {
+    display: inline-block;
+    font-size: 0.7rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    flex-shrink: 0;
+}
+.timing-tag-high { background: #dff0d8; color: #3c763d; }
+.timing-tag-low { background: #fcf8e3; color: #8a6d3b; }
+.timing-time { font-weight: 600; color: #1a2a3a; }
+.timing-dur { font-size: 0.78rem; color: #888; }
+
+.timing-section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #2a5a4a;
+    margin: 14px 0 8px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #eef1f4;
+}
+
+/* ---------- 舱室卡片 ---------- */
+.timing-room-list { display: grid; gap: 8px; }
+.timing-room-item {
+    background: #f8fafc;
+    border: 1px solid #e8ecf0;
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+.timing-room-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+}
+.timing-switch-time {
+    margin-left: auto;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #3f7e6b;
+}
+.timing-room-item-body {
+    font-size: 0.78rem;
+    color: #666;
+    line-height: 1.5;
+}
+.timing-badge-single {
+    font-size: 0.68rem;
+    background: #f0f0f0;
+    color: #888;
+    padding: 1px 6px;
+    border-radius: 8px;
+}
+.timing-badge-auto {
+    font-size: 0.68rem;
+    background: #e8f0ff;
+    color: #2a5a8a;
+    padding: 1px 6px;
+    border-radius: 8px;
+}
+
+/* ---------- 总控 ---------- */
+.timing-central {
+    background: #f8fafc;
+    border: 1px solid #e8ecf0;
+    border-radius: 10px;
+    padding: 12px 14px;
+}
+.timing-central-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+}
+.timing-central-ops {
+    font-size: 0.78rem;
+    color: #555;
+    margin: 4px 0 0 4px;
+    word-break: break-all;
+}
+
+/* ---------- 通用时间轴（0-24h 绝对坐标） ---------- */
+.ta-axis {
+    position: relative;
+    height: 44px;
+    background: #fafbfc;
+    border: 1px solid #e8ecf0;
+    border-radius: 6px;
+    overflow: hidden;
+    margin-top: 8px;
+}
+.ta-axis > div[class^="ta-"] {
+    position: absolute;
+    top: 0;
+    bottom: 18px;
+}
+.ta-labels {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 18px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 4px;
+    font-size: 0.62rem;
+    color: #888;
+    background: #fafbfc;
+    border-top: 1px solid #e8ecf0;
+}
+
+/* 色块：高效 / 过渡 / 高效2 / 低恢复 / 高恢复 */
+.ta-eff     { background: #93c8b1; }
+.ta-eff-2   { background: #d6e8df; }
+.ta-trans   { background: #f0d98a; }
+.ta-low     { background: #fcf8e3; }
+.ta-high    { background: #b8d8cc; }
+
+/* 标记（竖线） */
+.ta-mark-start,
+.ta-mark-switch,
+.ta-mark-trans-end,
+.ta-mark-room {
+    position: absolute;
+    top: 0;
+    bottom: 18px;
+    width: 2px;
+    z-index: 2;
+}
+.ta-mark-start { background: #c0392b; }       /* 起点：红 */
+.ta-mark-switch { background: #3f7e6b; }      /* 切换点：绿 */
+.ta-mark-trans-end { background: #e8a33d; }   /* 过渡终点：橙 */
+.ta-mark-room { background: rgba(63, 126, 107, 0.5); }  /* 其他舱切换点：半透明绿 */
+
+/* 标记上方的小圆点 */
+.ta-mark-start::before,
+.ta-mark-switch::before,
+.ta-mark-trans-end::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -3px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+}
+.ta-mark-start::before { background: #c0392b; }
+.ta-mark-switch::before { background: #3f7e6b; }
+.ta-mark-trans-end::before { background: #e8a33d; }
+/* ============ 新增：提示区 ============ */
+.timing-hints {
+    margin: 10px 0;
+}
+.timing-hint-line {
+    padding: 6px 10px;
+    margin-bottom: 4px;
+    background: #fff8e6;
+    border-left: 3px solid #f0b400;
+    border-radius: 6px;
+    font-size: 0.78rem;
+    color: #8a5e00;
+    line-height: 1.5;
+}
+.timing-hint-line:last-child { margin-bottom: 0; }
+/* ---------- 心情输入区 ---------- */
+.morale-room-block {
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px dashed #eef1f4;
+}
+.morale-room-block:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+.morale-room-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #2a5a4a;
+    margin-bottom: 6px;
+}
+.morale-op-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 0;
+    font-size: 0.8rem;
+}
+.morale-op-name {
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    color: #333;
+}
+.morale-op-tag {
+    font-size: 0.66rem;
+    padding: 1px 6px;
+    border-radius: 8px;
+    background: #eef2f6;
+    color: #666;
+    flex-shrink: 0;
+}
+.morale-input {
+    width: 56px;
+    padding: 4px 6px;
+    border: 1px solid #d0d7de;
+    border-radius: 6px;
+    font-size: 0.82rem;
+    font-family: inherit;
+    text-align: center;
+    flex-shrink: 0;
+}
+.morale-input:focus {
+    outline: none;
+    border-color: #3f7e6b;
+    box-shadow: 0 0 0 3px rgba(63, 126, 107, 0.12);
+}
+.morale-unit {
+    color: #888;
+    font-size: 0.78rem;
+    flex-shrink: 0;
+}
+
+/* ---------- 交换提示 ---------- */
+.timing-swap-info {
+    padding: 8px 12px;
+    margin-bottom: 10px;
+    background: #e8f0ff;
+    border-left: 3px solid #3f7e6b;
+    border-radius: 6px;
+    font-size: 0.8rem;
+    color: #2a5a8a;
+    line-height: 1.5;
+}
+/* ---------- 取整对比 ---------- */
+.timing-compare-row {
+    display: flex;
+    gap: 10px;
+    margin: 5px 0;
+    flex-wrap: wrap;
+}
+.timing-cmp {
+    font-size: 0.72rem;
+    color: #666;
+    background: #f0f2f5;
+    padding: 2px 8px;
+    border-radius: 10px;
+    font-family: ui-monospace, monospace;
+}
+.timing-chosen {
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin: 4px 0;
+    padding: 4px 8px;
+    border-radius: 6px;
+}
+.timing-chosen-floor {
+    background: #eef6f2;
+    color: #2a5a4a;
+}
+.timing-chosen-ceil {
+    background: #fff8e6;
+    color: #8a5e00;
+}
+/* ---------- Overview 标题 ---------- */
+.timing-overview-title {
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: #2a5a4a;
+    margin-bottom: 8px;
+    padding-bottom: 6px;
+    border-bottom: 1px dashed #b8d8cc;
+}
+/* timing-time 允许换行 */
+.timing-time {
+    font-weight: 600;
+    color: #1a2a3a;
+    line-height: 1.5;
+    word-break: break-all;
+}
+/* 推荐设置 */
+.timing-overview-sub {
+    font-size: 0.75rem;
+    color: #666;
+    margin-top: 4px;
+}
+
+.timing-setting {
+    background: #f0f6f3;
+    border: 1px solid #b8d8cc;
+    border-radius: 8px;
+    padding: 8px 12px;
+    margin: 6px 0;
+}
+.timing-setting-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.85rem;
+    padding: 3px 0;
+}
+.timing-setting-label {
+    color: #555;
+    font-weight: 600;
+}
+.timing-setting-value {
+    color: #1a2a3a;
+    font-weight: 700;
+    font-family: ui-monospace, monospace;
+    font-size: 0.95rem;
+}
+/* 时间轴：确保 .ta-axis 内的色块宽度正确 */
+.ta-axis > div {
+    position: absolute;
+    top: 0;
+    bottom: 18px;
+}
+/* 总控注释行 */
+.timing-central-note {
+    font-size: 0.72rem;
+    color: #888;
+    margin-top: 6px;
+}
+/* ---------- 移动端 ---------- */
+@media (max-width: 640px) {
+    .timing-input-row { flex-direction: column; align-items: stretch; }
+    .timing-input-fields { justify-content: flex-end; }
+    .ta-labels { font-size: 0.58rem; }
+}

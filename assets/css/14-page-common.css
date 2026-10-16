@@ -1,0 +1,110 @@
+/* ============================================================
+   14-page-common.css —— 多页面通用 + 主内容工具栏
+   ============================================================ */
+
+/* ---------- 主内容区工具栏 ---------- */
+.main-toolbar {
+    display: flex;
+    gap: 12px;
+    justify-content: flex-end;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+.main-toolbar-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #f8fafc;
+    border: 1px solid #d0d7de;
+    border-radius: 30px;
+    padding: 8px 18px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: #333;
+    cursor: pointer;
+    transition: background 0.2s, border-color 0.2s, transform 0.15s;
+}
+.main-toolbar-btn:hover {
+    background: #eef2f6;
+    border-color: #3f7e6b;
+    transform: translateY(-1px);
+}
+.main-toolbar-btn:active { transform: translateY(0); }
+.main-toolbar-btn .toolbar-icon { font-size: 1rem; }
+.main-toolbar-btn .toolbar-badge {
+    background: #3f7e6b;
+    color: #fff;
+    border-radius: 20px;
+    padding: 1px 8px;
+    font-size: 0.72rem;
+    font-weight: 700;
+    min-width: 20px;
+    text-align: center;
+}
+
+/* 干员库弹窗内容区域高度 */
+#operatorPanelOverlay .operator-list {
+    max-height: 60vh;
+    overflow-y: auto;
+}
+#strategyPanelOverlay .batch-modal {
+    max-height: 90vh;
+    overflow-y: auto;
+}
+
+/* ---------- 多页面通用壳 ---------- */
+.page-shell {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 20px 60px;
+}
+.page-shell-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a2a3a;
+    margin: 0 0 8px 0;
+}
+.page-shell-subtitle {
+    font-size: 0.9rem;
+    color: #666;
+    margin: 0 0 24px 0;
+}
+.page-shell-card {
+    background: #fff;
+    border: 1px solid #e8ecf0;
+    border-radius: 14px;
+    padding: 20px 24px;
+    margin-bottom: 16px;
+}
+.page-shell-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    margin-top: 24px;
+    padding-top: 16px;
+    border-top: 1px solid #eee;
+}
+.page-shell-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 9px 22px;
+    border-radius: 30px;
+    border: none;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    transition: 0.2s;
+}
+.page-shell-btn.primary {
+    background: #3f7e6b;
+    color: #fff;
+}
+.page-shell-btn.primary:hover { background: #2f5b50; }
+.page-shell-btn.secondary {
+    background: #eef2f6;
+    color: #3f7e6b;
+}
+.page-shell-btn.secondary:hover { background: #dce2ea; }

@@ -1,0 +1,267 @@
+/* ============================================================
+   17-help.css —— 关于和帮助页
+   ============================================================ */
+
+/* ---------- Tab 切换 ---------- */
+.help-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    border-bottom: 1px solid #e8ecf0;
+    padding-bottom: 0;
+}
+.help-tab {
+    padding: 10px 24px;
+    border: none;
+    background: none;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #888;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: 0.2s;
+    font-family: inherit;
+    margin-bottom: -1px;
+}
+.help-tab:hover { color: #3f7e6b; }
+.help-tab.active {
+    color: #3f7e6b;
+    border-bottom-color: #3f7e6b;
+}
+
+.help-pane { display: none; }
+.help-pane.active { display: block; }
+
+/* ---------- 关于：Hero ---------- */
+.about-hero {
+    text-align: center;
+    padding: 24px 12px 28px;
+}
+.about-logo {
+    font-size: 3rem;
+    line-height: 1;
+    margin-bottom: 10px;
+}
+.about-title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1a2a3a;
+    margin-bottom: 6px;
+}
+.about-subtitle {
+    font-size: 0.95rem;
+    color: #666;
+    margin-bottom: 8px;
+}
+.about-since {
+    display: inline-block;
+    font-size: 0.82rem;
+    color: #3f7e6b;
+    background: #eef6f2;
+    padding: 4px 14px;
+    border-radius: 20px;
+    font-weight: 600;
+}
+
+/* ---------- 关于：便签卡片 ---------- */
+.about-cards {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    margin-bottom: 20px;
+}
+.about-card {
+    display: flex;
+    gap: 14px;
+    padding: 18px;
+    background: #fff;
+    border: 1px solid #e8ecf0;
+    border-radius: 14px;
+    text-decoration: none;
+    color: inherit;
+    transition: 0.2s;
+    position: relative;
+}
+.about-card:hover {
+    border-color: #3f7e6b;
+    box-shadow: 0 6px 20px rgba(63, 126, 107, 0.1);
+    transform: translateY(-2px);
+}
+.about-card-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: #3f7e6b;
+    color: #fff;
+    font-size: 1.6rem;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+.about-card-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.about-card-avatar.github {
+    background: #24292e;
+    color: #fff;
+}
+.about-card-body {
+    flex: 1;
+    min-width: 0;
+}
+.about-card-name {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1a2a3a;
+    margin-bottom: 3px;
+}
+.about-card-role {
+    font-size: 0.78rem;
+    color: #3f7e6b;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+.about-card-message {
+    font-size: 0.85rem;
+    color: #666;
+    line-height: 1.55;
+}
+
+/* ---------- 关于：项目说明框 ---------- */
+.about-description {
+    background: #fff;
+    border: 1px solid #e8ecf0;
+    border-radius: 14px;
+    padding: 22px 26px;
+}
+.about-description-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1a2a3a;
+    margin-bottom: 12px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eef1f4;
+}
+.about-description-body {
+    font-size: 0.9rem;
+    color: #444;
+    line-height: 1.8;
+}
+.about-description-body p { margin: 10px 0; }
+.about-description-body ul {
+    padding-left: 1.4em;
+    margin: 8px 0;
+}
+.about-description-body li { margin: 4px 0; }
+
+/* ---------- 帮助 Tab ---------- */
+.help-intro {
+    font-size: 0.92rem;
+    color: #666;
+    background: #f8fafc;
+    border: 1px solid #e8ecf0;
+    border-radius: 12px;
+    padding: 14px 18px;
+    margin-bottom: 20px;
+    line-height: 1.6;
+}
+
+.help-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.help-action-btn {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 20px 22px;
+    background: #fff;
+    border: 1px solid #e8ecf0;
+    border-radius: 14px;
+    text-decoration: none;
+    color: inherit;
+    transition: 0.2s;
+}
+.help-action-btn:hover {
+    border-color: #3f7e6b;
+    background: #f8fcfa;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(63, 126, 107, 0.1);
+}
+.help-action-icon {
+    font-size: 2rem;
+    width: 56px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #eef6f2;
+    border-radius: 12px;
+    flex-shrink: 0;
+}
+.help-action-body {
+    flex: 1;
+    min-width: 0;
+}
+.help-action-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1a2a3a;
+    margin-bottom: 4px;
+}
+.help-action-desc {
+    font-size: 0.85rem;
+    color: #888;
+}
+.help-action-arrow {
+    font-size: 1.4rem;
+    color: #3f7e6b;
+    font-weight: 700;
+    flex-shrink: 0;
+    transition: 0.2s;
+}
+.help-action-btn:hover .help-action-arrow {
+    transform: translate(3px, -3px);
+}
+
+.help-contact {
+    background: #fff;
+    border: 1px solid #e8ecf0;
+    border-radius: 14px;
+    padding: 20px 24px;
+}
+.help-contact-title {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a2a3a;
+    margin-bottom: 8px;
+}
+.help-contact-desc {
+    font-size: 0.9rem;
+    color: #555;
+    line-height: 1.7;
+}
+.help-contact-desc a {
+    color: #3f7e6b;
+    text-decoration: underline;
+}
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 768px) {
+    .about-cards {
+        grid-template-columns: 1fr;
+    }
+    .about-title { font-size: 1.35rem; }
+    .about-logo { font-size: 2.4rem; }
+    .about-description { padding: 18px; }
+    .help-action-btn { padding: 16px; gap: 12px; }
+    .help-action-icon { width: 46px; height: 46px; font-size: 1.6rem; }
+    .help-action-title { font-size: 0.98rem; }
+}

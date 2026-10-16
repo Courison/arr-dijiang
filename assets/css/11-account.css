@@ -1,0 +1,226 @@
+/* ============================================================
+   11-account.css —— 账号系统样式
+   ============================================================ */
+
+/* ---------- 顶部账号按钮 ---------- */
+.header-account-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eef2f6;
+    color: #333;
+    border: none;
+    padding: 6px 14px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: background 0.2s, color 0.2s;
+    max-width: 180px;
+    overflow: hidden;
+}
+.header-account-btn:hover { background: #dce2ea; }
+.header-account-btn.logged-in { background: #e0f0ea; color: #2a5a4a; }
+.header-account-btn.logged-in:hover { background: #c8e2d6; }
+.header-account-btn .account-icon { font-size: 0.95rem; }
+.header-account-btn .account-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 130px;
+}
+
+/* ---------- 弹窗通用 ---------- */
+#accountModal .batch-modal,
+#accountManageModal .batch-modal { max-width: 460px; }
+
+/* ---------- Tab 切换 ---------- */
+.account-tabs {
+    display: flex;
+    gap: 4px;
+    background: #f8fafc;
+    padding: 4px;
+    border-radius: 30px;
+    margin-bottom: 20px;
+    border: 1px solid #e2e8f0;
+}
+.account-tabs button {
+    flex: 1;
+    padding: 8px 0;
+    border-radius: 30px;
+    border: none;
+    background: transparent;
+    font-weight: 600;
+    font-size: 0.88rem;
+    color: #666;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.account-tabs button:hover { color: #3f7e6b; }
+.account-tabs button.active { background: #3f7e6b; color: #fff; }
+
+/* ---------- 表单 ---------- */
+.account-form { display: flex; flex-direction: column; gap: 14px; }
+.account-form .form-group { display: flex; flex-direction: column; gap: 6px; }
+.account-form label { font-size: 0.85rem; font-weight: 600; color: #444; }
+.account-form input {
+    padding: 10px 14px;
+    border: 1px solid #d0d7de;
+    border-radius: 10px;
+    font-size: 0.95rem;
+    outline: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+    width: 100%;
+    box-sizing: border-box;
+}
+.account-form input:focus {
+    border-color: #3f7e6b;
+    box-shadow: 0 0 0 3px rgba(63, 126, 107, 0.12);
+}
+.account-form .input-row { display: flex; gap: 8px; }
+.account-form .input-row input { flex: 1; }
+.account-form .input-row button {
+    background: #eef2f6;
+    color: #3f7e6b;
+    border: 1px solid #d0d7de;
+    border-radius: 10px;
+    padding: 0 16px;
+    font-weight: 600;
+    font-size: 0.85rem;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: 0.2s;
+}
+.account-form .input-row button:hover:not(:disabled) { background: #dce2ea; }
+.account-form .input-row button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.account-form .submit-btn {
+    background: #3f7e6b;
+    color: #fff;
+    border: none;
+    padding: 12px 0;
+    border-radius: 10px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-top: 4px;
+}
+.account-form .submit-btn:hover:not(:disabled) { background: #2f5b50; }
+.account-form .submit-btn:disabled { background: #ccc; cursor: not-allowed; }
+
+.account-form .link-btn {
+    background: none;
+    border: none;
+    color: #3f7e6b;
+    font-size: 0.85rem;
+    cursor: pointer;
+    padding: 0;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    align-self: flex-end;
+}
+.account-form .link-btn:hover { color: #2f5b50; }
+.account-form .row-between {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* ---------- 密码强度 ---------- */
+.pwd-strength { display: flex; gap: 4px; margin-top: 4px; }
+.pwd-strength span {
+    flex: 1; height: 4px; border-radius: 2px;
+    background: #e0e0e0; transition: background 0.2s;
+}
+.pwd-strength.weak span:nth-child(1) { background: #d9534f; }
+.pwd-strength.medium span:nth-child(-n+2) { background: #f0b400; }
+.pwd-strength.strong span { background: #3f7e6b; }
+.pwd-hint { font-size: 0.75rem; color: #888; margin-top: 2px; }
+
+/* ---------- 状态提示 ---------- */
+.account-status {
+    min-height: 1.4em;
+    font-size: 0.85rem;
+    text-align: center;
+    margin-top: 6px;
+    line-height: 1.5;
+}
+.account-status.ok { color: #3f7e6b; }
+.account-status.err { color: #c0392b; }
+.account-status.info { color: #555; }
+
+/* ---------- 账号管理 ---------- */
+.manage-info {
+    background: #f8fafc;
+    border: 1px solid #e8ecf0;
+    border-radius: 12px;
+    padding: 16px 20px;
+    margin-bottom: 16px;
+    font-size: 0.88rem;
+    color: #444;
+    line-height: 1.8;
+}
+.manage-info .email {
+    font-weight: 700;
+    color: #1a2a3a;
+    font-size: 1rem;
+    word-break: break-all;
+}
+.manage-info .meta { font-size: 0.78rem; color: #888; margin-top: 4px; }
+
+.manage-actions { display: flex; flex-direction: column; gap: 10px; }
+.manage-actions button {
+    padding: 11px 16px;
+    border-radius: 10px;
+    border: 1px solid #d0d7de;
+    background: #fff;
+    color: #333;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: 0.2s;
+    text-align: left;
+}
+.manage-actions button:hover { background: #f8fafc; border-color: #3f7e6b; }
+.manage-actions button.primary {
+    background: #3f7e6b;
+    color: #fff;
+    border-color: #3f7e6b;
+    text-align: center;
+}
+.manage-actions button.primary:hover { background: #2f5b50; }
+.manage-actions button.danger {
+    color: #c0392b;
+    border-color: #e8b8b4;
+    text-align: center;
+}
+.manage-actions button.danger:hover { background: #fef2f2; border-color: #c0392b; }
+
+/* 账号管理弹窗：昵称显示 */
+.manage-info .nickname {
+    font-weight: 700;
+    color: #1a2a3a;
+    font-size: 1.05rem;
+    margin-bottom: 4px;
+    word-break: break-all;
+}
+.manage-info .email {
+    font-weight: 500;
+    color: #666;
+    font-size: 0.85rem;
+    margin-bottom: 4px;
+    word-break: break-all;
+}
+/* 注销按钮 */
+.manage-actions button#manageDeleteAccountBtn {
+    background: #fce8e6;
+    color: #b33c34;
+    border-color: #e8b8b4;
+    text-align: center;
+}
+.manage-actions button#manageDeleteAccountBtn:hover {
+    background: #f5cfcb;
+    border-color: #c0392b;
+}

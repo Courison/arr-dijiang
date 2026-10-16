@@ -1,0 +1,88 @@
+/* ============================================================
+   13-sidebar.css —— 侧边栏导航菜单
+   ============================================================ */
+
+#sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 300px;
+    max-width: 82vw;
+    height: 100%;
+    background: #fafafa;
+    border-right: 1px solid #e0e0e0;
+    transform: translateX(-105%);
+    transition: transform 0.3s ease;
+    z-index: 999;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+}
+#sidebar.open { transform: translateX(0); }
+
+.sidebar-header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #e0e0e0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f0f0f0;
+    flex-shrink: 0;
+}
+.sidebar-header span { font-weight: 700; font-size: 1.05rem; }
+.sidebar-close {
+    background: none; border: none;
+    font-size: 1.6rem; cursor: pointer;
+    color: #888; padding: 0 4px;
+}
+
+.sidebar-nav {
+    display: flex;
+    flex-direction: column;
+    padding: 12px 10px;
+    gap: 4px;
+}
+.sidebar-nav-bottom {
+    border-top: 1px solid #eee;
+    padding-top: 12px;
+    margin-top: 8px;
+}
+
+.sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #333;
+    transition: background 0.15s, color 0.15s;
+    border: 1px solid transparent;
+}
+.sidebar-link:hover {
+    background: #eef2f6;
+    border-color: #d8e0e8;
+}
+.sidebar-link.is-active {
+    background: #e0f0ea;
+    color: #2a5a4a;
+    border-color: #b8d5cb;
+}
+.sidebar-link-icon { font-size: 1.3rem; flex-shrink: 0; }
+.sidebar-link-text { display: flex; flex-direction: column; min-width: 0; }
+.sidebar-link-title {
+    font-size: 0.95rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+.sidebar-link-desc {
+    font-size: 0.75rem;
+    color: #888;
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.sidebar-link.is-active .sidebar-link-desc { color: #6ba08e; }
+
+.sidebar-spacer { flex: 1; }

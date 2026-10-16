@@ -1,0 +1,239 @@
+/* ============================================================
+   15-development.css —— 专精建议页
+   ============================================================ */
+
+/* ---------- 总览统计 ---------- */
+.dev-overview {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+    margin-bottom: 20px;
+}
+.dev-stat {
+    background: #fff;
+    border: 1px solid #e8ecf0;
+    border-radius: 12px;
+    padding: 16px 12px;
+    text-align: center;
+}
+.dev-stat-num {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #3f7e6b;
+    line-height: 1.2;
+}
+.dev-stat-label {
+    font-size: 0.8rem;
+    color: #888;
+    margin-top: 4px;
+}
+
+/* ---------- 舱室筛选 ---------- */
+.dev-filter {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.dev-filter-btn {
+    padding: 7px 18px;
+    border-radius: 30px;
+    border: 1px solid #d0d7de;
+    background: #f8fafc;
+    color: #333;
+    font-size: 0.88rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+}
+.dev-filter-btn:hover {
+    border-color: #3f7e6b;
+    background: #eef2f6;
+}
+.dev-filter-btn.active {
+    background: #3f7e6b;
+    color: #fff;
+    border-color: #3f7e6b;
+}
+
+/* ---------- 舱室卡片 ---------- */
+.dev-room-card {
+    background: #fff;
+    border: 1px solid #e8ecf0;
+    border-radius: 14px;
+    padding: 18px 20px;
+    margin-bottom: 16px;
+}
+.dev-room-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1a2a3a;
+    margin-bottom: 14px;
+    padding-bottom: 10px;
+    border-bottom: 1px dashed #e0e6ea;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.dev-count {
+    display: inline-block;
+    background: #e0f0ea;
+    color: #2a5a4a;
+    font-size: 0.75rem;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 12px;
+}
+
+/* ---------- 推荐卡片 ---------- */
+.dev-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+    gap: 12px;
+}
+.dev-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    border: 1px solid #eef1f4;
+    border-radius: 10px;
+    background: #fafbfc;
+    transition: 0.2s;
+}
+.dev-item:hover {
+    border-color: #c8d4de;
+    background: #fff;
+}
+.dev-avatar {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    object-fit: cover;
+    flex-shrink: 0;
+    background: #eaeaea;
+    border: 1px solid #d8dee4;
+}
+.dev-item-body {
+    flex: 1;
+    min-width: 0;
+}
+.dev-item-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+    flex-wrap: wrap;
+}
+.dev-name {
+    font-weight: 700;
+    color: #1a2a3a;
+    font-size: 0.98rem;
+}
+.dev-star {
+    font-size: 0.75rem;
+    color: #888;
+    background: #f0f2f5;
+    padding: 1px 6px;
+    border-radius: 6px;
+}
+.dev-badge {
+    font-size: 0.72rem;
+    font-weight: 700;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-left: auto;
+}
+.dev-badge.upgrade {
+    background: #fdecea;
+    color: #c0392b;
+}
+.dev-badge.point {
+    background: #e8f0ff;
+    color: #2a5a8a;
+}
+
+.dev-item-elite {
+    font-size: 0.85rem;
+    color: #555;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+.dev-elite-note {
+    color: #999;
+    font-weight: 400;
+    font-size: 0.78rem;
+}
+
+.dev-item-traits {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.dev-trait {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.82rem;
+    color: #444;
+    line-height: 1.4;
+}
+.dev-trait-icon {
+    width: 18px;
+    height: 18px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+
+/* ---------- 空态 / 加载 / 错误 ---------- */
+.dev-loading,
+.dev-empty {
+    text-align: center;
+    color: #888;
+    padding: 48px 0;
+    font-size: 0.95rem;
+}
+.dev-error {
+    text-align: center;
+    color: #c0392b;
+    padding: 48px 0;
+    font-size: 0.95rem;
+}
+.dev-empty-box {
+    background: #fff;
+    border: 1px solid #e8ecf0;
+    border-radius: 14px;
+    padding: 40px 24px;
+    text-align: center;
+}
+.dev-empty-box p {
+    color: #666;
+    margin: 8px 0;
+    font-size: 0.95rem;
+}
+.dev-empty-box a {
+    color: #3f7e6b;
+}
+.dev-go-btn {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 10px 26px;
+    background: #3f7e6b;
+    color: #fff !important;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+.dev-go-btn:hover { background: #2f5b50; }
+
+/* ---------- 移动端 ---------- */
+@media (max-width: 768px) {
+    .dev-overview {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    .dev-list {
+        grid-template-columns: 1fr;
+    }
+    .dev-stat-num { font-size: 1.3rem; }
+    .dev-room-card { padding: 14px; }
+}

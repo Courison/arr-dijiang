@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <script>window.__DIJIANG_DISABLE_EGG__ = true;</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>更新日志 · 帝江号排班系统</title>
+
+    <!-- Markdown 渲染 -->
+    <script src="/vendor/marked.min.js"></script>
+
+    <!-- 复用主站样式 -->
+    <link rel="stylesheet" href="/assets/css/01-base.css?v=202610012128">
+    <link rel="stylesheet" href="/assets/css/02-layout.css?v=202610012128">
+    <link rel="stylesheet" href="/assets/css/03-components.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/08-feedback-changelog.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/09-responsive.css?v=202610012128">
+    <link rel="stylesheet" href="/assets/css/10-pet.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/13-sidebar.css?v=202610012128">
+    <link rel="stylesheet" href="/assets/css/14-page-common.css?v=202610012128">
+
+    <!-- 日志页专用样式 -->
+    <style>
+        /* 主内容容器 */
+        #mainContent {
+            min-height: 100vh;
+        }
+        .page-shell {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 24px 20px 60px;
+        }
+        .page-shell-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: #1a2a3a;
+            margin: 0 0 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3f7e6b;
+        }
+        .page-shell-card {
+            background: #ffffff;
+            border-radius: 14px;
+            padding: 24px 28px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+            border: 1px solid #eaecef;
+        }
+
+        /* 日志正文排版 */
+        #logContent {
+            font-size: 0.95rem;
+            line-height: 1.75;
+            color: #333;
+        }
+        #logContent h1 {
+            font-size: 1.35rem;
+            color: #1a2a3a;
+            border-bottom: 2px solid #3f7e6b;
+            padding-bottom: 8px;
+            margin: 36px 0 14px;
+        }
+        #logContent h1:first-child { margin-top: 0; }
+        #logContent h2 {
+            font-size: 1.15rem;
+            color: #2a5a4a;
+            margin: 24px 0 10px;
+        }
+        #logContent h3 {
+            font-size: 1rem;
+            color: #3f7e6b;
+            margin: 18px 0 8px;
+            font-weight: 600;
+        }
+        #logContent p { margin: 8px 0; }
+        #logContent ul,
+        #logContent ol {
+            padding-left: 1.5em;
+            margin: 8px 0;
+        }
+        #logContent li { margin: 4px 0; }
+        #logContent code {
+            background: #f0f2f5;
+            padding: 0.15em 0.4em;
+            border-radius: 4px;
+            font-size: 0.88em;
+            font-family: ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+            color: #2a5a4a;
+        }
+        #logContent pre {
+            background: #f6f8fa;
+            border: 1px solid #e1e4e8;
+            border-radius: 8px;
+            padding: 12px 14px;
+            overflow-x: auto;
+            font-size: 0.85rem;
+            line-height: 1.5;
+        }
+        #logContent pre code {
+            background: transparent;
+            padding: 0;
+            font-size: inherit;
+        }
+        #logContent hr {
+            border: none;
+            border-top: 1px dashed #d0d7de;
+            margin: 32px 0;
+        }
+        #logContent strong { color: #1a2a3a; }
+        #logContent a { color: #3f7e6b; text-decoration: underline; }
+        #logContent blockquote {
+            border-left: 4px solid #3f7e6b;
+            padding: 4px 14px;
+            margin: 12px 0;
+            background: #f8fafc;
+            color: #555;
+            border-radius: 0 6px 6px 0;
+        }
+
+        /* 加载/空态 */
+        .log-loading,
+        .log-empty,
+        .log-error {
+            text-align: center;
+            color: #888;
+            padding: 48px 0;
+            font-size: 0.95rem;
+        }
+        .log-error { color: #c0392b; }
+
+        /* 移动端适配 */
+        @media (max-width: 768px) {
+            .page-shell { padding: 16px 12px 48px; }
+            .page-shell-title { font-size: 1.3rem; }
+            .page-shell-card { padding: 18px 16px; border-radius: 12px; }
+            #logContent h1 { font-size: 1.15rem; }
+            #logContent h2 { font-size: 1.02rem; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ========== 顶部栏 ========== -->
+<header class="app-header">
+    <button class="hamburger" id="toggleSidebarBtn">☰</button>
+    <h1>🏭 帝江号排班系统</h1>
+</header>
+
+<!-- ========== 侧边栏（导航版，/log/ 高亮） ========== -->
+<aside id="sidebar">
+    <div class="sidebar-header">
+        <span>🏭 帝江号</span>
+        <button class="sidebar-close" id="closeSidebarBtn">‹</button>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="/" class="sidebar-link">
+            <span class="sidebar-link-icon">📋</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">自动排班</span>
+                <span class="sidebar-link-desc">一键生成最优排班</span>
+            </span>
+        </a>
+        <a href="/manual/" class="sidebar-link">
+            <span class="sidebar-link-icon">✋</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">手动排班</span>
+                <span class="sidebar-link-desc">自由拖拽调整</span>
+            </span>
+        </a>
+        <a href="/development/" class="sidebar-link">
+            <span class="sidebar-link-icon">🔬</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">专精建议</span>
+                <span class="sidebar-link-desc">根据你的干员库分析</span>
+            </span>
+        </a>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <nav class="sidebar-nav sidebar-nav-bottom">
+        <a href="/agentpackage/" class="sidebar-link">          <!-- ★ 新增 -->
+            <span class="sidebar-link-icon">👥</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">干员库</span>
+                <span class="sidebar-link-desc">天赋一览与练度修改</span>
+            </span>
+        </a>
+        <a href="/log/" class="sidebar-link">
+            <span class="sidebar-link-icon">📰</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">更新日志</span>
+            </span>
+        </a>
+        <a href="/help/" class="sidebar-link">
+            <span class="sidebar-link-icon">❓</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">关于和帮助</span>
+            </span>
+        </a>
+    </nav>
+</aside>
+
+<!-- ========== 主内容区 ========== -->
+<main id="mainContent">
+    <div class="page-shell">
+        <h1 class="page-shell-title">📋 更新日志</h1>
+        <div class="page-shell-card">
+            <div id="logContent">
+                <p class="log-loading">加载中…</p>
+            </div>
+        </div>
+    </div>
+    <footer class="site-footer">
+    <div class="footer-author">网页素材来源于森空岛wiki | 网页作者：B站 @courison</div>
+    <div class="footer-beian">
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">
+            粤ICP备2026127433号-1
+        </a>
+        <span class="footer-sep">|</span>
+        <a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195202000492" target="_blank" rel="noopener">
+            <img src="/assets/images/record.png" alt="公安备案" class="beian-icon">
+            粤公网安备44195202000492号
+        </a>
+    </div>
+    </footer>
+</main>
+
+<!-- ========== 脚本 ========== -->
+<script src="/assets/js/modules/sidebar.js?v=202610012128"></script>
+<script>
+(function () {
+    'use strict';
+
+    const content = document.getElementById('logContent');
+    if (!content) return;
+
+    function escapeHtml(str) {
+        return String(str).replace(/[&<>"']/g, function (m) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+        });
+    }
+
+    function render(md) {
+        if (!md || !md.trim()) {
+            content.innerHTML = '<p class="log-empty">暂无更新日志。</p>';
+            return;
+        }
+        try {
+            content.innerHTML = marked.parse(md);
+            // 让页内锚点平滑滚动
+            document.documentElement.style.scrollBehavior = 'smooth';
+        } catch (e) {
+            content.innerHTML = '<p class="log-error">日志渲染失败：' + escapeHtml(e.message || '未知错误') + '</p>';
+        }
+    }
+
+    fetch('/log/log.md', { cache: 'no-cache' })
+        .then(function (res) {
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            return res.text();
+        })
+        .then(render)
+        .catch(function (err) {
+            content.innerHTML = '<p class="log-error">加载失败：' + escapeHtml(err.message) + '</p>';
+        });
+})();
+</script>
+<script src="/assets/js/modules/pet.js?v=202610021200"></script>
+<script src="/assets/js/modules/page-pet.js?v=202610021200"></script>
+</body>
+</html>

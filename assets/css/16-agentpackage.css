@@ -1,0 +1,527 @@
+/* ============================================================
+   16-agentpackage.css —— 干员天赋一览页
+   ============================================================ */
+
+/* ---------- 顶部标题行 ---------- */
+.ap-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+}
+.ap-edit-btn {
+    padding: 9px 22px;
+    background: #3f7e6b;
+    color: #fff;
+    border: none;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: 0.2s;
+    white-space: nowrap;
+}
+.ap-edit-btn:hover { background: #2f5b50; }
+
+/* ---------- 筛选区 ---------- */
+.ap-filters {
+    background: #fff;
+    border: 1px solid #e8ecf0;
+    border-radius: 14px;
+    padding: 16px 20px;
+    margin-bottom: 18px;
+}
+.ap-filter-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 12px;
+}
+.ap-filter-row:last-child { margin-bottom: 0; }
+.ap-filter-label {
+    font-size: 0.82rem;
+    color: #888;
+    font-weight: 600;
+    min-width: 72px;
+    flex-shrink: 0;
+}
+.ap-filter-tags {
+    display: flex;
+    gap: 6px;
+    flex-wrap: wrap;
+}
+.ap-filter-tag {
+    padding: 5px 14px;
+    border-radius: 20px;
+    border: 1px solid #d0d7de;
+    background: #f8fafc;
+    color: #333;
+    font-size: 0.82rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: inherit;
+}
+.ap-filter-tag:hover {
+    border-color: #3f7e6b;
+    background: #eef2f6;
+}
+.ap-filter-tag.active {
+    background: #3f7e6b;
+    color: #fff;
+    border-color: #3f7e6b;
+}
+
+/* ---------- 分隔线 ---------- */
+.ap-divider {
+    border: none;
+    border-top: 1px solid #e8ecf0;
+    margin: 0 0 20px;
+}
+
+/* ---------- 干员卡片 ---------- */
+.ap-card {
+    display: flex;
+    gap: 14px;
+    background: #fff;
+    border: 1px solid #e8ecf0;
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 10px;
+    transition: 0.2s;
+}
+.ap-card:hover {
+    border-color: #c8d4de;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+.ap-card-avatar-wrap {
+    position: relative;
+    width: 56px;
+    height: 56px;
+    flex-shrink: 0;
+}
+.ap-card-avatar {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e0e6ea;
+    background: #eaeaea;
+}
+.ap-card-elite {
+    position: absolute;
+    bottom: -4px;
+    right: -4px;
+    background: #3f7e6b;
+    color: #fff;
+    font-size: 0.65rem;
+    font-weight: 700;
+    padding: 2px 7px;
+    border-radius: 10px;
+    border: 2px solid #fff;
+    white-space: nowrap;
+}
+.ap-card-elite.none { background: #999; }
+.ap-card-body {
+    flex: 1;
+    min-width: 0;
+}
+.ap-card-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+}
+.ap-card-name {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #1a2a3a;
+}
+.ap-card-star {
+    font-size: 0.72rem;
+    color: #888;
+    background: #f0f2f5;
+    padding: 1px 7px;
+    border-radius: 6px;
+}
+
+/* ---------- 天赋行 ---------- */
+.ap-talent-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 5px 0;
+    font-size: 0.86rem;
+    line-height: 1.4;
+    border-top: 1px dashed #f0f2f5;
+}
+.ap-talent-row:first-child { border-top: none; }
+.ap-talent-icon {
+    width: 20px;
+    height: 20px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+.ap-talent-name {
+    font-weight: 600;
+    min-width: 84px;
+    flex-shrink: 0;
+}
+.ap-talent-effect {
+    color: #555;
+    flex: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.ap-talent-status {
+    font-size: 0.9rem;
+    flex-shrink: 0;
+}
+
+/* 状态样式 */
+.ap-talent-row.active .ap-talent-name { color: #2a5a4a; }
+.ap-talent-row.active .ap-talent-effect { color: #3f7e6b; }
+.ap-talent-row.active .ap-talent-status { color: #3f7e6b; }
+
+.ap-talent-row.available .ap-talent-name { color: #555; }
+.ap-talent-row.available .ap-talent-effect { color: #888; }
+.ap-talent-row.available .ap-talent-status { color: #999; }
+
+.ap-talent-row.locked .ap-talent-name { color: #bbb; }
+.ap-talent-row.locked .ap-talent-effect { color: #ccc; }
+.ap-talent-row.locked .ap-talent-status { color: #ccc; }
+
+/* ---------- 空态 / 加载 ---------- */
+.ap-loading,
+.ap-empty {
+    text-align: center;
+    color: #888;
+    padding: 48px 0;
+    font-size: 0.95rem;
+}
+.ap-error {
+    text-align: center;
+    color: #c0392b;
+    padding: 48px 0;
+}
+.ap-empty-box {
+    background: #fff;
+    border: 1px solid #e8ecf0;
+    border-radius: 14px;
+    padding: 40px 24px;
+    text-align: center;
+}
+.ap-empty-box p { color: #666; margin: 8px 0; }
+.ap-go-btn {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 10px 26px;
+    background: #3f7e6b;
+    color: #fff !important;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+}
+.ap-go-btn:hover { background: #2f5b50; }
+
+/* ---------- 编辑弹窗 ---------- */
+.modal-overlay {
+    position: fixed;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: rgba(0, 0, 0, 0.55);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 20px;
+    visibility: hidden;
+    opacity: 0;
+    transition: visibility 0.2s, opacity 0.2s;
+}
+.modal-overlay.open { visibility: visible; opacity: 1; }
+
+.ap-modal {
+    background: #fff;
+    border-radius: 16px;
+    width: 100%;
+    max-width: 720px;
+    max-height: 88vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.25);
+}
+.ap-modal-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 16px 20px;
+    border-bottom: 1px solid #eef1f4;
+    flex-shrink: 0;
+}
+.ap-modal-header h2 {
+    font-size: 1.1rem;
+    margin: 0;
+    color: #1a2a3a;
+    flex: 1;
+}
+.ap-modal-back,
+.ap-modal-close {
+    background: none;
+    border: none;
+    font-size: 1.1rem;
+    color: #666;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+    font-family: inherit;
+}
+.ap-modal-back:hover,
+.ap-modal-close:hover { background: #f0f2f5; }
+
+.ap-modal-body {
+    padding: 16px 20px 20px;
+    overflow-y: auto;
+    flex: 1;
+}
+
+/* 干员选择视图 */
+.ap-search {
+    width: 100%;
+    padding: 9px 14px;
+    border: 1px solid #d0d7de;
+    border-radius: 10px;
+    font-size: 0.9rem;
+    margin-bottom: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+}
+.ap-search:focus {
+    outline: none;
+    border-color: #3f7e6b;
+    box-shadow: 0 0 0 3px rgba(63, 126, 107, 0.1);
+}
+
+.ap-operator-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: 10px;
+}
+.ap-op-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 8px 4px;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    text-align: center;
+}
+.ap-op-item:hover { background: #f0f6f3; }
+.ap-op-item img {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: #eaeaea;
+    border: 2px solid #e0e6ea;
+    margin-bottom: 5px;
+}
+.ap-op-item .ap-op-name {
+    font-size: 0.78rem;
+    color: #333;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 100%;
+}
+.ap-op-item .ap-op-elite {
+    font-size: 0.68rem;
+    color: #3f7e6b;
+    font-weight: 700;
+    margin-top: 1px;
+}
+.ap-op-item .ap-op-elite.none { color: #bbb; font-weight: 400; }
+
+/* 编辑视图 */
+.ap-edit-hero {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 8px 0 16px;
+    border-bottom: 1px dashed #e0e6ea;
+    margin-bottom: 16px;
+}
+.ap-edit-avatar {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #e0e6ea;
+    background: #eaeaea;
+}
+.ap-edit-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a2a3a;
+}
+.ap-edit-meta {
+    font-size: 0.82rem;
+    color: #888;
+    margin-top: 3px;
+}
+
+.ap-edit-section-title {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #2a5a4a;
+    margin: 16px 0 8px;
+}
+.ap-edit-section-title:first-of-type { margin-top: 0; }
+
+.ap-elite-group {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+.ap-elite-group button {
+    padding: 7px 16px;
+    border: 1px solid #d0d7de;
+    background: #f8fafc;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: 0.2s;
+    font-family: inherit;
+    color: #333;
+}
+.ap-elite-group button:hover {
+    border-color: #3f7e6b;
+    background: #eef2f6;
+}
+.ap-elite-group button.active {
+    background: #3f7e6b;
+    color: #fff;
+    border-color: #3f7e6b;
+}
+.ap-elite-group button[data-level="none"].active {
+    background: #999;
+    border-color: #999;
+}
+
+.ap-talent-edit-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.ap-talent-edit-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    border: 1px solid #eef1f4;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: 0.2s;
+    background: #fafbfc;
+}
+.ap-talent-edit-item:hover {
+    border-color: #3f7e6b;
+    background: #fff;
+}
+.ap-talent-edit-item.locked {
+    cursor: not-allowed;
+    opacity: 0.55;
+    background: #f5f5f5;
+}
+.ap-talent-edit-item.locked:hover {
+    border-color: #eef1f4;
+    background: #f5f5f5;
+}
+.ap-talent-edit-icon {
+    width: 26px;
+    height: 26px;
+    object-fit: contain;
+    flex-shrink: 0;
+}
+.ap-talent-edit-info {
+    flex: 1;
+    min-width: 0;
+}
+.ap-talent-edit-name {
+    font-size: 0.88rem;
+    font-weight: 600;
+    color: #1a2a3a;
+}
+.ap-talent-edit-effect {
+    font-size: 0.78rem;
+    color: #777;
+    margin-top: 2px;
+}
+.ap-talent-edit-check {
+    font-size: 1.1rem;
+    flex-shrink: 0;
+    color: #999;
+}
+.ap-talent-edit-item.on .ap-talent-edit-check { color: #3f7e6b; }
+
+.ap-edit-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid #eef1f4;
+}
+.ap-btn {
+    padding: 9px 26px;
+    border-radius: 30px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: none;
+    font-family: inherit;
+    transition: 0.2s;
+}
+.ap-btn-cancel {
+    background: #eef2f6;
+    color: #555;
+}
+.ap-btn-cancel:hover { background: #dce2ea; }
+.ap-btn-save {
+    background: #3f7e6b;
+    color: #fff;
+}
+.ap-btn-save:hover { background: #2f5b50; }
+
+/* ---------- 响应式 ---------- */
+@media (max-width: 768px) {
+    .ap-header {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    .ap-edit-btn { width: 100%; }
+    .ap-filter-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 6px;
+    }
+    .ap-filter-label { min-width: auto; }
+    .ap-filter-tags {
+        overflow-x: auto;
+        flex-wrap: nowrap;
+        padding-bottom: 4px;
+        -webkit-overflow-scrolling: touch;
+    }
+    .ap-filter-tag { flex-shrink: 0; }
+    .ap-card { padding: 12px; }
+    .ap-talent-name { min-width: 72px; }
+    .ap-modal { max-height: 92vh; }
+    .ap-operator-grid {
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+    }
+}

@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <script>window.__DIJIANG_DISABLE_EGG__ = true;</script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>关于和帮助 · 帝江号排班系统</title>
+
+    <link rel="stylesheet" href="/assets/css/01-base.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/02-layout.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/03-components.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/08-feedback-changelog.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/09-responsive.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/10-pet.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/13-sidebar.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/14-page-common.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/17-help.css?v=202610021200">
+</head>
+<body>
+
+<header class="app-header">
+    <button class="hamburger" id="toggleSidebarBtn">☰</button>
+    <h1>🏭 帝江号排班系统</h1>
+</header>
+
+<aside id="sidebar">
+    <div class="sidebar-header">
+        <span>🏭 帝江号</span>
+        <button class="sidebar-close" id="closeSidebarBtn">‹</button>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="/" class="sidebar-link">
+            <span class="sidebar-link-icon">📋</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">自动排班</span>
+                <span class="sidebar-link-desc">一键生成最优排班</span>
+            </span>
+        </a>
+        <a href="/manual/" class="sidebar-link">
+            <span class="sidebar-link-icon">✋</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">手动排班</span>
+                <span class="sidebar-link-desc">自由拖拽调整</span>
+            </span>
+        </a>
+        <a href="/development/" class="sidebar-link">
+            <span class="sidebar-link-icon">🔬</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">专精建议</span>
+                <span class="sidebar-link-desc">根据你的干员库分析</span>
+            </span>
+        </a>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <nav class="sidebar-nav sidebar-nav-bottom">
+        <a href="/agentpackage/" class="sidebar-link">
+            <span class="sidebar-link-icon">👥</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">干员库</span>
+                <span class="sidebar-link-desc">天赋一览与练度修改</span>
+            </span>
+        </a>
+        <a href="/log/" class="sidebar-link">
+            <span class="sidebar-link-icon">📰</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">更新日志</span>
+            </span>
+        </a>
+        <a href="/help/" class="sidebar-link is-active">
+            <span class="sidebar-link-icon">❓</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">关于和帮助</span>
+            </span>
+        </a>
+    </nav>
+</aside>
+
+<main id="mainContent">
+    <div class="page-shell">
+        <h1 class="page-shell-title">❓ 关于和帮助</h1>
+
+        <div class="help-tabs" id="helpTabs">
+            <button class="help-tab active" data-tab="about">关于</button>
+            <button class="help-tab" data-tab="help">帮助</button>
+        </div>
+
+        <!-- ========== 关于 Tab ========== -->
+        <div class="help-pane active" data-pane="about">
+            <div class="about-hero">
+                <div class="about-logo" id="aboutLogo">🏭</div>
+                <div class="about-title" id="aboutTitle">加载中…</div>
+                <div class="about-subtitle" id="aboutSubtitle"></div>
+                <div class="about-since" id="aboutSince"></div>
+            </div>
+
+            <div class="about-cards" id="aboutCards"></div>
+
+            <div class="about-description">
+                <div class="about-description-title" id="aboutDescTitle">项目说明</div>
+                <div class="about-description-body" id="aboutDescBody"></div>
+            </div>
+        </div>
+
+        <!-- ========== 帮助 Tab ========== -->
+        <div class="help-pane" data-pane="help">
+            <div class="help-intro" id="helpIntro"></div>
+            <div class="help-actions" id="helpActions"></div>
+            <div class="help-contact">
+                <div class="help-contact-title" id="helpContactTitle"></div>
+                <div class="help-contact-desc" id="helpContactDesc"></div>
+            </div>
+        </div>
+    </div>
+    <footer class="site-footer">
+    <div class="footer-author">网页素材来源于森空岛wiki | 网页作者：B站 @courison</div>
+    <div class="footer-beian">
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">
+            粤ICP备2026127433号-1
+        </a>
+        <span class="footer-sep">|</span>
+        <a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195202000492" target="_blank" rel="noopener">
+            <img src="/assets/images/record.png" alt="公安备案" class="beian-icon">
+            粤公网安备44195202000492号
+        </a>
+    </div>
+    </footer>
+</main>
+
+<script src="/assets/js/modules/sidebar.js?v=202610021200"></script>
+<script>
+(function () {
+    'use strict';
+
+    // ---------- Tab 切换 ----------
+    function bindTabs() {
+        const tabs = document.querySelectorAll('.help-tab');
+        const panes = document.querySelectorAll('.help-pane');
+        tabs.forEach(function (tab) {
+            tab.addEventListener('click', function () {
+                const target = this.dataset.tab;
+                tabs.forEach(function (t) { t.classList.toggle('active', t === tab); });
+                panes.forEach(function (p) { p.classList.toggle('active', p.dataset.pane === target); });
+            });
+        });
+    }
+
+    // ---------- 工具 ----------
+    function escapeHtml(str) {
+        return String(str == null ? '' : str).replace(/[&<>"']/g, function (m) {
+            return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[m];
+        });
+    }
+
+    const GITHUB_SVG =
+        '<svg viewBox="0 0 24 24" width="36" height="36" fill="currentColor" aria-hidden="true">' +
+        '<path d="M12 .5C5.65.5.5 5.65.5 12c0 5.08 3.29 9.39 7.86 10.91.58.11.79-.25.79-.55 0-.27-.01-1.16-.02-2.11-3.2.7-3.88-1.36-3.88-1.36-.52-1.33-1.28-1.68-1.28-1.68-1.05-.72.08-.71.08-.71 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.55-.29-5.24-1.28-5.24-5.7 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.18 1.18.92-.26 1.91-.39 2.9-.39.98 0 1.98.13 2.9.39 2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.43-2.7 5.4-5.26 5.69.41.36.78 1.06.78 2.14 0 1.55-.01 2.8-.01 3.18 0 .31.21.67.8.55C20.21 21.39 23.5 17.08 23.5 12 23.5 5.65 18.35.5 12 .5z"/>' +
+        '</svg>';
+
+    // ---------- 渲染：Hero ----------
+    function renderHero(p) {
+        document.getElementById('aboutLogo').textContent = p.logo || '🏭';
+        document.getElementById('aboutTitle').textContent = p.name || '';
+        document.getElementById('aboutSubtitle').textContent = p.subtitle || '';
+        const since = document.getElementById('aboutSince');
+        if (p.since) {
+            since.textContent = '项目开始于 ' + p.since;
+            since.style.display = '';
+        } else {
+            since.style.display = 'none';
+        }
+    }
+
+    // ---------- 渲染：便签卡片 ----------
+    function renderCards(cards) {
+        const wrap = document.getElementById('aboutCards');
+        if (!Array.isArray(cards) || cards.length === 0) {
+            wrap.innerHTML = '';
+            return;
+        }
+        wrap.innerHTML = cards.map(function (c) {
+            const url = c.url || '#';
+            const targetAttr = /^https?:\/\//i.test(url) ? ' target="_blank" rel="noopener"' : '';
+            let avatarHtml = '';
+            if (c.avatarType === 'github') {
+                avatarHtml = '<div class="about-card-avatar github">' + GITHUB_SVG + '</div>';
+            } else {
+                const fallback = escapeHtml(c.avatarFallback || (c.name || '?').charAt(0));
+                const avatarSrc = escapeHtml(c.avatar || '');
+                avatarHtml =
+                    '<div class="about-card-avatar">' +
+                        '<img src="' + avatarSrc + '" alt="' + escapeHtml(c.name || '') + '" ' +
+                             'onerror="this.style.display=\'none\'; this.parentElement.textContent=\'' + fallback + '\';">' +
+                    '</div>';
+            }
+            return '<a class="about-card" href="' + escapeHtml(url) + '"' + targetAttr + '>' +
+                avatarHtml +
+                '<div class="about-card-body">' +
+                    '<div class="about-card-name">' + escapeHtml(c.name || '') + '</div>' +
+                    (c.role ? '<div class="about-card-role">' + escapeHtml(c.role) + '</div>' : '') +
+                    (c.message ? '<div class="about-card-message">' + escapeHtml(c.message) + '</div>' : '') +
+                '</div>' +
+            '</a>';
+        }).join('');
+    }
+
+    // ---------- 渲染：项目说明 ----------
+    function renderDescription(desc) {
+        if (!desc) return;
+        document.getElementById('aboutDescTitle').textContent = desc.title || '项目说明';
+        document.getElementById('aboutDescBody').innerHTML = desc.html || '';
+    }
+
+    // ---------- 渲染：帮助 Tab ----------
+    function renderHelp(h) {
+        if (!h) return;
+        document.getElementById('helpIntro').textContent = h.intro || '';
+
+        const actionsEl = document.getElementById('helpActions');
+        const actions = Array.isArray(h.actions) ? h.actions : [];
+        actionsEl.innerHTML = actions.map(function (a) {
+            const url = a.url || '#';
+            const targetAttr = /^https?:\/\//i.test(url) ? ' target="_blank" rel="noopener"' : ' target="_blank" rel="noopener"';
+            return '<a class="help-action-btn" href="' + escapeHtml(url) + '"' + targetAttr + '>' +
+                '<div class="help-action-icon">' + escapeHtml(a.icon || '📄') + '</div>' +
+                '<div class="help-action-body">' +
+                    '<div class="help-action-title">' + escapeHtml(a.title || '') + '</div>' +
+                    (a.desc ? '<div class="help-action-desc">' + escapeHtml(a.desc) + '</div>' : '') +
+                '</div>' +
+                '<div class="help-action-arrow">↗</div>' +
+            '</a>';
+        }).join('');
+
+        const contact = h.contact || {};
+        document.getElementById('helpContactTitle').textContent = contact.title || '';
+        document.getElementById('helpContactDesc').innerHTML = contact.html || '';
+    }
+
+    // ---------- 渲染：错误提示 ----------
+    function renderError(msg) {
+        document.getElementById('aboutTitle').textContent = '加载失败';
+        document.getElementById('aboutSubtitle').textContent = msg || '请刷新重试';
+        document.getElementById('aboutSince').style.display = 'none';
+        document.getElementById('aboutCards').innerHTML = '';
+        document.getElementById('aboutDescBody').innerHTML =
+            '<p style="color:#c0392b;">无法加载 list.json，请检查文件是否存在。</p>';
+        document.getElementById('helpIntro').textContent = '';
+        document.getElementById('helpActions').innerHTML = '';
+        document.getElementById('helpContactDesc').textContent = '';
+    }
+
+    // ---------- 启动 ----------
+    function init() {
+        bindTabs();
+
+        fetch('./list.json', { cache: 'no-cache' })
+            .then(function (res) {
+                if (!res.ok) throw new Error('HTTP ' + res.status);
+                return res.json();
+            })
+            .then(function (data) {
+                renderHero(data.project || {});
+                renderCards(data.cards || []);
+                renderDescription(data.description || {});
+                renderHelp(data.help || {});
+            })
+            .catch(function (err) {
+                console.error('[help] 加载 list.json 失败：', err);
+                renderError(err.message);
+            });
+    }
+
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', init);
+    } else {
+        init();
+    }
+})();
+</script>
+<script src="/assets/js/modules/pet.js?v=202610021200"></script>
+<script src="/assets/js/modules/page-pet.js?v=202610021200"></script>
+</body>
+</html>

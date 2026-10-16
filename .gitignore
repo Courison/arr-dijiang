@@ -1,0 +1,59 @@
+# ============================================================
+# 帝江号排班系统 · .gitignore  (2026-10-16 整理版)
+# 原则：仅排除隐私/密钥/数据库/运行环境/缓存，其余全部上传
+# ============================================================
+
+# ---------- 运行环境（体积大且可重建） ----------
+api-server/venv/
+qr-server/venv/
+account-server/venv/
+tools/venv/
+venv/
+env/
+
+# ---------- Python 缓存 ----------
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ---------- 数据库（隐私） ----------
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+account-server/userdata/
+api-server/userdata/
+qr-server/userdata/
+
+# ---------- 密钥 / 环境变量（隐私） ----------
+.env
+.env.*
+*.key
+*.pem
+id_rsa*
+
+# ---------- 用户反馈（含潜在隐私） ----------
+Suggest/
+
+# ---------- 日志（含请求信息，隐私） ----------
+*.log
+
+# ---------- SSL 一次性验证文件（续期时会变） ----------
+.well-known/acme-challenge/
+
+# ---------- 本地系统与编辑器 ----------
+.DS_Store
+Thumbs.db
+*.swp
+*.swo
+*~
+
+# ---------- 本地备份（本地留档即可） ----------
+*.bak
+*.bak.*
+*.old
+*.tmp

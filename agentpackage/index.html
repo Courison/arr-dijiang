@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>干员天赋一览 · 帝江号排班系统</title>
+
+    <!-- 禁用彩蛋（本页不触发） -->
+    <script>window.__DIJIANG_DISABLE_EGG__ = true;</script>
+
+    <link rel="stylesheet" href="/assets/css/01-base.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/02-layout.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/03-components.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/08-feedback-changelog.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/09-responsive.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/10-pet.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/11-account.css?v=2026090271700">
+    <link rel="stylesheet" href="/assets/css/13-sidebar.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/14-page-common.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/16-agentpackage.css?v=202610021200">
+</head>
+<body>
+
+<header class="app-header">
+    <button class="hamburger" id="toggleSidebarBtn">☰</button>
+    <h1>🏭 帝江号排班系统</h1>
+    <div class="header-right">
+        <button class="header-account-btn" id="accountBtn" title="点击登录">
+            <span class="account-icon">👤</span>
+            <span class="account-label" id="accountLabel">登录</span>
+        </button>
+        <button class="header-cloud-btn" id="dataSettingsBtn">⚙️ 干员数据设置</button>
+    </div>
+</header>
+
+<aside id="sidebar">
+    <div class="sidebar-header">
+        <span>🏭 帝江号</span>
+        <button class="sidebar-close" id="closeSidebarBtn">‹</button>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="/" class="sidebar-link">
+            <span class="sidebar-link-icon">📋</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">自动排班</span>
+                <span class="sidebar-link-desc">一键生成最优排班</span>
+            </span>
+        </a>
+        <a href="/manual/" class="sidebar-link">
+            <span class="sidebar-link-icon">✋</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">手动排班</span>
+                <span class="sidebar-link-desc">自由拖拽调整</span>
+            </span>
+        </a>
+        <a href="/development/" class="sidebar-link">
+            <span class="sidebar-link-icon">🔬</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">专精建议</span>
+                <span class="sidebar-link-desc">根据你的干员库分析</span>
+            </span>
+        </a>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <nav class="sidebar-nav sidebar-nav-bottom">
+        <a href="/agentpackage/" class="sidebar-link is-active">
+            <span class="sidebar-link-icon">👥</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">干员库</span>
+                <span class="sidebar-link-desc">天赋一览与练度修改</span>
+            </span>
+        </a>
+        <a href="/log/" class="sidebar-link">
+            <span class="sidebar-link-icon">📰</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">更新日志</span>
+            </span>
+        </a>
+        <a href="/help/" class="sidebar-link">
+            <span class="sidebar-link-icon">❓</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">关于和帮助</span>
+            </span>
+        </a>
+    </nav>
+</aside>
+
+<main id="mainContent">
+    <div class="page-shell">
+        <div class="ap-header">
+            <div>
+                <h1 class="page-shell-title">👥 干员天赋一览</h1>
+                <p class="page-shell-subtitle">按默认顺序展示所有干员的天赋，可筛选、可修改练度</p>
+            </div>
+            <button class="ap-edit-btn" id="apOpenEditBtn">✏️ 干员练度修改</button>
+        </div>
+
+        <div class="ap-filters">
+            <div class="ap-filter-row">
+                <span class="ap-filter-label">星级</span>
+                <div class="ap-filter-tags" data-filter="star">
+                    <button class="ap-filter-tag active" data-value="all">全部</button>
+                    <button class="ap-filter-tag" data-value="六星">六星</button>
+                    <button class="ap-filter-tag" data-value="五星">五星</button>
+                    <button class="ap-filter-tag" data-value="四星">四星</button>
+                </div>
+            </div>
+            <div class="ap-filter-row">
+                <span class="ap-filter-label">工作舱室</span>
+                <div class="ap-filter-tags" data-filter="room">
+                    <button class="ap-filter-tag active" data-value="all">全部</button>
+                    <button class="ap-filter-tag" data-value="总控中枢">总控中枢</button>
+                    <button class="ap-filter-tag" data-value="制造舱">制造舱</button>
+                    <button class="ap-filter-tag" data-value="培养舱">培养舱</button>
+                    <button class="ap-filter-tag" data-value="会客室">会客室</button>
+                </div>
+            </div>
+            <div class="ap-filter-row">
+                <span class="ap-filter-label">天赋类型</span>
+                <div class="ap-filter-tags" data-filter="type">
+                    <button class="ap-filter-tag active" data-value="all">全部</button>
+                    <button class="ap-filter-tag" data-value="心情回复">心情回复</button>
+                    <button class="ap-filter-tag" data-value="心情减耗">心情减耗</button>
+                    <button class="ap-filter-tag" data-value="效率提升">效率提升</button>
+                    <button class="ap-filter-tag" data-value="线索概率提升">线索概率提升</button>
+                </div>
+            </div>
+            <div class="ap-filter-row">
+                <span class="ap-filter-label">激活状态</span>
+                <div class="ap-filter-tags" data-filter="status">
+                    <button class="ap-filter-tag active" data-value="all">全部</button>
+                    <button class="ap-filter-tag" data-value="active">已激活</button>
+                    <button class="ap-filter-tag" data-value="inactive">未激活</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="ap-divider"></div>
+
+        <div id="apContent">
+            <p class="ap-loading">加载中…</p>
+        </div>
+    </div>
+    <footer class="site-footer">
+    <div class="footer-author">网页素材来源于森空岛wiki | 网页作者：B站 @courison</div>
+    <div class="footer-beian">
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">
+            粤ICP备2026127433号-1
+        </a>
+        <span class="footer-sep">|</span>
+        <a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195202000492" target="_blank" rel="noopener">
+            <img src="/assets/images/record.png" alt="公安备案" class="beian-icon">
+            粤公网安备44195202000492号
+        </a>
+    </div>
+    </footer>
+</main>
+
+<!-- ========== 干员练度修改弹窗 ========== -->
+<div class="modal-overlay" id="apEditModal">
+    <div class="ap-modal">
+        <div class="ap-modal-header">
+            <button class="ap-modal-back" id="apModalBack" style="display:none;">← 返回</button>
+            <h2 id="apModalTitle">✏️ 选择干员</h2>
+            <button class="ap-modal-close" id="apModalClose">✕</button>
+        </div>
+
+        <div class="ap-modal-body" id="apSelectView">
+            <input type="text" id="apSearchInput" class="ap-search" placeholder="搜索干员名…" autocomplete="off">
+            <div class="ap-operator-grid" id="apOperatorGrid"></div>
+        </div>
+
+        <div class="ap-modal-body" id="apEditView" style="display:none;">
+            <div class="ap-edit-hero">
+                <img id="apEditAvatar" class="ap-edit-avatar" src="" alt="">
+                <div class="ap-edit-info">
+                    <div class="ap-edit-name" id="apEditName">—</div>
+                    <div class="ap-edit-meta" id="apEditMeta">—</div>
+                </div>
+            </div>
+
+            <div class="ap-edit-section-title">精英化等级</div>
+            <div class="ap-elite-group" id="apEliteGroup">
+                <button data-level="none">未拥有</button>
+                <button data-level="精零">精零</button>
+                <button data-level="精一">精一</button>
+                <button data-level="精二">精二</button>
+                <button data-level="精三">精三</button>
+                <button data-level="精四">精四</button>
+            </div>
+
+            <div class="ap-edit-section-title">天赋激活（点击切换）</div>
+            <div class="ap-talent-edit-list" id="apTalentEditList"></div>
+
+            <div class="ap-edit-footer">
+                <button class="ap-btn ap-btn-cancel" id="apEditCancel">取消</button>
+                <button class="ap-btn ap-btn-save" id="apEditSave">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="/assets/js/modules/sidebar.js?v=202610021200"></script>
+<script src="/assets/js/modules/header-actions.js?v=202610021200"></script>
+<script src="/assets/js/modules/pet.js?v=202610021200"></script>
+<script src="/assets/js/modules/page-pet.js?v=202610021200"></script>
+<script src="/assets/js/modules/agentpackage.js?v=202610021200"></script>
+</body>
+</html>

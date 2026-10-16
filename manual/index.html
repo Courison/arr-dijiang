@@ -1,0 +1,441 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>手动排班 · 帝江号</title>
+
+    <script>
+    // ★ 手动排班页禁用彩蛋
+    window.__DIJIANG_DISABLE_EGG__ = true;
+
+    // ★ 提供 DijiangAccount 存根，避免 account.js 报错
+    window.DijiangAccount = {
+        getCurrentConfig: function() { return {}; },
+        applyConfig: function() { return false; }
+    };
+
+    // ★ 提供 openDataSettings 存根，引导到自动页
+    window.openDataSettings = function() {
+        if (confirm('干员数据设置仅在自动排班页可用。\n\n是否前往自动排班页进行导入或配置？')) {
+            window.location.href = '/';
+        }
+    };
+    window.closeDataSettings = function() {};
+    window.toggleDsCard = function() {};
+    </script>
+
+    <script src="/vendor/marked.min.js"></script>
+    <script src="/vendor/html2canvas.min.js"></script>
+
+    <link rel="stylesheet" href="/assets/css/01-base.css?v=2026090271700">
+    <link rel="stylesheet" href="/assets/css/02-layout.css?v=2026090271700">
+    <link rel="stylesheet" href="/assets/css/03-components.css?v=2026090271700">
+    <link rel="stylesheet" href="/assets/css/04-schedule.css?v=2026090271700">
+    <link rel="stylesheet" href="/assets/css/05-data-settings.css?v=2026090271700">
+    <link rel="stylesheet" href="/assets/css/06-import-wizard.css?v=2026090271700">
+    <link rel="stylesheet" href="/assets/css/07-talent.css?v=2026090271700">
+    <link rel="stylesheet" href="/assets/css/08-feedback-changelog.css?v=2026090271700">
+    <link rel="stylesheet" href="/assets/css/09-responsive.css?v=2026090271700">
+    <link rel="stylesheet" href="/assets/css/10-pet.css?v=2026090271700">
+    <link rel="stylesheet" href="/assets/css/11-account.css?v=2026090271700">
+    <link rel="stylesheet" href="/assets/css/12-onboarding.css?v=2026090271700">
+    <link rel="stylesheet" href="/assets/css/13-sidebar.css?v=2026090271700">
+    <link rel="stylesheet" href="/assets/css/14-page-common.css?v=2026090271700">
+    <link rel="stylesheet" href="/manual/manual.css?v=2026090271700">
+</head>
+<body>
+
+<header class="app-header">
+    <button class="hamburger" id="toggleSidebarBtn">☰</button>
+    <h1>✋ 手动排班 · 帝江号</h1>
+    <div class="header-right">
+        <button class="header-account-btn" id="accountBtn" title="点击登录">
+            <span class="account-icon">👤</span>
+            <span class="account-label" id="accountLabel">登录</span>
+        </button>
+        <button class="header-cloud-btn" id="dataSettingsBtn">⚙️ 干员数据设置</button>
+    </div>
+</header>
+
+<!-- ========== 账号弹窗 ========== -->
+<div class="modal-overlay" id="accountModal">
+    <div class="batch-modal">
+        <div class="batch-header">
+            <h2>账号</h2>
+            <button class="close-btn" id="accountCloseBtn">✕</button>
+        </div>
+
+        <div class="account-tabs">
+            <button data-tab="login" class="active">登录</button>
+            <button data-tab="register">注册</button>
+        </div>
+
+        <div class="account-form" id="paneLogin">
+            <div class="form-group">
+                <label>邮箱</label>
+                <input type="email" id="loginEmail" placeholder="you@example.com" autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="loginPassword" placeholder="请输入密码" autocomplete="current-password">
+            </div>
+            <div class="row-between">
+                <label class="checkbox-label" style="font-weight:normal; font-size:0.85rem; color:#444;">
+                    <input type="checkbox" id="loginRemember"> 记住我
+                </label>
+                <button class="link-btn" id="forgotPwdLink">忘记密码？</button>
+            </div>
+            <button class="submit-btn" id="loginSubmitBtn">登 录</button>
+            <div class="account-status" id="loginStatus"></div>
+        </div>
+
+        <div class="account-form" id="paneRegister" style="display:none;">
+            <div class="form-group">
+                <label>邮箱</label>
+                <input type="email" id="regEmail" placeholder="you@example.com" autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label>昵称</label>
+                <input type="text" id="regNickname" placeholder="用于登录后显示，1-20 个字符" maxlength="20" autocomplete="nickname">
+            </div>
+            <div class="form-group">
+                <label>验证码</label>
+                <div class="input-row">
+                    <input type="text" id="regCode" placeholder="6 位数字" maxlength="6" autocomplete="one-time-code">
+                    <button id="regSendCodeBtn">发送</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>密码</label>
+                <input type="password" id="regPassword" placeholder="至少 8 位，含字母和数字" autocomplete="new-password">
+                <div class="pwd-strength" id="regPwdStrength"><span></span><span></span><span></span></div>
+                <div class="pwd-hint">建议：字母 + 数字 + 特殊字符，至少 8 位</div>
+            </div>
+            <div class="form-group">
+                <label>确认密码</label>
+                <input type="password" id="regPassword2" placeholder="再次输入密码" autocomplete="new-password">
+            </div>
+            <button class="submit-btn" id="regSubmitBtn">注 册</button>
+            <div class="account-status" id="regStatus"></div>
+            <button class="link-btn" id="backToLoginFromReg" style="align-self:center;">已有账号？返回登录</button>
+        </div>
+
+        <div class="account-form" id="paneReset" style="display:none;">
+            <div class="form-group">
+                <label>邮箱</label>
+                <input type="email" id="resetEmail" placeholder="you@example.com" autocomplete="email">
+            </div>
+            <div class="form-group">
+                <label>验证码</label>
+                <div class="input-row">
+                    <input type="text" id="resetCode" placeholder="6 位数字" maxlength="6" autocomplete="one-time-code">
+                    <button id="resetSendCodeBtn">发送</button>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>新密码</label>
+                <input type="password" id="resetNewPassword" placeholder="至少 8 位，含字母和数字" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <label>确认新密码</label>
+                <input type="password" id="resetNewPassword2" placeholder="再次输入新密码" autocomplete="new-password">
+            </div>
+            <button class="submit-btn" id="resetSubmitBtn">重 置</button>
+            <div class="account-status" id="resetStatus"></div>
+            <button class="link-btn" id="backToLoginFromReset" style="align-self:center;">返回登录</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 账号管理弹窗 ========== -->
+<div class="modal-overlay" id="accountManageModal">
+    <div class="batch-modal">
+        <div class="batch-header">
+            <h2>👤 账号管理</h2>
+            <button class="close-btn" id="accountManageCloseBtn">✕</button>
+        </div>
+
+        <div class="manage-info">
+            <div class="nickname" id="manageNickname">—</div>
+            <div class="email" id="manageEmail">—</div>
+            <div class="meta">注册于 <span id="manageCreated">—</span> · 最近登录 <span id="manageLastLogin">—</span></div>
+        </div>
+
+        <div class="manage-actions">
+            <button class="primary" id="manageUploadBtn">📤 上传当前配置到账号</button>
+            <button id="manageDownloadBtn">📥 从账号下载配置</button>
+        </div>
+
+        <hr style="border:none; border-top:1px dashed #e0e0e0; margin: 10px 0;">
+
+        <div class="account-form">
+            <div class="form-group">
+                <label>修改密码</label>
+                <input type="password" id="changeOldPwd" placeholder="当前密码" autocomplete="current-password">
+            </div>
+            <div class="form-group">
+                <input type="password" id="changeNewPwd" placeholder="新密码（至少 8 位，含字母和数字）" autocomplete="new-password">
+            </div>
+            <div class="form-group">
+                <input type="password" id="changeNewPwd2" placeholder="确认新密码" autocomplete="new-password">
+            </div>
+            <button class="submit-btn" id="manageChangePwdBtn" style="background:#6c7a7a;">修 改 密 码</button>
+            <div class="account-status" id="changePwdStatus"></div>
+        </div>
+
+        <hr style="border:none; border-top:1px dashed #e0e0e0; margin: 10px 0;">
+
+        <div class="manage-actions">
+            <button id="manageLogoutBtn">退出登录</button>
+            <button class="danger" id="manageDeleteAccountBtn">⚠️ 注销账号</button>
+        </div>
+
+        <div class="account-status" id="manageStatus" style="margin-top:14px;"></div>
+    </div>
+</div>
+
+<div class="mobile-banner" id="mobileBanner">
+    <span class="banner-text">💻 建议使用PC端访问以获得最佳体验</span>
+    <button class="banner-close" id="bannerCloseBtn">✕</button>
+</div>
+
+<!-- ========== 侧边栏 ========== -->
+<aside id="sidebar">
+    <div class="sidebar-header">
+        <span>🏭 帝江号</span>
+        <button class="sidebar-close" id="closeSidebarBtn">‹</button>
+    </div>
+
+    <nav class="sidebar-nav">
+        <a href="/" class="sidebar-link">
+            <span class="sidebar-link-icon">📋</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">自动排班</span>
+                <span class="sidebar-link-desc">一键生成最优排班</span>
+            </span>
+        </a>
+        <a href="/manual/" class="sidebar-link is-active">
+            <span class="sidebar-link-icon">✋</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">手动排班</span>
+                <span class="sidebar-link-desc">自由拖拽调整</span>
+            </span>
+        </a>
+        <a href="/development/" class="sidebar-link">
+            <span class="sidebar-link-icon">🔬</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">专精建议</span>
+                <span class="sidebar-link-desc">根据你的干员库分析</span>
+            </span>
+        </a>
+    </nav>
+
+    <div class="sidebar-spacer"></div>
+
+    <nav class="sidebar-nav sidebar-nav-bottom">
+        <a href="/agentpackage/" class="sidebar-link">
+            <span class="sidebar-link-icon">👥</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">干员库</span>
+                <span class="sidebar-link-desc">天赋一览与练度修改</span>
+            </span>
+        </a>
+        <a href="/log/" class="sidebar-link">
+            <span class="sidebar-link-icon">📰</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">更新日志</span>
+            </span>
+        </a>
+        <a href="/help/" class="sidebar-link">
+            <span class="sidebar-link-icon">❓</span>
+            <span class="sidebar-link-text">
+                <span class="sidebar-link-title">关于和帮助</span>
+            </span>
+        </a>
+    </nav>
+</aside>
+
+<!-- ========== 干员选择弹窗 ========== -->
+<div class="modal-overlay" id="pickerOverlay">
+    <div class="batch-modal picker-modal">
+        <div class="batch-header">
+            <h2 id="pickerTitle">选择干员</h2>
+            <div class="batch-header-right">
+                <button class="close-btn" id="pickerCloseBtn">✕</button>
+            </div>
+        </div>
+
+        <div class="picker-filter-bar">
+            <div class="picker-filter-group">
+                <label>星级</label>
+                <select id="pickerStarFilter">
+                    <option value="all">全部</option>
+                    <option value="六星">六星</option>
+                    <option value="五星">五星</option>
+                    <option value="四星">四星</option>
+                </select>
+            </div>
+            <div class="picker-filter-group">
+                <label>属性</label>
+                <select id="pickerAttributeFilter">
+                    <option value="all">全部</option>
+                    <option value="灼热">灼热</option>
+                    <option value="电磁">电磁</option>
+                    <option value="寒冷">寒冷</option>
+                    <option value="自然">自然</option>
+                    <option value="物理">物理</option>
+                </select>
+            </div>
+            <div class="picker-filter-group">
+                <label>舱室</label>
+                <select id="pickerRoomFilter">
+                    <option value="all">全部</option>
+                    <option value="总控中枢">总控中枢</option>
+                    <option value="制造舱">制造舱</option>
+                    <option value="培养舱">培养舱</option>
+                    <option value="会客室">会客室</option>
+                </select>
+            </div>
+            <div class="picker-filter-actions">
+                <button id="pickerClearBtn">🗑️ 移除当前干员</button>
+            </div>
+        </div>
+
+        <div class="picker-grid" id="pickerGrid"></div>
+
+        <div class="picker-footer">
+            <span class="picker-tip">💡 悬停头像可查看天赋详情。当前舱室生效的天赋以红色显示。选择已排在其他位置的干员，会自动从原位置移入本位置。</span>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 干员库弹窗 ========== -->
+<div class="modal-overlay" id="operatorPanelOverlay">
+    <div class="batch-modal" style="max-width:520px;">
+        <div class="batch-header">
+            <h2>👥 干员库</h2>
+            <button class="close-btn" id="operatorPanelCloseBtn">✕</button>
+        </div>
+
+        <div class="btn-group" style="display:flex; gap:8px; margin-bottom:14px;">
+            <button id="clearConfigBtn" class="btn-warning" style="flex:1; padding:8px;">🗑️ 清空全部配置</button>
+            <button id="showTalentBtn" class="btn-primary" style="flex:1; padding:8px;">📊 天赋一览</button>
+        </div>
+
+        <div class="filter-bar">
+            <div class="tip-text">⚠️ 配置仅在当前标签页有效，可通过"干员数据设置"导出备份或上传云端。</div>
+            <div class="filter-row">
+                <span>筛选：</span>
+                <select id="eliteFilter">
+                    <option value="all">全部</option>
+                    <option value="none">未拥有</option>
+                    <option value="精零">精零</option>
+                    <option value="精一">精一</option>
+                    <option value="精二">精二</option>
+                    <option value="精三">精三</option>
+                    <option value="精四">精四</option>
+                </select>
+                <select id="starFilter">
+                    <option value="all">全部星级</option>
+                    <option value="六星">六星</option>
+                    <option value="五星">五星</option>
+                    <option value="四星">四星</option>
+                </select>
+                <select id="attributeFilter">
+                    <option value="all">全部属性</option>
+                    <option value="灼热">灼热</option>
+                    <option value="电磁">电磁</option>
+                    <option value="寒冷">寒冷</option>
+                    <option value="自然">自然</option>
+                    <option value="物理">物理</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="operatorStatusContainer" class="operator-list"></div>
+        <div class="info-note">※ 点击干员可单独修改精英化等级与天赋激活状态。</div>
+    </div>
+</div>
+
+<main id="mainContent">
+    <div class="main-toolbar">
+        <button class="main-toolbar-btn" id="importFromAutoBtn">
+            <span class="toolbar-icon">📥</span>
+            <span>从自动排班导入</span>
+        </button>
+        <button class="main-toolbar-btn" id="clearManualBtn">
+            <span class="toolbar-icon">🗑️</span>
+            <span>清空排班</span>
+        </button>
+        <button class="main-toolbar-btn round-toggle" id="toggleRoundBtn">
+            <span class="toolbar-icon">🔄</span>
+            <span id="roundModeLabel">单轮排班</span>
+        </button>
+        <button class="main-toolbar-btn" id="openStepSimBtn">
+            <span class="toolbar-icon">⏱️</span>
+            <span>步进模拟</span>
+        </button>
+        <button class="main-toolbar-btn" id="openOperatorPanelBtn">
+            <span class="toolbar-icon">👥</span>
+            <span>干员库</span>
+            <span class="toolbar-badge" id="operatorCountBadge">0</span>
+        </button>
+    </div>
+
+    <div id="manualSchedule" class="manual-schedule-grid">
+        <div style="text-align:center; color:#888;">正在加载干员库……</div>
+    </div>
+
+    <footer class="site-footer">
+    <div class="footer-author">网页素材来源于森空岛wiki | 网页作者：B站 @courison</div>
+    <div class="footer-beian">
+        <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener">
+            粤ICP备2026127433号-1
+        </a>
+        <span class="footer-sep">|</span>
+        <a href="https://beian.mps.gov.cn/#/query/webSearch?code=44195202000492" target="_blank" rel="noopener">
+            <img src="/assets/images/record.png" alt="公安备案" class="beian-icon">
+            粤公网安备44195202000492号
+        </a>
+    </div>
+    </footer>
+</main>
+
+<!-- 反馈 -->
+<div class="modal-overlay" id="feedbackModal">
+    <div class="batch-modal" style="max-width:700px;">
+        <div class="batch-header">
+            <h2>反馈 &amp; 建议</h2>
+            <button class="close-btn" id="feedbackCloseBtn">✕</button>
+        </div>
+        <div style="flex:1; overflow-y:auto;">
+            <div style="margin-bottom:16px;">
+                <label style="font-weight:600; display:block; margin-bottom:6px;">1. 使用时遇到的问题或对本工具的建议</label>
+                <textarea id="feedbackText" class="feedback-textarea" placeholder="请详细描述您的反馈..."></textarea>
+            </div>
+            <div>
+                <label style="font-weight:600; display:block; margin-bottom:6px;">2. 截图上传（总图片大小不超过5M）</label>
+                <div class="feedback-file-area" id="feedbackFileArea">
+                    <span style="color:#888;">点击或拖拽上传图片（支持 jpg/png/webp）</span>
+                    <input type="file" id="feedbackFileInput" accept="image/*" multiple style="display:none;">
+                </div>
+                <div class="feedback-file-list" id="feedbackFileList"></div>
+                <div style="font-size:0.8rem; color:#888; margin-top:6px;">已选文件总大小：<span id="feedbackTotalSize">0</span> KB（上限 5120 KB）</div>
+            </div>
+            <div id="feedbackStatus" class="feedback-status"></div>
+        </div>
+        <div class="save-area" style="justify-content:flex-end; margin-top:16px;">
+            <button class="btn-cancel" id="feedbackCancelBtn">取消</button>
+            <button class="btn-save" id="feedbackSubmitBtn">确认提交</button>
+        </div>
+    </div>
+</div>
+<script src="/vendor/crypto-js.min.js"></script>
+<script src="/assets/js/modules/pet.js?v=202610021200"></script>
+<script src="/assets/js/modules/page-pet.js?v=202610021200"></script>
+<script src="/assets/js/modules/account.js?v=2026090271700"></script>
+<script src="/assets/js/modules/sidebar.js?v=2026090271700"></script>
+<script src="/manual/manual.js?v=2026090271700"></script>
+</body>
+</html>
