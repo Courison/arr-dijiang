@@ -2617,6 +2617,15 @@
         return parts.join('，');
     }
 
+    // ★ 读取某舱某轮的推荐时段文本
+    //   来自 schedule-timing.js 计算后写入的 window.__DIJIANG_ROOM_TIMING__
+    function getRoomTimingText(roomKey, roundKey) {
+        const map = window.__DIJIANG_ROOM_TIMING__;
+        if (!map || !map[roomKey]) return '';
+        const slot = map[roomKey][roundKey];
+        return slot || '';
+    }
+
     function renderSchedule(queues) {
         const container = document.getElementById('scheduleResult');
         const hasAnyElite = operators.some(op => op.eliteLevel !== 'none');
@@ -2700,15 +2709,31 @@
                     items1 += buildRecommendItem((data.round1 || [])[i] || null, roomRaw[room], manufactType, cultureChecks);
                     items2 += buildRecommendItem((data.round2 || [])[i] || null, roomRaw[room], manufactType, cultureChecks);
                 }
+                // ★ 读取计算出的时段
+                const t1 = getRoomTimingText(room, 'round1');
+                const t2 = getRoomTimingText(room, 'round2');
+                const badge1 = t1 ? `<span class="round-timing-badge">${escapeHtml(t1)}</span>` : '';
+                const badge2 = t2 ? `<span class="round-timing-badge">${escapeHtml(t2)}</span>` : '';
                 recommendHTML = `
-                    <div style="margin-bottom:8px;"><div class="round-label">轮次一</div><div class="recommend-area">${items1}</div></div>
-                    <div><div class="round-label">轮次二</div><div class="recommend-area">${items2}</div></div>
+                    <div style="margin-bottom:8px;"><div class="round-label">轮次一${badge1}</div><div class="recommend-area">${items1}</div></div>
+                    <div><div class="round-label">轮次二${badge2}</div><div class="recommend-area">${items2}</div></div>
                 `;
             } else {
                 const recList = data.recommend || [];
                 let items = '';
                 for (let i = 0; i < 3; i++) items += buildRecommendItem(recList[i] || null, roomRaw[room], manufactType, cultureChecks);
-                recommendHTML = `<div class="recommend-area">${items}</div>`;
+
+                // ★ 单轮舱：若有时段缓存，显示在“轮次一”标签旁（非二轮的总控也会走这里）
+                const t1 = getRoomTimingText(room, 'round1');
+                const badge1 = t1 ? `<span class="round-timing-badge">${escapeHtml(t1)}</span>` : '';
+
+                recommendHTML = `
+                    <div style="margin-bottom:8px;">
+                        <div class="round-label">轮次一${badge1}</div>
+                        <div class="recommend-area">${items}</div>
+                    </div>
+                `;
+
                 const reserveList = data.reserve || [];
                 let reserveHTML = '';
                 if (reserveList.length === 0) { reserveHTML = '<div style="font-size:0.7rem; color:#999; padding:4px 0;">无储备</div>'; }
@@ -2744,6 +2769,8 @@
     }
 
     function generateSchedule() {
+        // ★ 生产策略变化 → 清空已缓存的时间段
+        window.__DIJIANG_ROOM_TIMING__ = {};
         updateClueAvailability();
         const scores = computeScoresForAll();
         let queues;
@@ -3714,6 +3741,10 @@
 
     // 启动时清空跳过标志，避免遗留
     window.__DIJIANG_SKIP_PAGEHIDE_SAVE__ = false;
+    // ★ 时间段推荐计算完成后，刷新排班表，让时段徽章显示出来
+    window.addEventListener('dijiang:timing-updated', function () {
+        if (window._lastQueues) renderSchedule(window._lastQueues);
+    });
     loadDataAndInit();
 
     // ★ 离开页面前兜底保存一次，保证跨页导航时配置完整

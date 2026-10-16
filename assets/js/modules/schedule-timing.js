@@ -660,6 +660,34 @@
         };
         lastResult = result;
         renderResult(result);
+
+        // ★ 缓存各舱各轮时段，供主站渲染
+        try {
+            const timingMap = {};
+            // 二轮舱室
+            for (const rk of ROOM_KEYS) {
+                const p = getRoomPeriods(rk);
+                if (!p) continue;
+                if (p.single) continue;   // 单轮舱不显示
+                timingMap[rk] = {
+                    round1: p.round1 ? renderRangeInline(p.round1) : '',
+                    round2: p.round2 ? renderRangeInline(p.round2) : ''
+                };
+            }
+            // ★ 总控中枢单独处理（不属于 ROOM_KEYS）
+            const cp = getRoomPeriods('central');
+            if (cp && !cp.single) {
+                timingMap.central = {
+                    round1: cp.round1 ? renderRangeInline(cp.round1) : '',
+                    round2: cp.round2 ? renderRangeInline(cp.round2) : ''
+                };
+            }
+            window.__DIJIANG_ROOM_TIMING__ = timingMap;
+        } catch (e) {
+            console.warn('[时间段] 缓存时段失败：', e);
+            window.__DIJIANG_ROOM_TIMING__ = {};
+        }
+        window.dispatchEvent(new CustomEvent('dijiang:timing-updated'));
     }
 
     /* ================= 对外接口 ================= */

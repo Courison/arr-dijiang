@@ -149,3 +149,74 @@
     font-weight: 500;
     text-align: center;
 }
+/* ★ 轮次标签旁的推荐时段徽章 */
+.round-timing-badge {
+    display: inline-block;
+    margin-left: 8px;
+    padding: 1px 8px;
+    font-size: 0.7rem;
+    font-weight: 600;
+    font-family: ui-monospace, monospace;
+    color: #2a5a4a;
+    background: #e0f0ea;
+    border: 1px solid #93c8b1;
+    border-radius: 10px;
+    line-height: 1.5;
+    vertical-align: middle;
+}
+.round-label.round2 .round-timing-badge {
+    color: #8a5e00;
+    background: #fff3cd;
+    border-color: #f0d98a;
+}
+
+/* ============================================================
+   ★ 轮次一 / 轮次二 显示框分色（与「时间段推荐」时间轴一致）
+   时间轴配色：
+     一轮 = 绿  #93c8b1 / 文字 #2a5a4a / 背景 #e0f0ea
+     二轮 = 黄  #f0d98a / 文字 #8a5e00 / 背景 #fff3cd
+   ============================================================ */
+
+/* ---------- 轮次一容器：左侧绿条 + 浅绿背景 ---------- */
+.room-box > div:nth-of-type(2):has(> .round-label) {
+    border-left: 4px solid #93c8b1;
+    padding-left: 10px;
+}
+.room-box > div:nth-of-type(2):has(> .round-label) > .round-label {
+    color: #2a5a4a;
+}
+.room-box > div:nth-of-type(2):has(> .round-label) > .recommend-area {
+    background: linear-gradient(180deg, #f4fbf8, #eaf6f0);
+    border: 1px solid #cde9dd;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+/* ---------- 轮次二容器：左侧黄条 + 浅黄背景 ---------- */
+.room-box > div:nth-of-type(3):has(> .round-label) {
+    border-left: 4px solid #f0d98a;
+    padding-left: 10px;
+}
+.room-box > div:nth-of-type(3):has(> .round-label) > .round-label {
+    color: #8a5e00;
+}
+.room-box > div:nth-of-type(3):has(> .round-label) > .recommend-area {
+    background: linear-gradient(180deg, #fffdf2, #fff7dd);
+    border: 1px solid #f4e3b3;
+    border-radius: 10px;
+    padding: 10px;
+}
+
+/* ---------- 二轮内的时段徽章也换成黄色 ---------- */
+.room-box > div:nth-of-type(3):has(> .round-label) .round-timing-badge {
+    color: #8a5e00;
+    background: #fff3cd;
+    border-color: #f0d98a;
+}
+
+/* ---------- 单轮舱室（无二轮）：仍走绿色一套 ---------- */
+.room-box > div:nth-of-type(2):has(> .round-label) .round-timing-badge {
+    color: #2a5a4a;
+    background: #e0f0ea;
+    border-color: #93c8b1;
+}
