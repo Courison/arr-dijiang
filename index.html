@@ -7,21 +7,21 @@
     <script src="/vendor/marked.min.js"></script>
     <script src="/vendor/html2canvas.min.js"></script>
 
-    <link rel="stylesheet" href="/assets/css/01-base.css?v=202610162230">
-    <link rel="stylesheet" href="/assets/css/02-layout.css?v=202610162230">
-    <link rel="stylesheet" href="/assets/css/03-components.css?v=202610162230">
-    <link rel="stylesheet" href="/assets/css/04-schedule.css?v=202610162230">
-    <link rel="stylesheet" href="/assets/css/05-data-settings.css?v=202610162230">
-    <link rel="stylesheet" href="/assets/css/06-import-wizard.css?v=202610162230">
-    <link rel="stylesheet" href="/assets/css/07-talent.css?v=202610162230">
-    <link rel="stylesheet" href="/assets/css/08-feedback-changelog.css?v=202610162230">
-    <link rel="stylesheet" href="/assets/css/09-responsive.css?v=202610162230">
-    <link rel="stylesheet" href="/assets/css/10-pet.css?v=202610162230">
-    <link rel="stylesheet" href="/assets/css/11-account.css?v=202610162230">
-    <link rel="stylesheet" href="/assets/css/12-onboarding.css?v=202610162230">
-    <link rel="stylesheet" href="/assets/css/13-sidebar.css?v=202610162230">
-    <link rel="stylesheet" href="/assets/css/14-page-common.css?v=202610162230">
-    <link rel="stylesheet" href="/assets/css/18-timing.css?v=202610162230">
+    <link rel="stylesheet" href="/assets/css/01-base.css?v=202610180019">
+    <link rel="stylesheet" href="/assets/css/02-layout.css?v=202610180019">
+    <link rel="stylesheet" href="/assets/css/03-components.css?v=202610180019">
+    <link rel="stylesheet" href="/assets/css/04-schedule.css?v=202610180019">
+    <link rel="stylesheet" href="/assets/css/05-data-settings.css?v=202610180019">
+    <link rel="stylesheet" href="/assets/css/06-import-wizard.css?v=202610180019">
+    <link rel="stylesheet" href="/assets/css/07-talent.css?v=202610180019">
+    <link rel="stylesheet" href="/assets/css/08-feedback-changelog.css?v=202610180019">
+    <link rel="stylesheet" href="/assets/css/09-responsive.css?v=202610180019">
+    <link rel="stylesheet" href="/assets/css/10-pet.css?v=202610180019">
+    <link rel="stylesheet" href="/assets/css/11-account.css?v=202610180019">
+    <link rel="stylesheet" href="/assets/css/12-onboarding.css?v=202610180019">
+    <link rel="stylesheet" href="/assets/css/13-sidebar.css?v=202610180019">
+    <link rel="stylesheet" href="/assets/css/14-page-common.css?v=202610180019">
+    <link rel="stylesheet" href="/assets/css/18-timing.css?v=202610180019">
 </head>
 <body>
 <!-- ========== 引导页 ========== -->
@@ -996,16 +996,11 @@
         </div>
 
         <div class="strategy-section-inner">
-            <h4>🔄 二轮排班舱室</h4>
-            <div class="checkbox-group double-round-area" id="doubleRoundRooms">
-                <label class="checkbox-label"><input type="checkbox" value="central" checked> 总控中枢</label>
-                <label class="checkbox-label"><input type="checkbox" value="manufactA" checked> 制造舱 A</label>
-                <label class="checkbox-label"><input type="checkbox" value="manufactB" checked> 制造舱 B</label>
-                <label class="checkbox-label"><input type="checkbox" value="culture" checked> 培养舱</label>
-                <label class="checkbox-label"><input type="checkbox" value="meeting" checked> 会客室</label>
+            <h4>🔄 舱室排班模式</h4>
+            <div class="room-mode-list" id="roomModeList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
+                <!-- JS 动态生成 -->
             </div>
-            <div class="confirm-btn-area"><button id="confirmDoubleRoundBtn" class="btn-primary">✅ 确认二轮舱室</button></div>
-            <div class="info-note" style="margin-top:4px;">勾选后点击"确认"生效，排班将更新。</div>
+            <div class="info-note" style="margin-top:4px;">选择“空置”该舱室将不分配干员，其生产策略失效。</div>
         </div>
 
         <div class="strategy-section-inner">
@@ -1185,14 +1180,14 @@
 
 <!-- ========== 外链脚本：按顺序加载 ========== -->
 <script src="/vendor/crypto-js.min.js"></script>
-<script src="/assets/js/main.js?v=202610162230"></script>
-<script src="/assets/js/modules/enfd-import.js?v=202610162230"></script>
-<script src="/assets/js/modules/hg-token-import.js?v=202610162230"></script>
-<script src="/assets/js/modules/qr-login.js?v=202610162230"></script>
-<script src="/assets/js/modules/pet.js?v=202610162230"></script>
-<script src="/assets/js/modules/account.js?v=202610162230"></script>
-<script src="/assets/js/modules/onboarding.js?v=202610162230"></script>
-<script src="/assets/js/modules/sidebar.js?v=202610162230"></script>
-<script src="/assets/js/modules/schedule-timing.js?v=202610162230"></script>
+<script src="/assets/js/main.js?v=202610180019"></script>
+<script src="/assets/js/modules/enfd-import.js?v=202610180019"></script>
+<script src="/assets/js/modules/hg-token-import.js?v=202610180019"></script>
+<script src="/assets/js/modules/qr-login.js?v=202610180019"></script>
+<script src="/assets/js/modules/pet.js?v=202610180019"></script>
+<script src="/assets/js/modules/account.js?v=202610180019"></script>
+<script src="/assets/js/modules/onboarding.js?v=202610180019"></script>
+<script src="/assets/js/modules/sidebar.js?v=202610180019"></script>
+<script src="/assets/js/modules/schedule-timing.js?v=202610180019"></script>
 </body>
 </html>

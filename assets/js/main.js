@@ -131,8 +131,17 @@
     let meetingPriorityEnabled = false;
     let missingClues = new Set();
     let excludedClues = new Set([3, 7]);   // ★ 会客室二轮排除线索，默认 3、7
-    const ALL_DOUBLE_ROOMS = ['central', 'manufactA', 'manufactB', 'culture', 'meeting'];
-    let doubleRoundRooms = ALL_DOUBLE_ROOMS.slice();
+    const ALL_ROOMS = ['central', 'manufactA', 'manufactB', 'culture', 'meeting'];
+    // ★ 新增：舱室模式配置，{ central: 'double' | 'single' | 'empty' }
+    let roomModes = {
+        central: 'double',
+        manufactA: 'double',
+        manufactB: 'double',
+        culture: 'double',
+        meeting: 'double'
+    };
+    // 兼容旧变量：依赖 doubleRoundRooms 的逻辑改为从这里取
+    let doubleRoundRooms = ALL_ROOMS.filter(k => roomModes[k] === 'double');
     let rawOperatorsData = null;
     let operators = [];
     let nextId = 1;
@@ -1830,6 +1839,26 @@
         }
     }
 
+    // ★ 新增：优化后强制高效组排在轮次一
+    function sortRoundsByEfficiency(round1Map, round2Map, mode, cultureTypes) {
+        for (const key of ['manufactA', 'manufactB', 'culture', 'meeting']) {
+            const A = round1Map[key] || [];
+            const B = round2Map[key] || [];
+            if (A.length === 0 || B.length === 0) continue;
+            
+            const pA = groupEffectiveEffReduce(A, key, mode, cultureTypes);
+            const pB = groupEffectiveEffReduce(B, key, mode, cultureTypes);
+            const rA = (1 + pA.eff / 100) * (1 + 0.4 * A.length);
+            const rB = (1 + pB.eff / 100) * (1 + 0.4 * B.length);
+            
+            // 如果二轮效率更高，直接交换两轮的干员
+            if (rA < rB) {
+                round1Map[key] = B;
+                round2Map[key] = A;
+            }
+        }
+    }
+
     function recordTimingInfo(round1Map, round2Map, doubleRooms, mode, cultureTypes) {
         const cRestHigh = getCRestHigh();
         const cRestLow  = 12 * 1.0;
@@ -2228,7 +2257,8 @@
     function buildSchedule(scores) {
         const mode = getManufactMode();
         const doubleRooms = doubleRoundRooms;
-        const centralDisabled = (centralMode === 'empty');
+        const emptyRooms = ALL_ROOMS.filter(k => roomModes[k] === 'empty');
+        const centralDisabled = (centralMode === 'empty' || emptyRooms.includes('central'));
         const isTrustMode = (centralMode === 'trust');
         const result = {
             central: { recommend: [], reserve: [], round1: [], round2: [] },
@@ -2342,7 +2372,7 @@
             for (const key of round1FillRooms) {
                 if (round1Map[key].length >= 3) continue;
                 const cand = remainingPool.filter(s => !assignedSet.has(s.opId) && !trustIdSet.has(s.opId));
-                if (cand.length === 0) break;
+                if (cand.length === 0) continue;
 
                 let field = roomDefs.find(d => d.key === key).field;
                 if (key === 'manufactA') field = (mode === 'weapon') ? 'weaponScore' : 'expScore';
@@ -2499,7 +2529,8 @@
 
         // ---- ★ 减耗优化：仅对二轮舱室做轮次间交换 ----
         optimizeReductionPlacement(round1Map, round2Map, doubleRooms, mode, getCultureTypes());
-
+        // ★ 强制高效组排在第一轮
+        sortRoundsByEfficiency(round1Map, round2Map, mode, getCultureTypes());
         // ---- ★ 计算各二轮舱的稳态 hA/hB（用于按时长评估贡献） ----
         const roomTiming = {};
         {
@@ -2552,6 +2583,46 @@
                 round1Map, round2Map, reservePool2, doubleRooms,
                 roomTiming, mode, getCultureTypes()
             );
+        }
+
+        // ---- ★ 强制补齐制造舱空位（只要还有未分配干员） ----
+        {
+            const allAvail = availableScores.filter(s => !trustIdSet.has(s.opId));
+            const currentlyUsed = new Set();
+            for (const key of Object.keys(round1Map)) for (const s of (round1Map[key] || [])) if(s) currentlyUsed.add(s.opId);
+            for (const key of Object.keys(round2Map)) for (const s of (round2Map[key] || [])) if(s) currentlyUsed.add(s.opId);
+            
+            // 按分数降序排列未分配干员
+            const unassigned = allAvail.filter(s => !currentlyUsed.has(s.opId));
+            unassigned.sort((a, b) => {
+                const scoreA = Math.max(a.score.expScore||0, a.score.weaponScore||0, a.score.meeting||0, a.score.culture||0, a.score.central||0);
+                const scoreB = Math.max(b.score.expScore||0, b.score.weaponScore||0, b.score.meeting||0, b.score.culture||0, b.score.central||0);
+                return scoreB - scoreA;
+            });
+
+            for (const rk of ALL_ROOMS) {
+                if (emptyRooms.includes(rk)) continue;
+                
+                // 补一轮
+                const arr1 = round1Map[rk] || [];
+                while (arr1.length < 3 && unassigned.length > 0) {
+                    const op = unassigned.shift();
+                    arr1.push(op);
+                    currentlyUsed.add(op.opId);
+                }
+                round1Map[rk] = arr1;
+
+                // 补二轮（如果开启了二轮）
+                if (doubleRooms.includes(rk)) {
+                    const arr2 = round2Map[rk] || [];
+                    while (arr2.length < 3 && unassigned.length > 0) {
+                        const op = unassigned.shift();
+                        arr2.push(op);
+                        currentlyUsed.add(op.opId);
+                    }
+                    round2Map[rk] = arr2;
+                }
+            }
         }
 
         // ---- 组装结果 ----
@@ -2689,6 +2760,15 @@
 
         const roomHTML = {};
         for (const room of roomKeys) {
+            if (roomModes[room] === 'empty') {
+                roomHTML[room] = `
+                    <div class="room-box" data-room="${room}" style="opacity:0.6;">
+                        <div class="room-box-header"><span>${DISPLAY_NAMES[room]}</span><span class="product-tag" style="background:#eee; color:#888;">空置</span></div>
+                        <div style="text-align:center; padding:40px 0; color:#999; font-size:0.85rem;">未启用排班</div>
+                    </div>
+                `;
+                continue;
+            }
             const data = queues[room];
             if (!data) continue;
             let productTag = '', manufactType = null;
@@ -3352,6 +3432,68 @@
         }
     }
 
+    function loadRoomModes() {
+        try {
+            const raw = sessionStorage.getItem('DijiangRoomModes');
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (parsed && typeof parsed === 'object') {
+                    for (const k of ALL_ROOMS) {
+                        if (['empty', 'single', 'double'].includes(parsed[k])) roomModes[k] = parsed[k];
+                    }
+                }
+            }
+        } catch (e) {}
+        // 兼容旧数据：如果有旧版的 doubleRoundRooms，尝试映射
+        try {
+            const oldDouble = sessionStorage.getItem('doubleRoundRooms');
+            if (oldDouble && !sessionStorage.getItem('DijiangRoomModes')) {
+                const arr = JSON.parse(oldDouble);
+                for (const k of ALL_ROOMS) {
+                    roomModes[k] = arr.includes(k) ? 'double' : 'single';
+                }
+            }
+        } catch (e) {}
+        syncDoubleRooms();
+    }
+    function syncDoubleRooms() {
+        doubleRoundRooms = ALL_ROOMS.filter(k => roomModes[k] === 'double');
+        sessionStorage.setItem('DijiangRoomModes', JSON.stringify(roomModes));
+    }
+
+    function renderRoomModesUI() {
+        const container = document.getElementById('roomModeList');
+        if (!container) return;
+        const LABELS = { central: '总控中枢', manufactA: '制造舱 A', manufactB: '制造舱 B', culture: '培养舱', meeting: '会客室' };
+        let html = '';
+        for (const rk of ALL_ROOMS) {
+            html += `<div style="display:flex; align-items:center; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #e0e0e0;">
+                <span style="font-size:0.9rem; font-weight:500;">${LABELS[rk]}</span>
+                <select class="room-mode-select" data-room="${rk}" style="border:1px solid #d0d7de; border-radius:6px; padding:2px 8px; font-size:0.85rem;">
+                    <option value="double" ${roomModes[rk] === 'double' ? 'selected' : ''}>二轮排班</option>
+                    <option value="single" ${roomModes[rk] === 'single' ? 'selected' : ''}>单轮排班</option>
+                    <option value="empty" ${roomModes[rk] === 'empty' ? 'selected' : ''}>空置 (停用)</option>
+                </select>
+            </div>`;
+        }
+        container.innerHTML = html;
+        container.querySelectorAll('.room-mode-select').forEach(sel => {
+            sel.addEventListener('change', function() {
+                const rk = this.dataset.room;
+                roomModes[rk] = this.value;
+                syncDoubleRooms();
+                if (roomModes[rk] === 'empty' && trustedAgentIds.length > 0 && rk === 'central') {
+                    // 如果中枢空置，清空信赖分配
+                    trustedAgentIds = []; trustAssignMap = {};
+                    sessionStorage.removeItem('trustedAgentIds');
+                    sessionStorage.removeItem('trustAssignMap');
+                    updateTrustTags(); closeTrustModal(); closeTrustAssignModal();
+                }
+                generateSchedule();
+            });
+        });
+    }
+
     // ---------- UI 初始化 ----------
     function initUI() {
         const savedMode = sessionStorage.getItem('centralMode');
@@ -3379,30 +3521,8 @@
             } catch(e) {}
         }
         updateTrustTags();
-        // ★ 默认全部舱室开启二轮；若 sessionStorage 有保存则以其为准
-        const savedDouble = sessionStorage.getItem('doubleRoundRooms');
-        if (savedDouble) {
-            try {
-                const arr = JSON.parse(savedDouble);
-                if (Array.isArray(arr)) {
-                    doubleRoundRooms = arr.filter(v => ALL_DOUBLE_ROOMS.includes(v));
-                } else {
-                    doubleRoundRooms = ALL_DOUBLE_ROOMS.slice();
-                }
-            } catch (e) {
-                doubleRoundRooms = ALL_DOUBLE_ROOMS.slice();
-            }
-        } else {
-            doubleRoundRooms = ALL_DOUBLE_ROOMS.slice();
-            // 首次访问 → 写入默认值，避免下次再判空
-            try {
-                sessionStorage.setItem('doubleRoundRooms', JSON.stringify(doubleRoundRooms));
-            } catch (e) {}
-        }
-        // 同步复选框状态
-        document.querySelectorAll('#doubleRoundRooms input').forEach(cb => {
-            cb.checked = doubleRoundRooms.includes(cb.value);
-        });
+        loadRoomModes();
+        renderRoomModesUI();
         const savedMeeting = sessionStorage.getItem('meetingPriority');
         if (savedMeeting === 'true') {
             meetingPriorityEnabled = true;
@@ -3514,39 +3634,6 @@
             });
         });
         // 培养舱由优先级 UI 处理（见下方 initCulturePriorityUI）
-        document.querySelectorAll('#doubleRoundRooms input').forEach(cb => {
-            cb.addEventListener('change', function() {
-                const checked = Array.from(document.querySelectorAll('#doubleRoundRooms input:checked')).map(c => c.value);
-                sessionStorage.setItem('doubleRoundRooms', JSON.stringify(checked));
-                if (centralMode === 'trust') {
-                    trustedAgentIds = [];
-                    trustAssignMap = {};
-                    sessionStorage.removeItem('trustedAgentIds');
-                    sessionStorage.removeItem('trustAssignMap');
-                    updateTrustTags();
-                    closeTrustModal();
-                    closeTrustAssignModal();
-                    updateTrustMaxLabel();
-                }
-            });
-        });
-        document.getElementById('confirmDoubleRoundBtn').addEventListener('click', function() {
-            const checked = Array.from(document.querySelectorAll('#doubleRoundRooms input:checked')).map(c => c.value);
-            doubleRoundRooms = checked;
-            sessionStorage.setItem('doubleRoundRooms', JSON.stringify(checked));
-            if (centralMode === 'trust') {
-                trustedAgentIds = [];
-                trustAssignMap = {};
-                sessionStorage.removeItem('trustedAgentIds');
-                sessionStorage.removeItem('trustAssignMap');
-                updateTrustTags();
-                closeTrustModal();
-                closeTrustAssignModal();
-                updateTrustMaxLabel();
-            }
-            generateSchedule();
-            alert('二轮舱室已更新！');
-        });
         document.getElementById('eliteFilter').addEventListener('change', e => { currentFilter = e.target.value; renderOperatorStatus(); });
         document.getElementById('starFilter').addEventListener('change', e => { currentStarFilter = e.target.value; renderOperatorStatus(); });
         document.getElementById('attributeFilter').addEventListener('change', e => { currentAttributeFilter = e.target.value; renderOperatorStatus(); });

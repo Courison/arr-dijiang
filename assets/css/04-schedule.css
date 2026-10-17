@@ -169,7 +169,10 @@
     background: #fff3cd;
     border-color: #f0d98a;
 }
-
+.room-mode-select:focus {
+    outline: none;
+    border-color: #3f7e6b;
+}
 /* ============================================================
    ★ 轮次一 / 轮次二 显示框分色（与「时间段推荐」时间轴一致）
    时间轴配色：
