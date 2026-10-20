@@ -3,9 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>专精建议 · 帝江号排班系统</title>
+    <title>提升建议 · 帝江号排班系统</title>
 
-    <!-- 禁用彩蛋（本页不触发） -->
     <script>window.__DIJIANG_DISABLE_EGG__ = true;</script>
 
     <link rel="stylesheet" href="/assets/css/01-base.css?v=202610021200">
@@ -18,6 +17,130 @@
     <link rel="stylesheet" href="/assets/css/13-sidebar.css?v=202610021200">
     <link rel="stylesheet" href="/assets/css/14-page-common.css?v=202610021200">
     <link rel="stylesheet" href="/assets/css/15-development.css?v=202610021200">
+    
+    <!-- 顶配推荐样式 -->
+    <style>
+        .dev-top-recommend {
+            background: #fff;
+            border-radius: 14px;
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid #e8ecf0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+        }
+        .dev-top-recommend h2 {
+            font-size: 1.1rem;
+            margin-bottom: 16px;
+            color: #2a5a4a;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: 700;
+        }
+        
+        /* ★ 新增：简易排班图 */
+        .dev-simple-schedule {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px dashed #e8ecf0;
+        }
+        .dev-schedule-room {
+            background: #f8fafc;
+            border: 1px solid #e8ecf0;
+            border-radius: 10px;
+            padding: 12px;
+        }
+        .dev-schedule-room-title {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: #2a5a4a;
+            margin-bottom: 8px;
+            text-align: center;
+            border-bottom: 1px solid #e8ecf0;
+            padding-bottom: 6px;
+        }
+        .dev-schedule-ops {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            justify-content: center;
+        }
+        .dev-schedule-op {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            width: 44px;
+        }
+        .dev-schedule-op img {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            background: #eaeaea;
+            border: 1px solid #ccc;
+        }
+        .dev-schedule-op .op-name {
+            font-size: 0.65rem;
+            margin-top: 2px;
+            color: #333;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            width: 100%;
+            text-align: center;
+        }
+
+        /* 顶配干员列表 */
+        .dev-top-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .dev-top-card {
+            position: relative;
+            width: 72px;
+            cursor: pointer;
+            text-align: center;
+            transition: transform 0.2s;
+        }
+        .dev-top-card:hover { transform: translateY(-4px); }
+        .dev-top-card img {
+            width: 64px;
+            height: 64px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid transparent;
+            background: #eaeaea;
+            margin: 0 auto;
+        }
+        .dev-top-card.maxed img { border-color: #3f7e6b; }
+        .dev-top-card:not(.maxed) img { border-color: #ff9800; }
+        .dev-top-card .name {
+            font-size: 0.78rem;
+            margin-top: 6px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #333;
+            font-weight: 600;
+        }
+        .dev-top-card .badge {
+            position: absolute;
+            top: -8px;
+            right: 0px;
+            background: #ff9800;
+            color: #fff;
+            font-size: 0.6rem;
+            padding: 2px 6px;
+            border-radius: 8px;
+            font-weight: 700;
+            box-shadow: 0 2px 4px rgba(255,152,0,0.3);
+        }
+        .dev-top-card.maxed .badge { display: none; }
+    </style>
 </head>
 <body>
 
@@ -57,7 +180,7 @@
         <a href="/development/" class="sidebar-link is-active">
             <span class="sidebar-link-icon">🔬</span>
             <span class="sidebar-link-text">
-                <span class="sidebar-link-title">专精建议</span>
+                <span class="sidebar-link-title">提升建议</span>
                 <span class="sidebar-link-desc">根据你的干员库分析</span>
             </span>
         </a>
@@ -90,10 +213,25 @@
 
 <main id="mainContent">
     <div class="page-shell">
-        <h1 class="page-shell-title">🔬 专精建议</h1>
+        <h1 class="page-shell-title">🔬 提升建议</h1>
         <p class="page-shell-subtitle">根据你的干员库分析，推荐可提升的干员和天赋</p>
 
         <div class="dev-overview" id="devOverview"></div>
+
+        <!-- ★ 顶配排班推荐区 -->
+        <div class="dev-top-recommend" id="devTopRecommend">
+            <h2>🏆 顶配排班模拟（已拥有干员）</h2>
+            
+            <!-- 简易排班图 -->
+            <div class="dev-simple-schedule" id="devSimpleSchedule">
+                <p class="dev-loading" style="grid-column:1/-1;">正在计算顶配排班…</p>
+            </div>
+
+            <h3 style="margin-top:10px; margin-bottom:12px; font-size:0.95rem; color:#555;">建议培养的干员（点击可一键满练）</h3>
+            <div class="dev-top-grid" id="devTopGrid">
+                <!-- 动态渲染干员 -->
+            </div>
+        </div>
 
         <div class="dev-filter" id="devFilter" style="display:none;">
             <button class="dev-filter-btn active" data-room="all">全部</button>
@@ -122,10 +260,12 @@
     </footer>
 </main>
 
+<!-- ★ 引入算法核心 -->
+<script src="/assets/js/scheduler-core.js?v=202610200100"></script>
 <script src="/assets/js/modules/sidebar.js?v=202610021200"></script>
 <script src="/assets/js/modules/header-actions.js?v=202610021200"></script>
 <script src="/assets/js/modules/pet.js?v=202610021200"></script>
 <script src="/assets/js/modules/page-pet.js?v=202610021200"></script>
-<script src="/assets/js/modules/dev.js?v=202610021200"></script>
+<script src="/assets/js/modules/dev.js?v=202610200100"></script>
 </body>
 </html>

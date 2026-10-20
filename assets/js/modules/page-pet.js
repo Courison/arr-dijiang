@@ -176,6 +176,11 @@
 
     // ---------- 导出排班存根：气泡提示跳转 ----------
     function installExportStub() {
+        // ★ 如果页面已经定义了导出函数（比如手动排班页的 manual.js 已经加载），则不覆盖
+        if (typeof window.DijiangExportSchedule === 'function') {
+            return;
+        }
+
         window.DijiangExportSchedule = function () {
             const msg = '管理员，导出排班图请在「自动排班」或「手动排班」页使用哦~';
             if (typeof window.DijiangPetSay === 'function') {

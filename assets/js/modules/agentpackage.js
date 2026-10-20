@@ -160,7 +160,7 @@
                 const res = await fetch('/dist/agent_sprite.json', { cache: 'no-cache' });
                 if (!res.ok) throw new Error('HTTP ' + res.status);
                 spriteIndex = await res.json();
-                img.src = '/dist/' + (spriteIndex.image || 'agent_sprite.webp') + '?t=' + Date.now();
+                const imgUrl = '/dist/' + (spriteIndex.image || 'agent_sprite.webp');
                 spriteImage = await new Promise((resolve, reject) => {
                     const img = new Image();
                     img.onload = () => resolve(img);
