@@ -62,6 +62,26 @@
     </div>
   </section>
 
+  <!-- ★ 心情恢复助力面板（支持按天独立配置） -->
+  <section class="step-panel">
+    <div class="step-panel-header">
+      <h2>⚡ 心情恢复助力</h2>
+    </div>
+    <div class="step-boost-settings">
+      <label class="boost-count-label">
+        每天可用次数：
+        <select id="dailyBoostCount">
+          <option value="0">0 次</option>
+          <option value="1">1 次</option>
+          <option value="2" selected>2 次</option>
+        </select>
+      </label>
+      <span class="boost-hint">（每次助力使目标心情 +30%，不超 100%；可分别设置第 1~5 天，仅可选已排班干员）</span>
+      <div class="boost-day-tabs" id="boostDayTabs"></div>
+      <div id="boostConfigList" class="boost-config-list"></div>
+    </div>
+  </section>
+
   <section class="step-panel">
     <div class="step-controls">
       <label>曲线采样
@@ -75,12 +95,10 @@
       </label>
       <label>时长
         <select id="maxHours">
-          <option value="6">6 h</option>
-          <option value="12">12 h</option>
           <option value="24" selected>24 h</option>
-          <option value="36">36 h</option>
           <option value="48">48 h</option>
           <option value="72">72 h</option>
+          <option value="96">96 h</option>
         </select>
       </label>
       <label>起点
@@ -110,7 +128,7 @@
   </section>
 
   <section class="step-panel">
-    <div class="step-panel-header"><h2>② 各舱心情曲线 & 产率</h2></div>
+    <div class="step-panel-header"><h2>② 各舱心情曲线 &amp; 产率</h2></div>
     <div id="moodCharts" class="mood-charts-grid">
       <div class="chart-placeholder">点击「开始」后绘制</div>
     </div>

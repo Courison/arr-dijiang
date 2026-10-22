@@ -28,9 +28,6 @@
         if (tmPanel) tmPanel.addEventListener('click', e => { if (e.target === tmPanel) closeModal(tmPanel); });
     })();
 
-    /* ============================================================
-       弹窗打开时隐藏浮动按钮，避免遮挡（兼容所有浏览器）
-       ============================================================ */
     (function() {
         const floatingGroup = document.querySelector('.floating-btn-group');
         if (!floatingGroup) return;
@@ -95,7 +92,7 @@
 
     let centralMode = 'normal';
     let trustedAgentIds = [];
-    let trustAssignMap = {};
+    let trustAssignMap = {}; // 已废弃：信赖干员轮次由核心按天赋评分自动分配
     let meetingPriorityEnabled = false;
     let missingClues = new Set();
     let excludedClues = new Set([3, 7]);
@@ -943,7 +940,7 @@
         }
     }
 
-    // ========== 信赖 UI (精简版) ==========
+    // ========== 信赖 UI ==========
     function updateTrustTags() {
         const container = document.getElementById('trustTags');
         if (!container) return;
@@ -951,9 +948,14 @@
         const names = trustedAgentIds.map(id => { const op = operators.find(o => o.id === id); return op ? op.name : '?'; });
         container.innerHTML = names.map(name => `<span class="trust-tag">${escapeHtml(name)}</span>`).join('');
     }
-    function closeTrustModal() { document.getElementById('trustModalOverlay').classList.remove('open'); }
-    function closeTrustAssignModal() { document.getElementById('trustAssignOverlay').classList.remove('open'); }
-    // (完整的信赖选人和分配逻辑较长，因为不影响主流程，此处省略，但必须在 initUI 中把对应按钮绑定上，如需完整信赖弹窗代码可单独提供)
+    function closeTrustModal() {
+        const el = document.getElementById('trustModalOverlay');
+        if (el) el.classList.remove('open');
+    }
+    function closeTrustAssignModal() {
+        const el = document.getElementById('trustAssignOverlay');
+        if (el) el.classList.remove('open');
+    }
 
     // ==========================================
     // ★ 补充模块：批量设置
@@ -1295,7 +1297,7 @@
     }
 
     // ==========================================
-    // ★ 补充模块：信赖系统完整逻辑
+    // ★ 补充模块：信赖系统（选择信赖干员，轮次由核心自动分配）
     // ==========================================
     const trustModalOverlay = document.getElementById('trustModalOverlay');
     const trustModalCloseBtn = document.getElementById('trustModalCloseBtn');
@@ -1315,7 +1317,7 @@
         const isDoubleCentral = doubleRoundRooms.includes('central');
         const max = isDoubleCentral ? 6 : 3;
         if(trustMaxCount) trustMaxCount.textContent = max;
-        if(trustInfoLabel) trustInfoLabel.textContent = `选择信赖干员（至多${max}人，${isDoubleCentral ? '可分配至两轮' : '优先放入中枢'}）：`;
+        if(trustInfoLabel) trustInfoLabel.textContent = `选择信赖干员（至多${max}人，${isDoubleCentral ? '将按天赋评分自动分配两轮' : '优先放入中枢'}）：`;
     }
     function getTrustFilteredOperators() {
         const star = trustFilterStar.value;
@@ -1333,9 +1335,6 @@
         renderTrustGrid(); 
         if(trustModalOverlay) trustModalOverlay.classList.add('open'); 
     }
-    
-    // 注意：前面已经有 closeTrustModal 和 closeTrustAssignModal 了，不需要重复定义，只要覆盖之前精简版即可。
-    // 为了安全，我们在 initUI 的后面重新绑定事件。
 
     function renderTrustGrid() {
         const filtered = getTrustFilteredOperators();
@@ -1365,113 +1364,36 @@
         });
     }
     
-    trustFilterStar.addEventListener('change', renderTrustGrid);
-    trustFilterAttribute.addEventListener('change', renderTrustGrid);
-    trustFilterResetBtn.addEventListener('click', function() { trustFilterStar.value = 'all'; trustFilterAttribute.value = 'all'; renderTrustGrid(); });
-    trustClearBtn.addEventListener('click', function() { trustTempSelected = []; renderTrustGrid(); });
-    trustCancelBtn.addEventListener('click', function() { trustModalOverlay.classList.remove('open'); });
-
-    trustConfirmBtn.addEventListener('click', function() {
+    if (trustFilterStar) trustFilterStar.addEventListener('change', renderTrustGrid);
+    if (trustFilterAttribute) trustFilterAttribute.addEventListener('change', renderTrustGrid);
+    if (trustFilterResetBtn) trustFilterResetBtn.addEventListener('click', function() { trustFilterStar.value = 'all'; trustFilterAttribute.value = 'all'; renderTrustGrid(); });
+    if (trustClearBtn) trustClearBtn.addEventListener('click', function() { trustTempSelected = []; renderTrustGrid(); });
+    if (trustCancelBtn) trustCancelBtn.addEventListener('click', function() { if (trustModalOverlay) trustModalOverlay.classList.remove('open'); });
+    if (trustConfirmBtn) trustConfirmBtn.addEventListener('click', function() {
         const max = parseInt(trustMaxCount.textContent) || 3;
         if (trustTempSelected.length > max) { alert(`最多选择 ${max} 名干员`); return; }
         trustedAgentIds = [...trustTempSelected];
         updateTrustTags();
         sessionStorage.setItem('trustedAgentIds', JSON.stringify(trustedAgentIds));
-        trustModalOverlay.classList.remove('open');
-        if (doubleRoundRooms.includes('central') && trustedAgentIds.length > 0) {
-            trustAssignMap = {};
-            if (trustedAgentIds.length <= 3) { for (const id of trustedAgentIds) trustAssignMap[id] = 'round1'; }
-            else {
-                const half = Math.min(3, Math.ceil(trustedAgentIds.length / 2));
-                trustedAgentIds.forEach((id, index) => { trustAssignMap[id] = index < half ? 'round1' : 'round2'; });
-            }
-            sessionStorage.setItem('trustAssignMap', JSON.stringify(trustAssignMap));
-            openTrustAssignModal();
-        } else {
-            trustAssignMap = {};
-            for (const id of trustedAgentIds) trustAssignMap[id] = 'round1';
-            sessionStorage.setItem('trustAssignMap', JSON.stringify(trustAssignMap));
-            generateSchedule();
-        }
-    });
-    trustModalCloseBtn.addEventListener('click', function() { trustModalOverlay.classList.remove('open'); });
-    trustModalOverlay.addEventListener('click', function(e) { if (e.target === this) trustModalOverlay.classList.remove('open'); });
-
-    const trustAssignOverlay = document.getElementById('trustAssignOverlay');
-    const trustAssignCloseBtn = document.getElementById('trustAssignCloseBtn');
-    const trustAssignCancelBtn = document.getElementById('trustAssignCancelBtn');
-    const trustAssignConfirmBtn = document.getElementById('trustAssignConfirmBtn');
-    const trustRound1Container = document.getElementById('trustRound1Container');
-    const trustRound2Container = document.getElementById('trustRound2Container');
-    let tempTrustAssignMap = {};
-
-    function openTrustAssignModal() {
-        if (Object.keys(trustAssignMap).length === 0 && trustedAgentIds.length > 0) {
-            const half = Math.min(3, Math.ceil(trustedAgentIds.length / 2));
-            trustedAgentIds.forEach((id, index) => { trustAssignMap[id] = index < half ? 'round1' : 'round2'; });
-            sessionStorage.setItem('trustAssignMap', JSON.stringify(trustAssignMap));
-        }
-        tempTrustAssignMap = { ...trustAssignMap };
-        renderTrustAssign();
-        if(trustAssignOverlay) trustAssignOverlay.classList.add('open');
-    }
-    function renderTrustAssign() {
-        trustRound1Container.innerHTML = '';
-        trustRound2Container.innerHTML = '';
-        const round1Ids = Object.keys(tempTrustAssignMap).filter(id => tempTrustAssignMap[id] === 'round1').map(Number);
-        const round2Ids = Object.keys(tempTrustAssignMap).filter(id => tempTrustAssignMap[id] === 'round2').map(Number);
-        const r1Label = document.querySelector('#trustAssignOverlay .trust-round1-label');
-        const r2Label = document.querySelector('#trustAssignOverlay .trust-round2-label');
-        if (r1Label) {
-            r1Label.textContent = `🔵 一轮（中枢） ${round1Ids.length}/3`;
-            r1Label.style.color = round1Ids.length > 3 ? '#c0392b' : '';
-        }
-        if (r2Label) {
-            r2Label.textContent = `🟡 二轮（中枢） ${round2Ids.length}/3`;
-            r2Label.style.color = round2Ids.length > 3 ? '#c0392b' : '';
-        }
-        renderDropZone(trustRound1Container, round1Ids);
-        renderDropZone(trustRound2Container, round2Ids);
-    }
-    function renderDropZone(container, idList) {
-        container.innerHTML = '';
-        if (idList.length === 0) { container.innerHTML = '<span class="empty-hint">暂无干员</span>'; return; }
-        idList.forEach(id => {
-            const op = operators.find(o => o.id === id);
-            if (!op) return;
-            const card = document.createElement('div');
-            card.className = 'trust-drag-card';
-            card.dataset.id = op.id;
-            const imgSrc = getAgentImgSrc(op);
-            card.innerHTML = `<img src="${imgSrc}" onerror="this.style.display='none';"><div class="name">${op.name}</div>`;
-            card.addEventListener('click', function() {
-                const cur = tempTrustAssignMap[id];
-                const target = cur === 'round1' ? 'round2' : 'round1';
-                tempTrustAssignMap[id] = target;
-                renderTrustAssign();
-            });
-            container.appendChild(card);
-        });
-    }
-    trustAssignCloseBtn.addEventListener('click', function() { tempTrustAssignMap = { ...trustAssignMap }; renderTrustAssign(); trustAssignOverlay.classList.remove('open'); });
-    trustAssignCancelBtn.addEventListener('click', function() { tempTrustAssignMap = { ...trustAssignMap }; renderTrustAssign(); trustAssignOverlay.classList.remove('open'); });
-    trustAssignConfirmBtn.addEventListener('click', function() {
-        const round1Count = Object.values(tempTrustAssignMap).filter(v => v === 'round1').length;
-        const round2Count = Object.values(tempTrustAssignMap).filter(v => v === 'round2').length;
-        if (round1Count > 3 || round2Count > 3) {
-            alert(`每轮最多 3 名干员（当前：一轮 ${round1Count} 人，二轮 ${round2Count} 人），请调整后再确认。`);
-            return;
-        }
-        if (trustedAgentIds.length > 3 && (round1Count === 0 || round2Count === 0)) {
-            alert('当选择超过3名干员时，一轮和二轮都至少需要分配1人');
-            return;
-        }
-        trustAssignMap = { ...tempTrustAssignMap };
-        sessionStorage.setItem('trustAssignMap', JSON.stringify(trustAssignMap));
-        trustAssignOverlay.classList.remove('open');
+        if (trustModalOverlay) trustModalOverlay.classList.remove('open');
+        trustAssignMap = {};
+        sessionStorage.removeItem('trustAssignMap');
         generateSchedule();
     });
-    trustAssignOverlay.addEventListener('click', function(e) { if (e.target === this) { tempTrustAssignMap = { ...trustAssignMap }; renderTrustAssign(); trustAssignOverlay.classList.remove('open'); } });
+    if (trustModalCloseBtn) trustModalCloseBtn.addEventListener('click', function() { if (trustModalOverlay) trustModalOverlay.classList.remove('open'); });
+    if (trustModalOverlay) trustModalOverlay.addEventListener('click', function(e) { if (e.target === this) trustModalOverlay.classList.remove('open'); });
+
+    // ===== 信赖轮次分配页面已废弃（信赖干员由核心自动分配轮次）=====
+    const trustAssignOverlay = document.getElementById('trustAssignOverlay');
+    let tempTrustAssignMap = {};
+    if (trustAssignOverlay) {
+        const trustAssignCloseBtn = document.getElementById('trustAssignCloseBtn');
+        const trustAssignCancelBtn = document.getElementById('trustAssignCancelBtn');
+        if (trustAssignCloseBtn) trustAssignCloseBtn.addEventListener('click', function() { trustAssignOverlay.classList.remove('open'); });
+        if (trustAssignCancelBtn) trustAssignCancelBtn.addEventListener('click', function() { trustAssignOverlay.classList.remove('open'); });
+        trustAssignOverlay.addEventListener('click', function(e) { if (e.target === this) trustAssignOverlay.classList.remove('open'); });
+    }
+    function openTrustAssignModal() { /* 已废弃 */ }
 
     // 补充 批量设置/导入导出的绑定
     document.getElementById('batchOperatorGrid').addEventListener('click', function(e) {
@@ -1534,14 +1456,8 @@
                 if (Array.isArray(arr)) { trustedAgentIds = arr.filter(id => operators.some(o => o.id === id)); if (trustedAgentIds.length > 6) trustedAgentIds = trustedAgentIds.slice(0, 6); }
             } catch(e) {}
         }
-        const savedAssign = sessionStorage.getItem('trustAssignMap');
-        if (savedAssign) {
-            try {
-                const parsed = JSON.parse(savedAssign); const validIds = operators.map(o => o.id);
-                trustAssignMap = {};
-                for (const [id, round] of Object.entries(parsed)) { const numId = parseInt(id); if (validIds.includes(numId)) trustAssignMap[numId] = round; }
-            } catch(e) {}
-        }
+        // trustAssignMap 已废弃，忽略历史存储
+        trustAssignMap = {};
         updateTrustTags();
         loadRoomModes();
         renderRoomModesUI();
@@ -1596,8 +1512,6 @@
         const initModeBtn = document.querySelector(`#centralModeSelector .mode-btn[data-mode="${centralMode}"]`);
         if (initModeBtn) { modeBtns.forEach(b => b.classList.remove('active')); initModeBtn.classList.add('active'); trustArea.style.display = centralMode === 'trust' ? 'flex' : 'none'; }
         
-        document.getElementById('openTrustModalBtn').addEventListener('click', () => { alert('信赖选择弹窗因篇幅省略，可按需补充'); });
-        
         try {
             const rawDefault = sessionStorage.getItem('DijiangDefaultProduct');
             if (rawDefault) {
@@ -1609,7 +1523,6 @@
             }
         } catch (e) {}
 
-        // ★ 核心修复：绑定制造舱产物的 change 事件，实时触发重排
         document.querySelectorAll('#manufactProducts input').forEach(cb => {
             cb.addEventListener('change', () => {
                 saveProductConfigToSession();
@@ -1617,16 +1530,13 @@
             });
         });
 
-        // 把之前占位的 alert 替换回真正的 openTrustModal
         const trustBtn = document.getElementById('openTrustModalBtn');
         if (trustBtn) {
-            // 移除旧的事件（防止重复绑定）
             const newBtn = trustBtn.cloneNode(true);
             trustBtn.parentNode.replaceChild(newBtn, trustBtn);
             newBtn.addEventListener('click', openTrustModal);
         }
 
-        // 绑定干员数据设置面板底部的三个按钮
         document.getElementById('dsBtnBatch').addEventListener('click', function() { window.closeDataSettings(); openBatchModal(); });
         document.getElementById('dsBtnImport').addEventListener('click', function() { window.closeDataSettings(); showImportModal(); });
         document.getElementById('dsBtnExport').addEventListener('click', function() { window.closeDataSettings(); showExportModal(); });
@@ -1644,7 +1554,6 @@
             });
         }
 
-        // 保留这些初始化
         saveProductConfigToSession();
         initCulturePriorityUI();
         initExcludedCluesUI();
@@ -1698,6 +1607,7 @@
         try { sessionStorage.setItem('missingClues', JSON.stringify([...missingClues])); } catch (e) {}
         try { sessionStorage.setItem('doubleRoundRooms', JSON.stringify(doubleRoundRooms)); } catch (e) {}
     });
+
     // ==========================================
     // ★ 补充模块 1：反馈弹窗相关逻辑
     // ==========================================
@@ -1824,15 +1734,7 @@
             const data = await res.json();
             _changelogVersionCache = data.version || '';
         } catch (e) {
-            try {
-                const res = await fetch('/log/log.md', { cache: 'no-cache' });
-                const text = await res.text();
-                const firstLine = (text.split(/\r?\n/)[0] || '').trim();
-                const m = firstLine.match(/^#\s*(.+?)\s*$/);
-                _changelogVersionCache = m ? m[1] : '';
-            } catch (e2) {
-                _changelogVersionCache = '';
-            }
+            _changelogVersionCache = '';
         }
         return _changelogVersionCache;
     }
@@ -1967,13 +1869,107 @@
         }
         return col;
     }
+    
+    // ==========================================
+    // ★ 补充模块 3：更新日志弹窗控制
+    // ==========================================
+    (async function initChangelog() {
+        const overlay = document.getElementById('changelogOverlay');
+        const body = document.getElementById('changelogBody');
+        const closeX = document.getElementById('changelogCloseX');
+        const confirmBtn = document.getElementById('changelogConfirmBtn');
+        const showAllBtn = document.getElementById('changelogShowAllBtn');
+        if (!overlay || !body) return;
+
+        let latestMarkdown = '';
+        let allMarkdown = null; // null 表示未加载
+        let showingAll = false;
+
+        try {
+            const resLatest = await fetch('/log/latest.md', { cache: 'no-cache' });
+            if (resLatest.ok) latestMarkdown = await resLatest.text();
+        } catch (e) {}
+
+        async function loadAllMarkdown() {
+            if (allMarkdown !== null) return allMarkdown;
+            try {
+                const resAll = await fetch('/log/log.md', { cache: 'no-cache' });
+                if (resAll.ok) allMarkdown = await resAll.text();
+                else allMarkdown = '';
+            } catch (e) { allMarkdown = ''; }
+            return allMarkdown;
+        }
+
+        function renderMarkdown(text) {
+            if (window.marked) return window.marked.parse(text);
+            return String(text).replace(/\n/g, '<br>');
+        }
+
+        const version = await getChangelogVersion();
+        const lastVersion = localStorage.getItem('DijiangLastViewedLogVersion');
+
+        function closeModal() {
+            overlay.classList.remove('open');
+            if (version) localStorage.setItem('DijiangLastViewedLogVersion', version);
+        }
+
+        if (closeX) closeX.addEventListener('click', closeModal);
+        if (confirmBtn) confirmBtn.addEventListener('click', closeModal);
+        overlay.addEventListener('click', (e) => { if (e.target === overlay) closeModal(); });
+
+        function updateDisplay() {
+            if (showingAll && allMarkdown) {
+                body.innerHTML = renderMarkdown(allMarkdown);
+                if (showAllBtn) showAllBtn.textContent = '收起日志';
+            } else {
+                body.innerHTML = latestMarkdown
+                    ? renderMarkdown(latestMarkdown)
+                    : '<p style="color:#888;">暂无日志内容</p>';
+                if (showAllBtn) {
+                    if (allMarkdown && allMarkdown !== latestMarkdown) {
+                        showAllBtn.style.display = '';
+                        showAllBtn.textContent = '显示全部日志';
+                    } else {
+                        showAllBtn.style.display = 'none';
+                    }
+                }
+            }
+        }
+
+        if (showAllBtn) {
+            showAllBtn.addEventListener('click', async () => {
+                if (!showingAll) {
+                    await loadAllMarkdown();
+                    showingAll = true;
+                } else {
+                    showingAll = false;
+                }
+                updateDisplay();
+            });
+        }
+
+        updateDisplay();
+
+        // 首次打开网页，或版本号发生变化时，自动弹出更新日志
+        if (version && version !== lastVersion) {
+            setTimeout(() => {
+                const onboarding = document.getElementById('onboardingOverlay');
+                if (onboarding && onboarding.style.display !== 'none' && onboarding.style.display !== '') {
+                    setTimeout(() => overlay.classList.add('open'), 2000);
+                } else {
+                    overlay.classList.add('open');
+                }
+            }, 800);
+        }
+    })();
     // ---------- 对外接口 ----------
+    function getOperatorOrder() {
+        let order = rawOperatorsData.operator_order;
+        if (!order || !Array.isArray(order) || order.length === 0) order = Object.keys(rawOperatorsData).filter(key => key !== 'operator_order');
+        return order;
+    }
     window.DijiangAPI = {
-        getOperatorOrder: function() { 
-            let order = rawOperatorsData.operator_order;
-            if (!order || !Array.isArray(order) || order.length === 0) order = Object.keys(rawOperatorsData).filter(key => key !== 'operator_order');
-            return order;
-        },
+        getOperatorOrder: getOperatorOrder,
         getOperators: function() { return operators; },
         getRawData: function() { return rawOperatorsData; },
         parseActivatedTalents: function(cultivationTalents) { return parseActivatedTalents(cultivationTalents); },
@@ -2032,7 +2028,8 @@
                         else if (Array.isArray(strategy.doubleRoundRooms)) { doubleRoundRooms = strategy.doubleRoundRooms.filter(v => ['central','manufactA','manufactB','culture','meeting'].includes(v)); }
                         if (typeof strategy.centralMode === 'string' && ['normal','empty','trust'].includes(strategy.centralMode)) centralMode = strategy.centralMode;
                         if (Array.isArray(strategy.trustedAgentIds)) trustedAgentIds = strategy.trustedAgentIds.filter(id => operators.some(o => o.id === id));
-                        if (strategy.trustAssignMap && typeof strategy.trustAssignMap === 'object') { trustAssignMap = {}; for (const [id, round] of Object.entries(strategy.trustAssignMap)) { const numId = parseInt(id); if (operators.some(o => o.id === numId)) trustAssignMap[numId] = round; } }
+                        // trustAssignMap 已废弃，忽略
+                        trustAssignMap = {};
                         if (typeof strategy.meetingPriorityEnabled === 'boolean') meetingPriorityEnabled = strategy.meetingPriorityEnabled;
                         if (Array.isArray(strategy.missingClues)) missingClues = new Set(strategy.missingClues.filter(n => n >= 1 && n <= 7));
                         if (Array.isArray(strategy.excludedClues)) excludedClues = new Set(strategy.excludedClues.filter(n => n >= 1 && n <= 7));

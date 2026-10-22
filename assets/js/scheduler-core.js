@@ -548,7 +548,7 @@
                 const effHighWork = Math.min(hHigh, 100 / cWorkHigh);
                 const effLowWork  = Math.min(hLow,  100 / cWorkLow);
                 if (effHighWork * cWorkHigh > hLow * cRestHigh + 1e-6) continue;
-                if (effLowWork  * cWorkLow  > hHigh * cRestLow + 1e-6) continue;
+                if (effLowWork  * cWorkLow  > hHigh * cRestLow  + 1e-6) continue;
                 const output = highRate * effHighWork + lowRate * effLowWork;
                 if (!found || output > bestOutput) { bestOutput = output; bestHHigh = hHigh; found = true; }
             }
@@ -557,6 +557,24 @@
             const hB = 24 - hA;
             info[key] = { hA, hB, cA: cWorkA, cB: cWorkB, rA, rB, round1IsEfficient: highIsA };
             if (key === 'culture') info[key].cultureBasisProduct = firstCultureProduct;
+        }
+
+        // 总控中枢：时间段与其它舱低效率轮对齐（高恢复轮位于第二轮）
+        if (doubleRooms.includes('central')) {
+            const baseKey = ['manufactA', 'manufactB', 'culture'].find(k => info[k]);
+            const base = baseKey ? info[baseKey] : { hA: 11, hB: 13, cA: 0.072, cB: 0.072, rA: 1, rB: 1 };
+            
+            // 准确计算中枢两轮的真实恢复情况
+            const pA = groupEffectiveEffReduce(round1Map.central || [], 'central', mode, options.cultureTypes);
+            const pB = groupEffectiveEffReduce(round2Map.central || [], 'central', mode, options.cultureTypes);
+            const centralRound1IsEfficient = pA.eff >= pB.eff;
+            
+            info.central = {
+                hA: base.hA, hB: base.hB,
+                cA: base.cA, cB: base.cB,
+                rA: base.rA, rB: base.rB,
+                round1IsEfficient: centralRound1IsEfficient
+            };
         }
         return info;
     }
@@ -596,23 +614,29 @@
         const round1Map = { central: [], meeting: [], culture: [], manufactA: [], manufactB: [] };
         const round2Map = { central: [], meeting: [], culture: [], manufactA: [], manufactB: [] };
 
-        // 总控信赖模式
-        if (!centralDisabled) {
-            if (isTrustMode && trustIdSet.size > 0) {
-                const trustRound1Ids = [], trustRound2Ids = [];
-                for (const id of options.trustedAgentIds) {
-                    (options.trustAssignMap[id] || 'round1') === 'round1' ? trustRound1Ids.push(id) : trustRound2Ids.push(id);
-                }
-                const getTrustScores = idList => idList.map(id => availableScores.find(s => s.opId === id)).filter(Boolean);
-                round1Map.central = getTrustScores(trustRound1Ids).slice(0, 3);
-                const need1 = 3 - round1Map.central.length;
-                if (need1 > 0) {
-                    const fill = remainingPool.filter(s => !assignedSet.has(s.opId)).sort((a, b) => (b.score.central || 0) - (a.score.central || 0)).slice(0, need1);
-                    for (const s of fill) { round1Map.central.push(s); assignedSet.add(s.opId); const idx = remainingPool.indexOf(s); if (idx !== -1) remainingPool.splice(idx, 1); }
-                }
-                window._trustRound2Cache = getTrustScores(trustRound2Ids).slice(0, 3);
-            } else { window._trustRound2Cache = []; }
-        } else { window._trustRound2Cache = []; }
+        // ===== 总控信赖模式：信赖干员按天赋评分自动分配两轮 =====
+        if (!centralDisabled && isTrustMode && trustIdSet.size > 0) {
+            const isDoubleCentral = doubleRooms.includes('central');
+            const maxTrust = isDoubleCentral ? 6 : 3;
+            const trustScores = options.trustedAgentIds
+                .map(id => availableScores.find(s => s.opId === id))
+                .filter(Boolean)
+                .sort((a, b) => (b.score.central || 0) - (a.score.central || 0))
+                .slice(0, maxTrust);
+            if (isDoubleCentral) {
+                const half = Math.min(3, trustScores.length);
+                round1Map.central = trustScores.slice(0, half);
+                round2Map.central = trustScores.slice(half, half + 3);
+            } else {
+                round1Map.central = trustScores.slice(0, 3);
+            }
+            for (const s of trustScores) {
+                assignedSet.add(s.opId);
+                const idx = remainingPool.indexOf(s);
+                if (idx !== -1) remainingPool.splice(idx, 1);
+            }
+        }
+        window._trustRound2Cache = [];
 
         // 一轮贪心
         const order1 = options.priorityOrderRound1;
@@ -644,7 +668,7 @@
             const idx = remainingPool.indexOf(pair.scoreObj); if (idx !== -1) remainingPool.splice(idx, 1);
         }
 
-        // 一轮平铺（强化补位逻辑，严格控制产物类型）
+        // 一轮平铺
         const round1FillRooms = activeRooms1.filter(k => k !== 'central');
         if (!centralDisabled) round1FillRooms.push('central');
         let r1FillActive = true;
@@ -696,10 +720,9 @@
             }
         }
 
-        // 二轮启用舱室
+        // 二轮启用舱室（信赖模式下保留预置的 round2Map.central 并补足剩余名额）
         let doubleKeys = ['meeting', 'culture', 'manufactA', 'manufactB', 'central'].filter(k => doubleRooms.includes(k) && !(k === 'central' && centralDisabled));
         if (isTrustMode && trustIdSet.size > 0 && doubleKeys.includes('central')) {
-            round2Map.central = (window._trustRound2Cache || []).slice(0, 3);
             const asg = new Set(round2Map.central.map(s => s.opId));
             const need2 = 3 - round2Map.central.length;
             if (need2 > 0) {
@@ -738,7 +761,7 @@
             const idx = remainingPool.indexOf(pair.scoreObj); if (idx !== -1) remainingPool.splice(idx, 1);
         }
 
-        // 二轮平铺（强化补位逻辑，严格控制产物类型）
+        // 二轮平铺
         const round2FillRooms = doubleKeys.filter(k => k !== 'central');
         let r2FillActive = true;
         while (r2FillActive) {
@@ -828,7 +851,21 @@
         // 优化与替换
         optimizeReductionPlacement(round1Map, round2Map, doubleRooms, mode, options.cultureTypes, options);
         sortRoundsByEfficiency(round1Map, round2Map, mode, options.cultureTypes);
-        
+
+        // ===== 总控中枢：将高恢复轮交换至第二轮（人员层交换，无修改）=====
+        if (!centralDisabled && doubleRooms.includes('central')) {
+            const centralR1 = round1Map.central || [];
+            const centralR2 = round2Map.central || [];
+            if (centralR1.length > 0 && centralR2.length > 0) {
+                const pA = groupEffectiveEffReduce(centralR1, 'central', mode, options.cultureTypes);
+                const pB = groupEffectiveEffReduce(centralR2, 'central', mode, options.cultureTypes);
+                if (pA.eff > pB.eff + 1e-6) {
+                    round1Map.central = centralR2;
+                    round2Map.central = centralR1;
+                }
+            }
+        }
+
         const roomTiming = {};
         {
             const cRestHigh = options.cRestHigh;
@@ -843,6 +880,15 @@
                 const hA_max = Math.min(100 / cA, 24 * cRestHigh / (cA + cRestHigh));
                 const hA_opt = Math.max(1, Math.min(23, Math.floor(hA_max)));
                 roomTiming[rk] = { hA: hA_opt, hB: 24 - hA_opt };
+            }
+        }
+
+        // ===== 总控中枢时间段与其它舱低效率轮对齐 =====
+        if (roomTiming.central) {
+            const baseKey = ['manufactA', 'manufactB', 'culture'].find(k => roomTiming[k]);
+            if (baseKey) {
+                const baseHA = roomTiming[baseKey].hA;
+                roomTiming.central = { hA: baseHA, hB: 24 - baseHA };
             }
         }
 

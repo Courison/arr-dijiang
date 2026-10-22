@@ -357,7 +357,7 @@
     /* ================= 总控分析 ================= */
     function analyzeCentral(usedNames, queues, roomModes) {
         if (roomModes && roomModes.central === 'empty') {
-            return { high: [], low: [], g_high: 0, g_low: 0, isSingle: false, isEmpty: true };
+            return { high: [], low: [], round1: [], round2: [], g_high: 0, g_low: 0, isSingle: false, isEmpty: true, isRound1High: true };
         }
 
         let r1Names = [], r2Names = [];
@@ -374,27 +374,34 @@
             const g_high = ops.reduce((s, op) => s + op.rooms['总控中枢'].restore, 0);
             return {
                 high: ops, low: [],
+                round1: ops, round2: [],
                 g_high, g_low: 0,
-                isSingle: true, isEmpty: false
+                isSingle: true, isEmpty: false, isRound1High: true
             };
         }
 
-        const usedInCentral = [...new Set([...r1Names, ...r2Names])];
-        if (usedInCentral.length > 0) {
-            const ops = usedInCentral.map(n => operatorMap[n]).filter(Boolean);
-            if (ops.length > 0) {
-                ops.sort((a, b) => b.rooms['总控中枢'].restore - a.rooms['总控中枢'].restore);
-                const high = ops.slice(0, 3);
-                const low = ops.slice(3, 6);
-                return {
-                    high, low,
-                    g_high: high.reduce((s, op) => s + op.rooms['总控中枢'].restore, 0),
-                    g_low: low.reduce((s, op) => s + op.rooms['总控中枢'].restore, 0),
-                    isSingle: false, isEmpty: false
-                };
-            }
+        if (r1Names.length > 0 || r2Names.length > 0) {
+            const ops1 = r1Names.map(n => operatorMap[n]).filter(Boolean);
+            const ops2 = r2Names.map(n => operatorMap[n]).filter(Boolean);
+            const g1 = ops1.reduce((s, op) => s + op.rooms['总控中枢'].restore, 0);
+            const g2 = ops2.reduce((s, op) => s + op.rooms['总控中枢'].restore, 0);
+
+            const isRound1High = g1 >= g2;
+            
+            let high, low;
+            if (isRound1High) { high = ops1; low = ops2; } 
+            else { high = ops2; low = ops1; }
+
+            return {
+                high, low,
+                round1: ops1, round2: ops2,
+                g_high: isRound1High ? g1 : g2,
+                g_low: isRound1High ? g2 : g1,
+                isSingle: false, isEmpty: false, isRound1High
+            };
         }
 
+        // 兜底：如果没排班数据则从可用人员里取
         const available = Object.values(operatorMap).filter(op => !usedNames.has(op.name));
         const withRestore = available.filter(op => (op.rooms['总控中枢'].restore || 0) > 0);
         withRestore.sort((a, b) => b.rooms['总控中枢'].restore - a.rooms['总控中枢'].restore);
@@ -402,9 +409,10 @@
         const low = withRestore.slice(3, 6);
         return {
             high, low,
+            round1: high, round2: low,
             g_high: high.reduce((s, op) => s + op.rooms['总控中枢'].restore, 0),
             g_low: low.reduce((s, op) => s + op.rooms['总控中枢'].restore, 0),
-            isSingle: false, isEmpty: false
+            isSingle: false, isEmpty: false, isRound1High: true
         };
     }
 
@@ -698,7 +706,6 @@
             const highRows = splitRange(cp.start, cp.end);
             const lowRows  = splitRange(cp.end, cp.start + 24);
 
-            // 如果是单轮，直接返回计算出的高恢复组工作时段
             if (lastResult.central.isSingle) {
                 return {
                     single: false,
@@ -708,21 +715,8 @@
                 };
             }
 
-            let r1IsHigh = true;
-            try {
-                const raw = sessionStorage.getItem('DijiangLastQueues');
-                if (raw) {
-                    const q = JSON.parse(raw);
-                    const r1List = (q.central && q.central.round1) || [];
-                    const highNames = new Set(lastResult.central.high.map(o => o.name));
-                    let inter = 0;
-                    for (const item of r1List) {
-                        const n = item.name || item;
-                        if (highNames.has(n)) inter++;
-                    }
-                    if (r1List.length >= 2) r1IsHigh = inter >= Math.ceil(r1List.length / 2);
-                }
-            } catch (e) {}
+            // 直接使用准确的判断结果
+            const r1IsHigh = lastResult.central.isRound1High;
 
             return {
                 single: false,

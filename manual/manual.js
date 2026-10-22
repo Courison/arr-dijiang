@@ -958,8 +958,48 @@
             }
         }
         manualSchedule.rooms = newRooms; manualSchedule.mode = useDouble ? 'double' : 'single';
-        saveManualSchedule(); renderManualSchedule();
-        alert(`已从自动排班导入（${useDouble ? '二轮' : '单轮'}）`);
+        saveManualSchedule();
+
+        // ★ 强制同步产品策略配置
+        try {
+            const prodRaw = sessionStorage.getItem('DijiangDefaultProduct');
+            if (prodRaw) {
+                const prod = JSON.parse(prodRaw);
+                // 同步制造舱
+                if (prod.manufactA) roomProducts.manufactA = prod.manufactA;
+                if (prod.manufactB) roomProducts.manufactB = prod.manufactB;
+                
+                // 同步培养舱
+                if (prod.culture) {
+                    let order = [];
+                    const c = prod.culture;
+                    if (Array.isArray(c)) {
+                        order = c.slice();
+                    } else if (c && typeof c === 'object') {
+                        const prods = Array.isArray(c.products) ? c.products : [];
+                        if (Array.isArray(c.priority) && c.priority.length > 0) {
+                            order = c.priority.filter(x => prods.includes(x));
+                            for (const x of prods) if (!order.includes(x)) order.push(x);
+                        } else {
+                            for (const x of DEFAULT_CULTURE_PRIORITY) if (prods.includes(x)) order.push(x);
+                            for (const x of prods) if (!order.includes(x)) order.push(x);
+                        }
+                    }
+                    roomProducts.culture = { products: order, priority: null };
+                }
+                saveRoomProducts();
+            }
+        } catch (e) {
+            console.warn('同步生产策略失败：', e);
+        }
+
+        renderManualSchedule();
+        
+        if (typeof window.DijiangPetSay === 'function') {
+            window.DijiangPetSay(`已导入排班（${useDouble ? '二轮' : '单轮'}）`);
+        } else {
+            alert(`已从自动排班导入（${useDouble ? '二轮' : '单轮'}）`);
+        }
     }
 
     // ============ 导出排班图 (修复) ============
@@ -1138,6 +1178,14 @@
                 renderManualSchedule();
             }
         });
+        const stepBtn = document.getElementById('openStepSimBtn');
+        if (stepBtn) {
+            stepBtn.addEventListener('click', function (e) {
+                e.preventDefault();
+                e.stopPropagation();
+                window.location.href = '/manual/step/';
+            });
+        }
 
         const pickerCloseBtn = document.getElementById('pickerCloseBtn');
         if (pickerCloseBtn) pickerCloseBtn.addEventListener('click', closePicker);

@@ -753,3 +753,134 @@
   .step-controls { gap: 8px; }
   .step-controls button { padding: 4px 12px; font-size: 0.78rem; }
 }
+
+/* ============ 新增：心情恢复助力面板样式 ============ */
+.step-boost-settings {
+  padding: 12px 20px;
+  background: #fff;
+  border-radius: 0 0 12px 12px;
+}
+
+.boost-count-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.boost-count-label select {
+  padding: 6px 12px;
+  border-radius: 6px;
+  border: 1px solid #d0d7de;
+  margin-left: 8px;
+  font-family: inherit;
+  outline: none;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.boost-count-label select:focus {
+  border-color: #3f7e6b;
+}
+
+.boost-hint {
+  font-size: 0.8rem;
+  color: #888;
+  margin-left: 12px;
+}
+
+.boost-config-list {
+  margin-top: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.boost-config-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: #f8fafc;
+  padding: 10px 14px;
+  border-radius: 8px;
+  border: 1px solid #e8ecf0;
+  font-size: 0.9rem;
+  color: #444;
+}
+
+.boost-config-row input[type="number"] {
+  width: 56px;
+  text-align: center;
+  padding: 6px;
+  border: 1px solid #d0d7de;
+  border-radius: 6px;
+  outline: none;
+  font-family: inherit;
+}
+
+.boost-config-row input[type="number"]:focus {
+  border-color: #3f7e6b;
+  box-shadow: 0 0 0 2px rgba(63, 126, 107, 0.1);
+}
+
+.boost-target-btn {
+  background: #fff;
+  color: #333;
+  border: 1px solid #d0d7de;
+  padding: 6px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-weight: 600;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+
+.boost-target-btn:hover {
+  background: #eef2f6;
+  border-color: #3f7e6b;
+}
+
+.boost-target-btn.has-target {
+  background: #3f7e6b;
+  color: #fff;
+  border-color: #3f7e6b;
+}
+
+.boost-target-btn.has-target:hover {
+  background: #2f5b50;
+}
+
+.boost-target-level {
+  font-size: 0.75rem;
+  color: #888;
+}
+
+/* 日志中助力事件高亮 */
+.log-line.log-boost {
+  color: #d35400;
+  font-weight: 600;
+}
+
+/* ============ 助力按天切换 ============ */
+.boost-day-tabs {
+  display: flex;
+  gap: 6px;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+.boost-day-tab {
+  padding: 4px 12px;
+  border-radius: 16px;
+  border: 1px solid #d0d7de;
+  background: #fff;
+  font-size: 0.8rem;
+  cursor: pointer;
+  color: #555;
+  transition: all 0.15s;
+}
+.boost-day-tab:hover { border-color: #3f7e6b; color: #2a5a4a; }
+.boost-day-tab.active {
+  background: #3f7e6b;
+  color: #fff;
+  border-color: #3f7e6b;
+  font-weight: 700;
+}
