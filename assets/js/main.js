@@ -642,14 +642,14 @@
                 const t2 = getRoomTimingText(room, 'round2');
                 const badge1 = t1 ? `<span class="round-timing-badge">${escapeHtml(t1)}</span>` : '';
                 const badge2 = t2 ? `<span class="round-timing-badge">${escapeHtml(t2)}</span>` : '';
-                recommendHTML = `<div style="margin-bottom:8px;"><div class="round-label">轮次一${badge1}</div><div class="recommend-area">${items1}</div></div><div><div class="round-label">轮次二${badge2}</div><div class="recommend-area">${items2}</div></div>`;
+                recommendHTML = `<div style="margin-bottom:8px;"><div class="round-label">A 班${badge1}</div><div class="recommend-area">${items1}</div></div><div><div class="round-label">B 班${badge2}</div><div class="recommend-area">${items2}</div></div>`;
             } else {
                 const recList = data.recommend || [];
                 let items = '';
                 for (let i = 0; i < 3; i++) items += buildRecommendItem(recList[i] || null, roomRaw[room], manufactType, cultureChecks);
                 const t1 = getRoomTimingText(room, 'round1');
                 const badge1 = t1 ? `<span class="round-timing-badge">${escapeHtml(t1)}</span>` : '';
-                recommendHTML = `<div style="margin-bottom:8px;"><div class="round-label">轮次一${badge1}</div><div class="recommend-area">${items}</div></div>`;
+                recommendHTML = `<div style="margin-bottom:8px;"><div class="round-label">A 班${badge1}</div><div class="recommend-area">${items}</div></div>`;
                 const reserveList = data.reserve || [];
                 let reserveHTML = '';
                 if (reserveList.length === 0) { reserveHTML = '<div style="font-size:0.7rem; color:#999; padding:4px 0;">无储备</div>'; }
@@ -1314,10 +1314,9 @@
     let trustTempSelected = [];
 
     function updateTrustMaxLabel() {
-        const isDoubleCentral = doubleRoundRooms.includes('central');
-        const max = isDoubleCentral ? 6 : 3;
+        const max = 3; // 强制上限 3 人
         if(trustMaxCount) trustMaxCount.textContent = max;
-        if(trustInfoLabel) trustInfoLabel.textContent = `选择信赖干员（至多${max}人，${isDoubleCentral ? '将按天赋评分自动分配两轮' : '优先放入中枢'}）：`;
+        if(trustInfoLabel) trustInfoLabel.textContent = `选择信赖干员（至多 3 人，将优先安排至总控中枢）：`;
     }
     function getTrustFilteredOperators() {
         const star = trustFilterStar.value;
@@ -1453,7 +1452,7 @@
         if (savedTrust) {
             try {
                 const arr = JSON.parse(savedTrust);
-                if (Array.isArray(arr)) { trustedAgentIds = arr.filter(id => operators.some(o => o.id === id)); if (trustedAgentIds.length > 6) trustedAgentIds = trustedAgentIds.slice(0, 6); }
+                if (Array.isArray(arr)) { trustedAgentIds = arr.filter(id => operators.some(o => o.id === id)); if (trustedAgentIds.length > 3) trustedAgentIds = trustedAgentIds.slice(0, 3); }
             } catch(e) {}
         }
         // trustAssignMap 已废弃，忽略历史存储

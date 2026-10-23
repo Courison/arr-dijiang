@@ -1,6 +1,10 @@
 /* ============================================================
    scheduler-core.js —— 纯算法核心模块
-   包含：评分计算、贪心排班、微调优化、会客室/制造舱特化
+   总控策略：
+   - 有总控天赋信赖 → 预置到一轮总控（≤3 人，按恢复降序）
+   - 无总控天赋信赖 → 不参与贪心，交换后填充 A 班（低效一轮）
+   - 一轮贪心 3 人 → 二轮添补 → 合并池排序（前 3 进 B 班、剩余进 A 班）
+   - 优先级语义：priorityOrder 索引 0 = 优先级 1（最高），索引 4 = 优先级 5（最低）
    ============================================================ */
 (function() {
     'use strict';
@@ -103,11 +107,9 @@
         const rateB = (1 + pB.eff / 100) * (1 + 0.4 * B.length);
         const cWorkA = 7.2 * Math.max(0.1, 1 - pA.reduce / 100);
         const cWorkB = 7.2 * Math.max(0.1, 1 - pB.reduce / 100);
-
         let highRate, lowRate, cWorkHigh, cWorkLow;
         if (rateA >= rateB) { highRate = rateA; lowRate = rateB; cWorkHigh = cWorkA; cWorkLow = cWorkB; }
         else { highRate = rateB; lowRate = rateA; cWorkHigh = cWorkB; cWorkLow = cWorkA; }
-
         let bestOutput = 0, found = false;
         for (let hHigh = 1; hHigh <= 23; hHigh++) {
             const hLow = 24 - hHigh;
@@ -129,7 +131,6 @@
         if (!A || !B || A.length === 0 || B.length === 0) return;
         if (!priority || priority.length === 0) return;
         const EFF_TYPE_MAP = { mineral: '矿物效率', fungi: '菌类效率', plant: '晶植效率' };
-
         function calcHA() {
             const pA = groupEffectiveEffReduce(A, 'culture', 'dual', []);
             const pB = groupEffectiveEffReduce(B, 'culture', 'dual', []);
@@ -152,8 +153,7 @@
             return (1 + eff / 100) * (1 + 0.4 * N);
         }
         function totalValue(A2, B2) {
-            const hA = calcHA();
-            const hB = 24 - hA;
+            const hA = calcHA(); const hB = 24 - hA;
             const weights = getPriorityWeights(options);
             let V = 0;
             for (let i = 0; i < priority.length; i++) {
@@ -163,7 +163,6 @@
             }
             return V;
         }
-
         const MAX_PER_GROUP = 3;
         let iterations = 0, improved = true;
         while (improved && iterations < 8) {
@@ -205,10 +204,7 @@
         if (A.length === 0 && B.length === 0) return;
         if (roomKey === 'culture') {
             const priority = options.culturePriority;
-            if (priority && priority.length > 1) {
-                optimizeCulturePair(A, B, priority, cRestHigh, options);
-                return;
-            }
+            if (priority && priority.length > 1) { optimizeCulturePair(A, B, priority, cRestHigh, options); return; }
         }
         const MAX_PER_GROUP = 3;
         let iterations = 0, improved = true;
@@ -409,11 +405,9 @@
             if (info.cluePowerNums.length > 0) badIndices.push(i); else neutralIndices.push(i);
         }
         if (badIndices.length === 0 && neutralIndices.length === 0) return;
-
         const usedIds = new Set();
         for (const op of R1) if (op) usedIds.add(op.opId);
         for (const op of R2) if (op) usedIds.add(op.opId);
-
         const usefulCandidates = [];
         for (const s of reservePool) {
             if (usedIds.has(s.opId)) continue;
@@ -444,7 +438,6 @@
             }
         }
         usefulCandidates.sort((a, b) => b.score - a.score);
-
         const placeholderCandidates = [];
         for (const s of reservePool) {
             if (usedIds.has(s.opId)) continue;
@@ -452,7 +445,6 @@
             const usefulPowerNums = info.cluePowerNums.filter(n => options.missingClues.has(n) || !options.excludedClues.has(n));
             if (info.clueEff === 0 && usefulPowerNums.length === 0 && info.cluePowerNums.length === 0) placeholderCandidates.push({ op: s });
         }
-
         const usedCandIds = new Set();
         function doReplace(idx, cand) {
             const displaced = R2[idx]; R2[idx] = cand.op;
@@ -495,11 +487,9 @@
                 if (calcRoomContributionActual(op, rk, effH, options) <= 0.01) weakIndices.push(i);
             }
             if (weakIndices.length === 0) continue;
-
             const usedIds = new Set();
             for (const key of Object.keys(round1Map)) for (const s of (round1Map[key] || [])) if (s) usedIds.add(s.opId);
             for (const key of Object.keys(round2Map)) for (const s of (round2Map[key] || [])) if (s) usedIds.add(s.opId);
-
             const candidates = [];
             for (const s of reservePool) {
                 if (usedIds.has(s.opId) || options.trustedAgentIds.includes(s.opId)) continue;
@@ -507,7 +497,6 @@
                 if (contrib > 0.01) candidates.push({ op: s, contrib });
             }
             candidates.sort((a, b) => b.contrib - a.contrib);
-
             const n = Math.min(weakIndices.length, candidates.length);
             for (let k = 0; k < n; k++) {
                 const idx = weakIndices[k]; const displaced = R2[idx];
@@ -525,7 +514,6 @@
         const info = {};
         const firstCultureProduct = options.culturePriority[0] || null;
         const cultureTypesForTiming = firstCultureProduct ? [firstCultureProduct] : options.cultureTypes;
-
         for (const key of ['manufactA', 'manufactB', 'culture', 'meeting']) {
             if (!doubleRooms.includes(key)) continue;
             const A = round1Map[key] || []; const B = round2Map[key] || [];
@@ -537,11 +525,9 @@
             const cWorkB = 7.2 * Math.max(0.1, 1 - pB.reduce / 100);
             const rA = (1 + pA.eff / 100) * (1 + 0.4 * A.length);
             const rB = (1 + pB.eff / 100) * (1 + 0.4 * B.length);
-
             const highIsA = rA >= rB;
             const highRate = highIsA ? rA : rB; const lowRate  = highIsA ? rB : rA;
             const cWorkHigh = highIsA ? cWorkA : cWorkB; const cWorkLow  = highIsA ? cWorkB : cWorkA;
-
             let bestHHigh = 13, bestOutput = -1, found = false;
             for (let hHigh = 1; hHigh <= 23; hHigh++) {
                 const hLow = 24 - hHigh;
@@ -558,23 +544,13 @@
             info[key] = { hA, hB, cA: cWorkA, cB: cWorkB, rA, rB, round1IsEfficient: highIsA };
             if (key === 'culture') info[key].cultureBasisProduct = firstCultureProduct;
         }
-
-        // 总控中枢：时间段与其它舱低效率轮对齐（高恢复轮位于第二轮）
         if (doubleRooms.includes('central')) {
             const baseKey = ['manufactA', 'manufactB', 'culture'].find(k => info[k]);
             const base = baseKey ? info[baseKey] : { hA: 11, hB: 13, cA: 0.072, cB: 0.072, rA: 1, rB: 1 };
-            
-            // 准确计算中枢两轮的真实恢复情况
             const pA = groupEffectiveEffReduce(round1Map.central || [], 'central', mode, options.cultureTypes);
             const pB = groupEffectiveEffReduce(round2Map.central || [], 'central', mode, options.cultureTypes);
             const centralRound1IsEfficient = pA.eff >= pB.eff;
-            
-            info.central = {
-                hA: base.hA, hB: base.hB,
-                cA: base.cA, cB: base.cB,
-                rA: base.rA, rB: base.rB,
-                round1IsEfficient: centralRound1IsEfficient
-            };
+            info.central = { hA: base.hA, hB: base.hB, cA: base.cA, cB: base.cB, rA: base.rA, rB: base.rB, round1IsEfficient: centralRound1IsEfficient };
         }
         return info;
     }
@@ -585,10 +561,9 @@
         const doubleRooms = options.doubleRooms;
         const emptyRooms = options.emptyRooms;
         const centralDisabled = options.centralDisabled;
-        const isTrustMode = options.isTrustMode;
         const trustIdSet = new Set(options.trustedAgentIds);
         const roomModes = options.roomModes;
-        
+
         const result = {
             central: { recommend: [], reserve: [], round1: [], round2: [] },
             meeting: { recommend: [], reserve: [], round1: [], round2: [] },
@@ -609,43 +584,39 @@
             { key: 'manufactA', field: 'expScore', disabled: false },
             { key: 'manufactB', field: 'weaponScore', disabled: false }
         ];
-        let remainingPool = availableScores.filter(s => !trustIdSet.has(s.opId));
-        const assignedSet = new Set(trustIdSet);
+
+        // ===== 信赖列表：无条件强制去总控（最多 3 人，按总控天赋降序） =====
+        const validTrustList = [];
+        for (const id of trustIdSet) {
+            const s = availableScores.find(x => x.opId === id);
+            if (s) validTrustList.push(s);
+        }
+        validTrustList.sort((a, b) => (b.score.central || 0) - (a.score.central || 0));
+        const finalTrustList = validTrustList.slice(0, 3);
+
+        const assignedSet = new Set();
         const round1Map = { central: [], meeting: [], culture: [], manufactA: [], manufactB: [] };
         const round2Map = { central: [], meeting: [], culture: [], manufactA: [], manufactB: [] };
 
-        // ===== 总控信赖模式：信赖干员按天赋评分自动分配两轮 =====
-        if (!centralDisabled && isTrustMode && trustIdSet.size > 0) {
-            const isDoubleCentral = doubleRooms.includes('central');
-            const maxTrust = isDoubleCentral ? 6 : 3;
-            const trustScores = options.trustedAgentIds
-                .map(id => availableScores.find(s => s.opId === id))
-                .filter(Boolean)
-                .sort((a, b) => (b.score.central || 0) - (a.score.central || 0))
-                .slice(0, maxTrust);
-            if (isDoubleCentral) {
-                const half = Math.min(3, trustScores.length);
-                round1Map.central = trustScores.slice(0, half);
-                round2Map.central = trustScores.slice(half, half + 3);
-            } else {
-                round1Map.central = trustScores.slice(0, 3);
-            }
-            for (const s of trustScores) {
+        // ===== 预置信赖到一轮总控池 =====
+        if (!centralDisabled) {
+            for (const s of finalTrustList) {
+                round1Map.central.push(s);
                 assignedSet.add(s.opId);
-                const idx = remainingPool.indexOf(s);
-                if (idx !== -1) remainingPool.splice(idx, 1);
             }
         }
-        window._trustRound2Cache = [];
 
-        // 一轮贪心
-        const order1 = options.priorityOrderRound1;
-        const activeRooms1 = order1.filter(k => roomModes[k] !== 'empty');
+        let remainingPool = availableScores.filter(s => !assignedSet.has(s.opId));
+
+        // ===== 一轮贪心 =====
+        let effectiveOrder1 = options.priorityOrderRound1.slice();
+        if (options.meetingPriorityEnabled) effectiveOrder1 = ['meeting'].concat(effectiveOrder1.filter(k => k !== 'meeting'));
+        const activeRooms1 = effectiveOrder1.filter(k => roomModes[k] !== 'empty');
         const roomPriority1 = {};
         activeRooms1.forEach((k, index) => { roomPriority1[k] = index; });
         if (roomPriority1['central'] === undefined) roomPriority1['central'] = 4;
         let round1Rooms = activeRooms1.filter(k => k !== 'central');
-        if (!centralDisabled && !(isTrustMode && trustIdSet.size > 0)) round1Rooms.push('central');
+        if (!centralDisabled) round1Rooms.push('central');
 
         const round1Pairs = [];
         for (const s of remainingPool) {
@@ -658,12 +629,18 @@
                 if (score > 0) round1Pairs.push({ scoreObj: s, roomKey: key, score: score, priority: roomPriority1[key] });
             }
         }
-        round1Pairs.sort((a, b) => b.score !== a.score ? b.score - a.score : a.priority - b.priority);
+        round1Pairs.sort((a, b) => {
+            if (b.score !== a.score) return b.score - a.score;
+            const aT = trustIdSet.has(a.scoreObj.opId) ? 1 : 0;
+            const bT = trustIdSet.has(b.scoreObj.opId) ? 1 : 0;
+            if (aT !== bT) return aT - bT;
+            return a.priority - b.priority;
+        });
 
-        const roomCount1 = { central: 0, meeting: 0, culture: 0, manufactA: 0, manufactB: 0 };
-        if (isTrustMode && trustIdSet.size > 0) roomCount1.central = round1Map.central.length;
+        const ROOM1_CAP = { central: 3, meeting: 3, culture: 3, manufactA: 3, manufactB: 3 };
+        const roomCount1 = { central: round1Map.central.length, meeting: 0, culture: 0, manufactA: 0, manufactB: 0 };
         for (const pair of round1Pairs) {
-            if (assignedSet.has(pair.scoreObj.opId) || roomCount1[pair.roomKey] >= 3) continue;
+            if (assignedSet.has(pair.scoreObj.opId) || roomCount1[pair.roomKey] >= (ROOM1_CAP[pair.roomKey] || 3)) continue;
             round1Map[pair.roomKey].push(pair.scoreObj); assignedSet.add(pair.scoreObj.opId); roomCount1[pair.roomKey]++;
             const idx = remainingPool.indexOf(pair.scoreObj); if (idx !== -1) remainingPool.splice(idx, 1);
         }
@@ -675,10 +652,7 @@
         while (r1FillActive) {
             r1FillActive = false;
             if (options.meetingPriorityEnabled && round1Map.meeting.length < 3) {
-                const cand = remainingPool.filter(s => {
-                    if (assignedSet.has(s.opId) || trustIdSet.has(s.opId)) return false;
-                    return s.mergedTraits && s.mergedTraits.some(t => t.舱室 === '会客室' && t.类型 === '收集线索效率');
-                });
+                const cand = remainingPool.filter(s => !assignedSet.has(s.opId) && s.mergedTraits && s.mergedTraits.some(t => t.舱室 === '会客室' && t.类型 === '收集线索效率'));
                 if (cand.length > 0) {
                     cand.sort((a, b) => (b.score.meeting || 0) - (a.score.meeting || 0));
                     const picked = cand[0]; round1Map.meeting.push(picked); assignedSet.add(picked.opId);
@@ -687,14 +661,13 @@
                 }
             }
             for (const key of round1FillRooms) {
-                if (round1Map[key].length >= 3) continue;
-                let cand = remainingPool.filter(s => !assignedSet.has(s.opId) && !trustIdSet.has(s.opId));
+                const cap1 = 3;
+                if (round1Map[key].length >= cap1) continue;
+                let cand = remainingPool.filter(s => !assignedSet.has(s.opId));
                 if (cand.length === 0) continue;
-                
                 let field = roomDefs.find(d => d.key === key).field;
                 if (key === 'manufactA') field = (mode === 'weapon') ? 'weaponScore' : 'expScore';
                 else if (key === 'manufactB') field = (mode === 'exp') ? 'expScore' : 'weaponScore';
-                
                 if (key === 'manufactA' || key === 'manufactB') {
                     const validCand = cand.filter(s => (s.score[field] || 0) > 0);
                     if (validCand.length > 0) {
@@ -712,7 +685,6 @@
                         }
                     }
                 }
-                
                 cand.sort((a, b) => (b.score[field] || 0) - (a.score[field] || 0));
                 const picked = cand[0]; round1Map[key].push(picked); assignedSet.add(picked.opId);
                 const idx = remainingPool.indexOf(picked); if (idx !== -1) remainingPool.splice(idx, 1);
@@ -720,28 +692,19 @@
             }
         }
 
-        // 二轮启用舱室（信赖模式下保留预置的 round2Map.central 并补足剩余名额）
+        // ===== 二轮贪心（总控不参与）=====
         let doubleKeys = ['meeting', 'culture', 'manufactA', 'manufactB', 'central'].filter(k => doubleRooms.includes(k) && !(k === 'central' && centralDisabled));
-        if (isTrustMode && trustIdSet.size > 0 && doubleKeys.includes('central')) {
-            const asg = new Set(round2Map.central.map(s => s.opId));
-            const need2 = 3 - round2Map.central.length;
-            if (need2 > 0) {
-                const fill = remainingPool.filter(s => !assignedSet.has(s.opId) && !asg.has(s.opId)).sort((a, b) => (b.score.central || 0) - (a.score.central || 0)).slice(0, need2);
-                for (const s of fill) { round2Map.central.push(s); asg.add(s.opId); const idx = remainingPool.indexOf(s); if (idx !== -1) remainingPool.splice(idx, 1); }
-            }
-            window._centralRound2Assigned = asg; doubleKeys = doubleKeys.filter(k => k !== 'central');
-        } else { window._centralRound2Assigned = new Set(); }
-
-        // 二轮贪心
-        const order2 = options.priorityOrderRound2;
-        const activeRooms2 = order2.filter(k => doubleKeys.includes(k));
+        let effectiveOrder2 = options.priorityOrderRound2.slice();
+        if (options.meetingPriorityEnabled) effectiveOrder2 = ['meeting'].concat(effectiveOrder2.filter(k => k !== 'meeting'));
+        const activeRooms2 = effectiveOrder2.filter(k => doubleKeys.includes(k));
         const roomPriority2 = {};
         activeRooms2.forEach((k, index) => { roomPriority2[k] = index; });
 
         const round2Pairs = [];
         for (const s of remainingPool) {
-            if (assignedSet.has(s.opId) || window._centralRound2Assigned.has(s.opId) || trustIdSet.has(s.opId)) continue;
+            if (assignedSet.has(s.opId)) continue;
             for (const key of doubleKeys) {
+                if (key === 'central') continue;
                 if (key === 'meeting' && !hasValidMeetingTalent(s, options)) continue;
                 let field = roomDefs.find(d => d.key === key).field;
                 if (key === 'manufactA') field = (mode === 'weapon') ? 'weaponScore' : 'expScore';
@@ -752,9 +715,8 @@
         }
         round2Pairs.sort((a, b) => b.score !== a.score ? b.score - a.score : a.priority - b.priority);
 
-        const assignedSecond = new Set(window._centralRound2Assigned);
+        const assignedSecond = new Set();
         const roomCount2 = { central: 0, meeting: 0, culture: 0, manufactA: 0, manufactB: 0 };
-        for (const s of round2Map.central) { assignedSecond.add(s.opId); roomCount2.central++; }
         for (const pair of round2Pairs) {
             if (assignedSecond.has(pair.scoreObj.opId) || roomCount2[pair.roomKey] >= 3) continue;
             round2Map[pair.roomKey].push(pair.scoreObj); assignedSecond.add(pair.scoreObj.opId); roomCount2[pair.roomKey]++;
@@ -767,7 +729,7 @@
         while (r2FillActive) {
             r2FillActive = false;
             if (options.meetingPriorityEnabled && round2FillRooms.includes('meeting') && round2Map.meeting.length < 3) {
-                const cand = remainingPool.filter(s => !assignedSecond.has(s.opId) && !trustIdSet.has(s.opId));
+                const cand = remainingPool.filter(s => !assignedSecond.has(s.opId));
                 if (cand.length > 0) {
                     cand.sort((a, b) => (b.score.meeting || 0) - (a.score.meeting || 0));
                     const picked = cand[0]; round2Map.meeting.push(picked); assignedSecond.add(picked.opId);
@@ -778,22 +740,17 @@
             for (const key of round2FillRooms) {
                 if (round2Map[key].length >= 3) continue;
                 let cand = remainingPool.filter(s => {
-                    if (assignedSecond.has(s.opId) || trustIdSet.has(s.opId)) return false;
+                    if (assignedSecond.has(s.opId)) return false;
                     if (key === 'meeting' && !hasValidMeetingTalent(s, options)) return false;
                     return true;
                 });
                 if (key === 'meeting' && cand.length === 0) {
-                    cand = remainingPool.filter(s => {
-                        if (assignedSecond.has(s.opId) || trustIdSet.has(s.opId)) return false;
-                        return s.mergedTraits && s.mergedTraits.some(t => t.舱室 === '会客室');
-                    });
+                    cand = remainingPool.filter(s => !assignedSecond.has(s.opId) && s.mergedTraits && s.mergedTraits.some(t => t.舱室 === '会客室'));
                 }
                 if (cand.length === 0) continue;
-                
                 let field = roomDefs.find(d => d.key === key).field;
                 if (key === 'manufactA') field = (mode === 'weapon') ? 'weaponScore' : 'expScore';
                 else if (key === 'manufactB') field = (mode === 'exp') ? 'expScore' : 'weaponScore';
-
                 if (key === 'manufactA' || key === 'manufactB') {
                     const validCand = cand.filter(s => (s.score[field] || 0) > 0);
                     if (validCand.length > 0) {
@@ -811,7 +768,6 @@
                         }
                     }
                 }
-
                 cand.sort((a, b) => (b.score[field] || 0) - (a.score[field] || 0));
                 const picked = cand[0]; round2Map[key].push(picked); assignedSecond.add(picked.opId);
                 const idx = remainingPool.indexOf(picked); if (idx !== -1) remainingPool.splice(idx, 1);
@@ -823,18 +779,15 @@
         const finalUsedIds = new Set();
         for (const key of Object.keys(round1Map)) for (const s of (round1Map[key] || [])) finalUsedIds.add(s.opId);
         for (const key of Object.keys(round2Map)) for (const s of (round2Map[key] || [])) finalUsedIds.add(s.opId);
-        const reservePool = availableScores.filter(s => !finalUsedIds.has(s.opId) && !trustIdSet.has(s.opId));
+        const reservePool = availableScores.filter(s => !finalUsedIds.has(s.opId));
         const reserveMap = { central: [], meeting: [], culture: [], manufactA: [], manufactB: [] };
-        
         for (const def of roomDefs) {
             if (def.disabled) continue;
             let field = def.field;
             if (def.key === 'manufactA') field = (mode === 'weapon') ? 'weaponScore' : 'expScore';
             else if (def.key === 'manufactB') field = (mode === 'exp') ? 'expScore' : 'weaponScore';
-            
             let cand = reservePool.filter(s => (s.score[field] || 0) > 0);
             cand.sort((a, b) => (b.score[field] || 0) - (a.score[field] || 0));
-            
             if (def.key === 'meeting') {
                 cand = cand.filter(s => {
                     let hasOther = false;
@@ -852,20 +805,6 @@
         optimizeReductionPlacement(round1Map, round2Map, doubleRooms, mode, options.cultureTypes, options);
         sortRoundsByEfficiency(round1Map, round2Map, mode, options.cultureTypes);
 
-        // ===== 总控中枢：将高恢复轮交换至第二轮（人员层交换，无修改）=====
-        if (!centralDisabled && doubleRooms.includes('central')) {
-            const centralR1 = round1Map.central || [];
-            const centralR2 = round2Map.central || [];
-            if (centralR1.length > 0 && centralR2.length > 0) {
-                const pA = groupEffectiveEffReduce(centralR1, 'central', mode, options.cultureTypes);
-                const pB = groupEffectiveEffReduce(centralR2, 'central', mode, options.cultureTypes);
-                if (pA.eff > pB.eff + 1e-6) {
-                    round1Map.central = centralR2;
-                    round2Map.central = centralR1;
-                }
-            }
-        }
-
         const roomTiming = {};
         {
             const cRestHigh = options.cRestHigh;
@@ -882,51 +821,92 @@
                 roomTiming[rk] = { hA: hA_opt, hB: 24 - hA_opt };
             }
         }
-
-        // ===== 总控中枢时间段与其它舱低效率轮对齐 =====
         if (roomTiming.central) {
             const baseKey = ['manufactA', 'manufactB', 'culture'].find(k => roomTiming[k]);
-            if (baseKey) {
-                const baseHA = roomTiming[baseKey].hA;
-                roomTiming.central = { hA: baseHA, hB: 24 - baseHA };
-            }
+            if (baseKey) { const baseHA = roomTiming[baseKey].hA; roomTiming.central = { hA: baseHA, hB: 24 - baseHA }; }
         }
 
         {
             const usedIds2 = new Set();
             for (const key of Object.keys(round1Map)) for (const s of (round1Map[key] || [])) usedIds2.add(s.opId);
             for (const key of Object.keys(round2Map)) for (const s of (round2Map[key] || [])) usedIds2.add(s.opId);
-            const reservePool2 = availableScores.filter(s => !usedIds2.has(s.opId) && !trustIdSet.has(s.opId));
+            const reservePool2 = availableScores.filter(s => !usedIds2.has(s.opId));
             refineManufactSecondRoundByActualTime(round1Map, round2Map, reservePool2, doubleRooms, mode, options.cultureTypes, roomTiming, options);
         }
-
         {
             const usedIds2 = new Set();
             for (const key of Object.keys(round1Map)) for (const s of (round1Map[key] || [])) usedIds2.add(s.opId);
             for (const key of Object.keys(round2Map)) for (const s of (round2Map[key] || [])) usedIds2.add(s.opId);
-            const reservePool2 = availableScores.filter(s => !usedIds2.has(s.opId) && !trustIdSet.has(s.opId));
+            const reservePool2 = availableScores.filter(s => !usedIds2.has(s.opId));
             replaceMeetingSecondRoundWithCluePowers(round1Map, round2Map, reservePool2, doubleRooms, roomTiming, mode, options.cultureTypes, options);
         }
 
-        // 兜底补齐
+        // ===== 兜底补齐：所有生产舱室优先按优先级补满（含一轮、二轮） =====
+        // 会客室若开启优先（或在策略中排第 1），会最先吃满人，避免被总控挤占
         {
-            const allAvail = availableScores.filter(s => !trustIdSet.has(s.opId));
             const currentlyUsed = new Set();
-            for (const key of Object.keys(round1Map)) for (const s of (round1Map[key] || [])) if(s) currentlyUsed.add(s.opId);
-            for (const key of Object.keys(round2Map)) for (const s of (round2Map[key] || [])) if(s) currentlyUsed.add(s.opId);
-            const unassigned = allAvail.filter(s => !currentlyUsed.has(s.opId));
+            for (const key of Object.keys(round1Map)) for (const s of (round1Map[key] || [])) if (s) currentlyUsed.add(s.opId);
+            for (const key of Object.keys(round2Map)) for (const s of (round2Map[key] || [])) if (s) currentlyUsed.add(s.opId);
+            const unassigned = availableScores.filter(s => !currentlyUsed.has(s.opId));
             unassigned.sort((a, b) => Math.max(b.score.expScore||0, b.score.weaponScore||0, b.score.meeting||0, b.score.culture||0, b.score.central||0) - Math.max(a.score.expScore||0, a.score.weaponScore||0, a.score.meeting||0, a.score.culture||0, a.score.central||0));
 
-            for (const rk of ALL_ROOMS) {
-                if (emptyRooms.includes(rk)) continue;
+            // 1. 一轮补齐（按一轮优先级）
+            for (const rk of effectiveOrder1) {
+                if (rk === 'central' || emptyRooms.includes(rk)) continue;
                 const arr1 = round1Map[rk] || [];
-                while (arr1.length < 3 && unassigned.length > 0) { const op = unassigned.shift(); arr1.push(op); currentlyUsed.add(op.opId); }
-                round1Map[rk] = arr1;
-                if (doubleRooms.includes(rk)) {
-                    const arr2 = round2Map[rk] || [];
-                    while (arr2.length < 3 && unassigned.length > 0) { const op = unassigned.shift(); arr2.push(op); currentlyUsed.add(op.opId); }
-                    round2Map[rk] = arr2;
+                while (arr1.length < 3 && unassigned.length > 0) {
+                    const op = unassigned.shift();
+                    arr1.push(op); currentlyUsed.add(op.opId);
                 }
+                round1Map[rk] = arr1;
+            }
+
+            // 2. 二轮补齐（按二轮优先级）
+            for (const rk of effectiveOrder2) {
+                if (rk === 'central' || emptyRooms.includes(rk)) continue;
+                if (!doubleRooms.includes(rk)) continue;
+                const arr2 = round2Map[rk] || [];
+                while (arr2.length < 3 && unassigned.length > 0) {
+                    const op = unassigned.shift();
+                    arr2.push(op); currentlyUsed.add(op.opId);
+                }
+                round2Map[rk] = arr2;
+            }
+        }
+
+        // ===== 总控补漏：当备选池还有闲人，且总控总人数 < 4 时，把总控填满 =====
+        if (!centralDisabled && doubleRooms.includes('central')) {
+            const usedNow = new Set();
+            for (const key of Object.keys(round1Map)) for (const s of (round1Map[key] || [])) if (s) usedNow.add(s.opId);
+            for (const key of Object.keys(round2Map)) for (const s of (round2Map[key] || [])) if (s) usedNow.add(s.opId);
+            const spare = availableScores.filter(s => !usedNow.has(s.opId));
+
+            const currentCentralCount = (round1Map.central || []).length + (round2Map.central || []).length;
+            if (currentCentralCount < 4 && spare.length > 0) {
+                spare.sort((a, b) => (b.score.central || 0) - (a.score.central || 0));
+                const need = 4 - currentCentralCount;
+                const pull = Math.min(need, spare.length);
+                for (let i = 0; i < pull; i++) {
+                    round1Map.central.push(spare[i]);
+                }
+            }
+        }
+
+        // ===== 合并交换：保证 B 班高效，A 班保底（不限人数）=====
+        if (!centralDisabled && doubleRooms.includes('central')) {
+            const merged = [...(round1Map.central || []), ...(round2Map.central || [])];
+            merged.sort((x, y) => (y.score.central || 0) - (x.score.central || 0));
+
+            if (merged.length === 0) {
+                round1Map.central = [];
+                round2Map.central = [];
+            } else if (merged.length === 1) {
+                round1Map.central = [merged[0]];
+                round2Map.central = [];
+            } else {
+                const bCount = Math.min(3, merged.length - 1);
+                round2Map.central = merged.slice(0, bCount);
+                round1Map.central = merged.slice(bCount);
             }
         }
 
@@ -944,7 +924,6 @@
         }
         const timingInfo = recordTimingInfo(round1Map, round2Map, doubleRooms, mode, options);
         result._timingInfo = timingInfo;
-        delete window._trustRound2Cache; delete window._centralRound2Assigned;
         return result;
     }
 

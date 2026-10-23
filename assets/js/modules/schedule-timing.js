@@ -532,11 +532,11 @@
                 </div>
                 <div class="timing-setting">
                     <div class="timing-setting-row">
-                        <span class="timing-setting-label">轮次一</span>
+                        <span class="timing-setting-label">A 班</span>
                         <span class="timing-setting-value">${renderRangeInline(r1Rows)}</span>
                     </div>
                     <div class="timing-setting-row">
-                        <span class="timing-setting-label">轮次二</span>
+                        <span class="timing-setting-label">B 班</span>
                         <span class="timing-setting-value">${renderRangeInline(r2Rows)}</span>
                     </div>
                 </div>

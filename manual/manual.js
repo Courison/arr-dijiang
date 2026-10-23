@@ -1,6 +1,7 @@
 /* ============================================================
-   manual.js —— 手动排班页 v6.1
+   manual.js —— 手动排班页 v6.2
    - 修复导出功能，增加 DOM 判空防御
+   - 修复干员库按钮跳转及数量徽章更新
    ============================================================ */
 (function () {
     'use strict';
@@ -1105,6 +1106,14 @@
         }
     }
 
+    // ★ 新增：更新干员数量徽章
+    function updateOperatorCountBadge() {
+        const badge = document.getElementById('operatorCountBadge');
+        if (!badge) return;
+        const owned = operators.filter(op => op.eliteLevel !== 'none').length;
+        badge.textContent = owned;
+    }
+
     function showRoundStatPopup(anchor, roomKey, roundKey) {
         const old = document.querySelector('.round-stat-popup-wrap');
         if (old) old.remove();
@@ -1150,6 +1159,7 @@
         } catch(e) { return; }
         
         initOperators();
+        updateOperatorCountBadge(); // ★ 更新数量徽章
         loadManualSchedule();
         loadEditingState();
         loadRoomProducts();
@@ -1159,6 +1169,14 @@
         
         renderManualSchedule();
         
+        // ★ 绑定干员库跳转
+        const opBtn = document.getElementById('openOperatorPanelBtn');
+        if (opBtn) {
+            opBtn.addEventListener('click', function () {
+                window.location.href = '/agentpackage/';
+            });
+        }
+
         const importBtn = document.getElementById('importFromAutoBtn');
         if (importBtn) importBtn.addEventListener('click', importFromAuto);
         
@@ -1178,6 +1196,7 @@
                 renderManualSchedule();
             }
         });
+
         const stepBtn = document.getElementById('openStepSimBtn');
         if (stepBtn) {
             stepBtn.addEventListener('click', function (e) {
