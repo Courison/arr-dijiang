@@ -40,6 +40,9 @@
     let operatorOrder = [];
     let config = {};  // { name: { elite, talents: [] } }
     const filters = { star: 'all', room: 'all', type: 'all', status: 'all' };
+    // ★ 新增：弹窗内的筛选状态
+    let editFilterStar = 'all';
+    let editFilterAttr = 'all';
 
     // ========== 工具 ==========
     function escapeHtml(str) {
@@ -403,20 +406,48 @@
     function renderOperatorGrid(search) {
         const grid = document.getElementById('apOperatorGrid');
         const kw = (search || '').trim().toLowerCase();
-        const names = operatorOrder.filter(function (n) {
-            if (!kw) return true;
-            return n.toLowerCase().indexOf(kw) !== -1;
+        
+        // 1. 筛选：名字、星级、属性
+        let names = operatorOrder.filter(function (n) {
+            const opData = rawData[n];
+            if (!opData) return false;
+            if (editFilterStar !== 'all' && opData.star !== editFilterStar) return false;
+            if (editFilterAttr !== 'all' && opData.attribute !== editFilterAttr) return false;
+            if (kw && n.toLowerCase().indexOf(kw) === -1) return false;
+            return true;
         });
+
+        // 2. 排序：按照“未拥有 → 精零 → 精一 → 精二 → 精三 → 精四”顺序
+        names.sort((a, b) => {
+            const ea = config[a]?.elite || 'none';
+            const eb = config[b]?.elite || 'none';
+            const ra = ELITE_RANK[ea] || 0;
+            const rb = ELITE_RANK[eb] || 0;
+            if (ra !== rb) return ra - rb; // 升序排列
+            return operatorOrder.indexOf(a) - operatorOrder.indexOf(b); // 同等级保持原顺序
+        });
+
         if (!names.length) {
             grid.innerHTML = '<p class="ap-empty" style="grid-column:1/-1;">未找到匹配的干员</p>';
             return;
         }
+
         grid.innerHTML = names.map(function (name) {
             const entry = config[name] || { elite: 'none', talents: [] };
             const eliteText = entry.elite === 'none' ? '未拥有' : entry.elite;
             const eliteClass = entry.elite === 'none' ? ' none' : '';
             const imgSrc = getAgentImgSrc(name);
-            return '<div class="ap-op-item" data-name="' + escapeHtml(name) + '">' +
+            
+            // ★ 核心判断：如果是精四，且 4 个天赋全部激活（全满状态）
+            const isMax = (entry.elite === '精四' && 
+                           entry.talents && 
+                           entry.talents.includes('1_1') && 
+                           entry.talents.includes('2_1') && 
+                           entry.talents.includes('1_2') && 
+                           entry.talents.includes('2_2'));
+            const maxClass = isMax ? ' is-max' : '';
+
+            return '<div class="ap-op-item' + maxClass + '" data-name="' + escapeHtml(name) + '">' +
                 '<img src="' + imgSrc + '" onerror="this.onerror=null; this.src=\'' + AVATAR_FALLBACK + '\';" alt="' + escapeHtml(name) + '">' +
                 '<div class="ap-op-name" title="' + escapeHtml(name) + '">' + escapeHtml(name) + '</div>' +
                 '<div class="ap-op-elite' + eliteClass + '">' + escapeHtml(eliteText) + '</div>' +
@@ -508,13 +539,10 @@
                 const newElite = this.dataset.level;
                 tempElite = newElite;
                 // 切换精英化：等级提高时自动激活新增天赋，降低时自动清理越界天赋
-                const oldRank = ELITE_RANK[tempElite];
                 const auto = autoActivateByElite(newElite);
-                // 保留用户已有的激活状态，但补齐新增可点的天赋
                 const next = Object.assign({}, tempTalents);
                 for (const tid of TALENT_ORDER) {
                     if (auto[tid] && !next[tid] && canActivate(newElite, tid)) {
-                        // 等级提高解锁的新天赋，自动激活
                         next[tid] = true;
                     }
                 }
@@ -580,6 +608,16 @@
         const searchInput = document.getElementById('apSearchInput');
         searchInput.addEventListener('input', function () {
             renderOperatorGrid(this.value);
+        });
+
+        // ★ 新增：绑定星级、属性筛选事件
+        document.getElementById('apEditFilterStar').addEventListener('change', function() {
+            editFilterStar = this.value;
+            renderOperatorGrid(searchInput.value);
+        });
+        document.getElementById('apEditFilterAttr').addEventListener('change', function() {
+            editFilterAttr = this.value;
+            renderOperatorGrid(searchInput.value);
         });
 
         bindEliteButtons();

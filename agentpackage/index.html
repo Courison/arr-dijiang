@@ -8,16 +8,16 @@
     <!-- 禁用彩蛋（本页不触发） -->
     <script>window.__DIJIANG_DISABLE_EGG__ = true;</script>
 
-    <link rel="stylesheet" href="/assets/css/01-base.css?v=202610021200">
-    <link rel="stylesheet" href="/assets/css/02-layout.css?v=202610021200">
-    <link rel="stylesheet" href="/assets/css/03-components.css?v=202610021200">
-    <link rel="stylesheet" href="/assets/css/08-feedback-changelog.css?v=202610021200">
-    <link rel="stylesheet" href="/assets/css/09-responsive.css?v=202610021200">
-    <link rel="stylesheet" href="/assets/css/10-pet.css?v=202610021200">
-    <link rel="stylesheet" href="/assets/css/11-account.css?v=2026090271700">
-    <link rel="stylesheet" href="/assets/css/13-sidebar.css?v=202610021200">
-    <link rel="stylesheet" href="/assets/css/14-page-common.css?v=202610021200">
-    <link rel="stylesheet" href="/assets/css/16-agentpackage.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/01-base.css?v=202610261200">
+    <link rel="stylesheet" href="/assets/css/02-layout.css?v=202610261200">
+    <link rel="stylesheet" href="/assets/css/03-components.css?v=202610261200">
+    <link rel="stylesheet" href="/assets/css/08-feedback-changelog.css?v=202610261200">
+    <link rel="stylesheet" href="/assets/css/09-responsive.css?v=202610261200">
+    <link rel="stylesheet" href="/assets/css/10-pet.css?v=202610261200">
+    <link rel="stylesheet" href="/assets/css/11-account.css?v=202610261200">
+    <link rel="stylesheet" href="/assets/css/13-sidebar.css?v=202610261200">
+    <link rel="stylesheet" href="/assets/css/14-page-common.css?v=202610261200">
+    <link rel="stylesheet" href="/assets/css/16-agentpackage.css?v=202610261200">
 </head>
 <body>
 
@@ -170,6 +170,25 @@
 
         <div class="ap-modal-body" id="apSelectView">
             <input type="text" id="apSearchInput" class="ap-search" placeholder="搜索干员名…" autocomplete="off">
+            
+            <!-- ★ 新增：弹窗内的筛选栏 -->
+            <div class="ap-modal-filters">
+                <select id="apEditFilterStar">
+                    <option value="all">全部星级</option>
+                    <option value="六星">六星</option>
+                    <option value="五星">五星</option>
+                    <option value="四星">四星</option>
+                </select>
+                <select id="apEditFilterAttr">
+                    <option value="all">全部属性</option>
+                    <option value="灼热">灼热</option>
+                    <option value="电磁">电磁</option>
+                    <option value="寒冷">寒冷</option>
+                    <option value="自然">自然</option>
+                    <option value="物理">物理</option>
+                </select>
+            </div>
+
             <div class="ap-operator-grid" id="apOperatorGrid"></div>
         </div>
 
@@ -203,10 +222,10 @@
     </div>
 </div>
 
-<script src="/assets/js/modules/sidebar.js?v=202610021200"></script>
-<script src="/assets/js/modules/header-actions.js?v=202610021200"></script>
-<script src="/assets/js/modules/pet.js?v=202610021200"></script>
-<script src="/assets/js/modules/page-pet.js?v=202610021200"></script>
-<script src="/assets/js/modules/agentpackage.js?v=202610021200"></script>
+<script src="/assets/js/modules/sidebar.js?v=202610261200"></script>
+<script src="/assets/js/modules/header-actions.js?v=202610261200"></script>
+<script src="/assets/js/modules/pet.js?v=202610261200"></script>
+<script src="/assets/js/modules/page-pet.js?v=202610261200"></script>
+<script src="/assets/js/modules/agentpackage.js?v=202610261200"></script>
 </body>
 </html>

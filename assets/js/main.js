@@ -514,8 +514,10 @@
         const options = {
             mode: getManufactMode(), doubleRooms: doubleRoundRooms, roomModes: roomModes,
             emptyRooms: ALL_ROOMS.filter(k => roomModes[k] === 'empty'),
-            centralDisabled: (centralMode === 'empty' || roomModes.central === 'empty'),
-            isTrustMode: (centralMode === 'trust'), trustedAgentIds: trustedAgentIds, trustAssignMap: trustAssignMap,
+            centralDisabled: false,
+            isTrustMode: (trustedAgentIds.length > 0),
+            trustedAgentIds: trustedAgentIds,
+            trustAssignMap: trustAssignMap,
             priorityOrderRound1: getRoomPriorityOrder(1), priorityOrderRound2: getRoomPriorityOrder(2),
             meetingPriorityEnabled: meetingPriorityEnabled, missingClues: missingClues, excludedClues: excludedClues,
             cultureTypes: getCultureTypes(), culturePriority: getCulturePriority(),
@@ -1460,56 +1462,78 @@
         updateTrustTags();
         loadRoomModes();
         renderRoomModesUI();
+        // 1. 初始化状态
         const savedMeeting = sessionStorage.getItem('meetingPriority');
         if (savedMeeting === 'true') {
             meetingPriorityEnabled = true;
-            document.getElementById('meetingPriorityToggle').classList.add('active');
-            document.getElementById('priorityStatus').textContent = '开启';
             document.getElementById('missingCluesArea').style.display = 'block';
             const savedClues = sessionStorage.getItem('missingClues');
             if (savedClues) {
                 try {
                     missingClues = new Set(JSON.parse(savedClues));
-                    document.querySelectorAll('.clue-btn').forEach(btn => { if (missingClues.has(parseInt(btn.dataset.clue))) btn.classList.add('selected'); });
                 } catch(e) {}
             }
+        } else {
+            meetingPriorityEnabled = false;
+            document.getElementById('missingCluesArea').style.display = 'none';
         }
-        const toggle = document.getElementById('meetingPriorityToggle');
-        const clueArea = document.getElementById('missingCluesArea');
+
+        // 2. 初始化按钮状态
+        let oldToggle = document.getElementById('meetingPriorityToggle');
+        if (oldToggle) {
+            oldToggle.classList.toggle('active', meetingPriorityEnabled);
+            document.getElementById('priorityStatus').textContent = meetingPriorityEnabled ? '开启' : '关闭';
+        }
+
+        // 3. 生成线索按钮
         const clueContainer = document.getElementById('clueButtons');
-        if (clueContainer.children.length === 0) {
+        if (clueContainer && clueContainer.children.length === 0) {
             for (let i = 1; i <= 7; i++) {
-                const btn = document.createElement('div'); btn.className = 'clue-btn'; btn.textContent = `线索${i}`; btn.dataset.clue = i;
+                const btn = document.createElement('div'); 
+                btn.className = 'clue-btn'; 
+                btn.textContent = `线索${i}`; 
+                btn.dataset.clue = i;
+                if (missingClues.has(i)) btn.classList.add('selected');
                 btn.addEventListener('click', function() {
-                    if (!meetingPriorityEnabled) return; if (this.classList.contains('disabled')) return;
-                    this.classList.toggle('selected'); const num = parseInt(this.dataset.clue);
-                    if (this.classList.contains('selected')) missingClues.add(num); else missingClues.delete(num);
-                    sessionStorage.setItem('missingClues', JSON.stringify([...missingClues])); generateSchedule();
+                    if (!meetingPriorityEnabled) return; 
+                    if (this.classList.contains('disabled')) return;
+                    this.classList.toggle('selected'); 
+                    const num = parseInt(this.dataset.clue);
+                    if (this.classList.contains('selected')) missingClues.add(num); 
+                    else missingClues.delete(num);
+                    sessionStorage.setItem('missingClues', JSON.stringify([...missingClues])); 
+                    generateSchedule();
                 });
                 clueContainer.appendChild(btn);
             }
         }
         updateClueAvailability();
 
-        toggle.addEventListener('click', function() {
-            meetingPriorityEnabled = !meetingPriorityEnabled;
-            if (meetingPriorityEnabled) { this.classList.add('active'); document.getElementById('priorityStatus').textContent = '开启'; clueArea.style.display = 'block'; sessionStorage.setItem('meetingPriority', 'true'); }
-            else { this.classList.remove('active'); document.getElementById('priorityStatus').textContent = '关闭'; clueArea.style.display = 'none'; missingClues.clear(); document.querySelectorAll('.clue-btn').forEach(b => b.classList.remove('selected')); sessionStorage.setItem('meetingPriority', 'false'); }
-            generateSchedule();
-        });
-        const modeBtns = document.querySelectorAll('#centralModeSelector .mode-btn');
-        const trustArea = document.getElementById('centralTrustArea');
-        modeBtns.forEach(btn => {
-            btn.addEventListener('click', function() {
-                const mode = this.dataset.mode;
-                if (mode !== 'trust' && centralMode === 'trust') { trustedAgentIds = []; trustAssignMap = {}; sessionStorage.removeItem('trustedAgentIds'); sessionStorage.removeItem('trustAssignMap'); updateTrustTags(); closeTrustModal(); closeTrustAssignModal(); }
-                centralMode = mode; modeBtns.forEach(b => b.classList.remove('active')); this.classList.add('active');
-                if (mode === 'trust') { trustArea.style.display = 'flex'; } else trustArea.style.display = 'none';
-                sessionStorage.setItem('centralMode', mode); generateSchedule();
+        // 4. 绑定开关事件 (使用 cloneNode 清除旧事件，避免多次绑定)
+        if (oldToggle) {
+            const newToggle = oldToggle.cloneNode(true);
+            newToggle.classList.toggle('active', meetingPriorityEnabled); // 重新应用状态
+            oldToggle.parentNode.replaceChild(newToggle, oldToggle);
+            
+            newToggle.addEventListener('click', function() {
+                meetingPriorityEnabled = !meetingPriorityEnabled;
+                if (meetingPriorityEnabled) { 
+                    this.classList.add('active'); 
+                    document.getElementById('priorityStatus').textContent = '开启'; 
+                    document.getElementById('missingCluesArea').style.display = 'block'; 
+                    sessionStorage.setItem('meetingPriority', 'true'); 
+                } else { 
+                    this.classList.remove('active'); 
+                    document.getElementById('priorityStatus').textContent = '关闭'; 
+                    document.getElementById('missingCluesArea').style.display = 'none'; 
+                    missingClues.clear(); 
+                    // ★ 关键：只清除会客室优先的线索选择，不影响下方二轮排除线索
+                    document.querySelectorAll('#clueButtons .clue-btn').forEach(b => b.classList.remove('selected')); 
+                    sessionStorage.setItem('meetingPriority', 'false'); 
+                }
+                generateSchedule();
             });
-        });
-        const initModeBtn = document.querySelector(`#centralModeSelector .mode-btn[data-mode="${centralMode}"]`);
-        if (initModeBtn) { modeBtns.forEach(b => b.classList.remove('active')); initModeBtn.classList.add('active'); trustArea.style.display = centralMode === 'trust' ? 'flex' : 'none'; }
+        }
         
         try {
             const rawDefault = sessionStorage.getItem('DijiangDefaultProduct');
@@ -1605,6 +1629,8 @@
         try { sessionStorage.setItem('meetingPriority', meetingPriorityEnabled ? 'true' : 'false'); } catch (e) {}
         try { sessionStorage.setItem('missingClues', JSON.stringify([...missingClues])); } catch (e) {}
         try { sessionStorage.setItem('doubleRoundRooms', JSON.stringify(doubleRoundRooms)); } catch (e) {}
+        try { sessionStorage.setItem('DijiangTimingStartHour', document.getElementById('timingStartHour')?.value || ''); } catch (e) {}
+        try { sessionStorage.setItem('DijiangTimingStartMinute', document.getElementById('timingStartMinute')?.value || ''); } catch (e) {}
     });
 
     // ==========================================
@@ -2003,12 +2029,21 @@
                 let manufactProducts = null, cultureProducts = null;
                 try { const raw = sessionStorage.getItem('DijiangDefaultProduct'); if (raw) manufactProducts = JSON.parse(raw); } catch (e) {}
                 try { const raw = sessionStorage.getItem('DijiangManualProduct'); if (raw) { const p = JSON.parse(raw); if (p && p.culture) cultureProducts = p.culture; } } catch (e) {}
+                
+                // ★ 修复：实时从 DOM 读取时间，如果没有 DOM 则从缓存读
+                const hEl = document.getElementById('timingStartHour');
+                const mEl = document.getElementById('timingStartMinute');
+                const tH = hEl ? hEl.value : (sessionStorage.getItem('DijiangTimingStartHour') || '');
+                const tM = mEl ? mEl.value : (sessionStorage.getItem('DijiangTimingStartMinute') || '');
+
                 obj._strategy = {
                     doubleRoundRooms: doubleRoundRooms.slice(), roomModes: Object.assign({}, roomModes), centralMode: centralMode,
                     trustedAgentIds: trustedAgentIds.slice(), trustAssignMap: Object.assign({}, trustAssignMap),
                     meetingPriorityEnabled: meetingPriorityEnabled, missingClues: [...missingClues], excludedClues: [...excludedClues],
                     manufactProducts: manufactProducts, cultureProducts: cultureProducts,
-                    roomPriorityOrderRound1: roomPriorityOrderRound1.slice(), roomPriorityOrderRound2: roomPriorityOrderRound2.slice()
+                    roomPriorityOrderRound1: roomPriorityOrderRound1.slice(), roomPriorityOrderRound2: roomPriorityOrderRound2.slice(),
+                    timingStartHour: tH,
+                    timingStartMinute: tM
                 };
                 return obj;
             } catch (e) { return {}; }
@@ -2023,11 +2058,11 @@
                 
                 if (strategy) {
                     try {
+                        // ... 前面原有的 roomModes 等逻辑保持不变 ...
                         if (strategy.roomModes) { for (const k of ALL_ROOMS) { if (['empty', 'single', 'double'].includes(strategy.roomModes[k])) roomModes[k] = strategy.roomModes[k]; } syncDoubleRooms(); renderRoomModesUI(); }
                         else if (Array.isArray(strategy.doubleRoundRooms)) { doubleRoundRooms = strategy.doubleRoundRooms.filter(v => ['central','manufactA','manufactB','culture','meeting'].includes(v)); }
                         if (typeof strategy.centralMode === 'string' && ['normal','empty','trust'].includes(strategy.centralMode)) centralMode = strategy.centralMode;
                         if (Array.isArray(strategy.trustedAgentIds)) trustedAgentIds = strategy.trustedAgentIds.filter(id => operators.some(o => o.id === id));
-                        // trustAssignMap 已废弃，忽略
                         trustAssignMap = {};
                         if (typeof strategy.meetingPriorityEnabled === 'boolean') meetingPriorityEnabled = strategy.meetingPriorityEnabled;
                         if (Array.isArray(strategy.missingClues)) missingClues = new Set(strategy.missingClues.filter(n => n >= 1 && n <= 7));
@@ -2036,9 +2071,31 @@
                         if (strategy.cultureProducts) { let all = {}; try { const raw = sessionStorage.getItem('DijiangManualProduct'); if (raw) all = JSON.parse(raw) || {}; } catch (e) {} all.culture = strategy.cultureProducts; sessionStorage.setItem('DijiangManualProduct', JSON.stringify(all)); }
                         if (Array.isArray(strategy.roomPriorityOrderRound1)) roomPriorityOrderRound1 = strategy.roomPriorityOrderRound1;
                         if (Array.isArray(strategy.roomPriorityOrderRound2)) roomPriorityOrderRound2 = strategy.roomPriorityOrderRound2;
+
+                        // ★ 新增：恢复起点时间
+                        if (strategy.timingStartHour !== undefined) {
+                            sessionStorage.setItem('DijiangTimingStartHour', strategy.timingStartHour);
+                            const hInput = document.getElementById('timingStartHour');
+                            if (hInput) { hInput.value = strategy.timingStartHour; hInput.dataset.touched = '1'; }
+                        }
+                        if (strategy.timingStartMinute !== undefined) {
+                            sessionStorage.setItem('DijiangTimingStartMinute', strategy.timingStartMinute);
+                            const mInput = document.getElementById('timingStartMinute');
+                            if (mInput) { mInput.value = strategy.timingStartMinute; mInput.dataset.touched = '1'; }
+                        }
+
                     } catch (e) {}
                 }
-                initUI(); generateSchedule();
+                initUI(); 
+                generateSchedule();
+                
+                // ★ 新增：应用配置后，触发时间面板重新计算
+                setTimeout(() => {
+                    if (window.DijiangTiming && typeof window.DijiangTiming.run === 'function') {
+                        window.DijiangTiming.run();
+                    }
+                }, 100);
+
                 return true;
             } catch (e) { return false; }
         }

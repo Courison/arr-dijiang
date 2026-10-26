@@ -63,10 +63,18 @@
             padding-bottom: 6px;
         }
         .dev-schedule-ops {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px;
-            justify-content: center;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            justify-items: center;
+            margin-bottom: 8px;
+        }
+        .dev-schedule-round-label {
+            font-size: 0.75rem;
+            color: #888;
+            font-weight: 600;
+            margin: 6px 0 4px;
+            text-align: left;
         }
         .dev-schedule-op {
             display: flex;
@@ -98,6 +106,14 @@
             display: flex;
             flex-wrap: wrap;
             gap: 16px;
+            align-items: flex-start;
+        }
+        .dev-group-divider {
+            width: 1px;
+            background-color: #e0e6ea;
+            margin: 0 4px;
+            align-self: stretch;
+            min-height: 80px;
         }
         .dev-top-card {
             position: relative;

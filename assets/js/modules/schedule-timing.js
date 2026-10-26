@@ -560,7 +560,11 @@
         const resultDiv = document.getElementById('timingResult');
         if (!resultDiv) return;
         resultDiv.innerHTML = '<p style="color:#888;">计算稳态循环…</p>';
-        
+        // ★ 新增：每次运行时，强制把输入框的值同步到缓存，确保账号上传时能拿到最新值
+        const hEl = document.getElementById('timingStartHour');
+        const mEl = document.getElementById('timingStartMinute');
+        if (hEl) sessionStorage.setItem('DijiangTimingStartHour', hEl.value);
+        if (mEl) sessionStorage.setItem('DijiangTimingStartMinute', mEl.value);
         const moodContainer = document.getElementById('timingRInputs');
         if (moodContainer) moodContainer.innerHTML = '';
 
@@ -618,9 +622,31 @@
             if (!ra) continue;
             
             if (!ra.isSingle && ra.loop && ra.loop.feasible) {
-                const lowEnd = t0 + ra.effRestDur; 
-                const effStart = lowEnd;
-                const effEnd = t0 + 24;
+                let lowEnd = t0 + ra.effRestDur; 
+                let effStart = lowEnd;
+                let effEnd = t0 + 24;
+                
+                // ★ 核心修复：如果是培养舱，且确实有干员提供首选产物时，才强制让该组拿长班
+                if (ra.roomKey === 'culture' && ra.cultureFirstProduct) {
+                    const productKey = ra.cultureFirstProduct;
+                    // 只有当班次中切实含有该产物的干员时，才执行强制分配
+                    const g1HasTarget = ra.mainRound1.ops.some(op => (op.rooms['培养舱'].eff[productKey] || 0) > 0);
+                    const g2HasTarget = ra.mainRound2.ops.some(op => (op.rooms['培养舱'].eff[productKey] || 0) > 0);
+                    
+                    if (g1HasTarget || g2HasTarget) {
+                        // 强制将时间段切分为：前段低效7h，后段高效17h
+                        lowEnd = t0 + 7; 
+                        effStart = lowEnd;
+                        effEnd = t0 + 24;
+
+                        if (g1HasTarget) {
+                            ra.isRound1Efficient = true; 
+                        } else {
+                            ra.isRound1Efficient = false;
+                        }
+                    }
+                }
+
                 ra.periods = {
                     efficient: splitRange(effStart, effEnd),
                     inefficient: splitRange(t0, lowEnd)
@@ -755,10 +781,33 @@
         const now = new Date();
         const h = document.getElementById('timingStartHour');
         const m = document.getElementById('timingStartMinute');
-        if (h && !h.dataset.touched) h.value = now.getHours();
-        if (m && !m.dataset.touched) m.value = now.getMinutes();
-        if (h) h.addEventListener('input', () => { h.dataset.touched = '1'; });
-        if (m) m.addEventListener('input', () => { m.dataset.touched = '1'; });
+        
+        // 优先读取本地保存的时间设置
+        const savedH = sessionStorage.getItem('DijiangTimingStartHour');
+        const savedM = sessionStorage.getItem('DijiangTimingStartMinute');
+
+        if (h && !h.dataset.touched) {
+            // ★ 修复：排除空字符串的情况，如果为空则回退当前时间
+            h.value = (savedH !== null && savedH !== '') ? savedH : now.getHours();
+        }
+        if (m && !m.dataset.touched) {
+            m.value = (savedM !== null && savedM !== '') ? savedM : now.getMinutes();
+        }
+
+        if (h) {
+            h.addEventListener('input', () => { 
+                h.dataset.touched = '1'; 
+                sessionStorage.setItem('DijiangTimingStartHour', h.value); 
+                run(); 
+            });
+        }
+        if (m) {
+            m.addEventListener('input', () => { 
+                m.dataset.touched = '1'; 
+                sessionStorage.setItem('DijiangTimingStartMinute', m.value); 
+                run(); 
+            });
+        }
     }
 
     function bind() {

@@ -18,7 +18,7 @@
         '<svg xmlns="http://www.w3.org/2000/svg" width="56" height="56"><rect width="56" height="56" fill="#eaeaea"/><text x="50%" y="54%" text-anchor="middle" font-size="20" fill="#999">?</text></svg>'
     );
 
-    // 记录顶配干员被分配的舱室 { name: ['制造舱', '培养舱'] }
+    // 记录顶配干员被分配的舱室 { name: Set(['制造舱', '总控中枢', '总控中枢(低效)']) }
     let topRoomMap = {};
 
     // ========== 工具 ==========
@@ -169,39 +169,53 @@
         return '/Agent/' + encodeURIComponent(name) + '.webp';
     }
 
-    // ========== ★ 渲染简易排班图 ==========
+    // ========== ★ 渲染简易排班图 (按班次每行3人) ==========
     function renderSimpleSchedule(queues) {
         const container = document.getElementById('devSimpleSchedule');
         if (!container) return;
         const ROOM_MAP = { central: '总控中枢', manufactA: '制造舱 A', manufactB: '制造舱 B', culture: '培养舱', meeting: '会客室' };
         let html = '';
         
+        const renderOpCard = (op) => {
+            if (!op) return '<div></div>';
+            const imgSrc = getAgentImgSrc(op.name);
+            return `<div class="dev-schedule-op" title="${op.name}">
+                <img src="${imgSrc}" onerror="this.onerror=null; this.src='${AVATAR_FALLBACK}';">
+                <div class="op-name">${escapeHtml(op.name)}</div>
+            </div>`;
+        };
+
         for (const rk of ['central', 'manufactA', 'manufactB', 'culture', 'meeting']) {
             const data = queues[rk];
             if (!data) continue;
             
-            // 收集舱室内所有干员（去重）
-            const ops = new Set();
-            if (data.round1) data.round1.forEach(o => o && ops.add(o.name));
-            if (data.round2) data.round2.forEach(o => o && ops.add(o.name));
-            if (data.recommend) data.recommend.forEach(o => o && ops.add(o.name));
+            const isDouble = (data.round1 && data.round1.length > 0) || (data.round2 && data.round2.length > 0);
+            const hasSingle = data.recommend && data.recommend.length > 0;
             
-            if (ops.size === 0) continue;
+            if (!isDouble && !hasSingle) continue;
 
             html += `<div class="dev-schedule-room">
-                <div class="dev-schedule-room-title">${ROOM_MAP[rk]}</div>
-                <div class="dev-schedule-ops">`;
+                <div class="dev-schedule-room-title">${ROOM_MAP[rk]}</div>`;
                 
-            for (const name of ops) {
-                const imgSrc = getAgentImgSrc(name);
-                html += `<div class="dev-schedule-op" title="${name}">
-                    <img src="${imgSrc}" onerror="this.onerror=null; this.src='${AVATAR_FALLBACK}';">
-                    <div class="op-name">${escapeHtml(name)}</div>
-                </div>`;
+            if (isDouble) {
+                html += `<div class="dev-schedule-round-label">A 班</div>
+                         <div class="dev-schedule-ops">`;
+                for (let i = 0; i < 3; i++) html += renderOpCard((data.round1 || [])[i]);
+                html += `</div>`;
+                
+                html += `<div class="dev-schedule-round-label">B 班</div>
+                         <div class="dev-schedule-ops">`;
+                for (let i = 0; i < 3; i++) html += renderOpCard((data.round2 || [])[i]);
+                html += `</div>`;
+            } else {
+                html += `<div class="dev-schedule-ops" style="margin-top:8px;">`;
+                for (let i = 0; i < 3; i++) html += renderOpCard((data.recommend || [])[i]);
+                html += `</div>`;
             }
-            html += `</div></div>`;
+            html += `</div>`;
         }
-        container.innerHTML = html;
+        
+        container.innerHTML = html || '<p class="dev-empty">当前配置下无干员排班</p>';
     }
 
     // ========== ★ 顶配排班计算 ==========
@@ -212,7 +226,6 @@
             return;
         }
 
-        // 组装全满干员
         const maxOps = [];
         for (const [name, val] of Object.entries(config)) {
             const entry = parseConfigEntry(val);
@@ -231,7 +244,6 @@
             return;
         }
 
-        // 读取策略
         let roomModes = { central: 'double', manufactA: 'double', manufactB: 'double', culture: 'double', meeting: 'double' };
         try { const rm = sessionStorage.getItem('DijiangRoomModes'); if (rm) roomModes = JSON.parse(rm); } catch (e) {}
         
@@ -268,10 +280,8 @@
             return;
         }
 
-        // 渲染简易排班图
         renderSimpleSchedule(queues);
 
-        // 提取干员所在舱室
         topRoomMap = {};
         const ROOM_MAP = { central: '总控中枢', manufactA: '制造舱', manufactB: '制造舱', culture: '培养舱', meeting: '会客室' };
         
@@ -279,14 +289,26 @@
             const d = queues[roomKey];
             if (!d) return;
             const roomName = ROOM_MAP[roomKey];
-            const addRooms = (arr) => { 
+            
+            const addRooms = (arr, tag) => { 
                 (arr || []).forEach(o => {
                     if (!o) return;
                     if (!topRoomMap[o.name]) topRoomMap[o.name] = new Set();
-                    topRoomMap[o.name].add(roomName);
+                    topRoomMap[o.name].add(tag);
                 }); 
             };
-            addRooms(d.recommend); addRooms(d.round1); addRooms(d.round2);
+
+            if (roomKey === 'central') {
+                if (d.round1 && d.round1.length > 0) addRooms(d.round1, '总控中枢(低效)');
+                if (d.round2 && d.round2.length > 0) addRooms(d.round2, '总控中枢');
+                if ((!d.round1 || d.round1.length === 0) && (!d.round2 || d.round2.length === 0)) {
+                    addRooms(d.recommend, '总控中枢');
+                }
+            } else {
+                addRooms(d.recommend, roomName); 
+                addRooms(d.round1, roomName); 
+                addRooms(d.round2, roomName);
+            }
         });
 
         if (Object.keys(topRoomMap).length === 0) {
@@ -294,35 +316,72 @@
             return;
         }
 
-        // 渲染干员卡片 (仅显示未满练的)
-        let html = '';
+        const groups = {
+            '总控中枢': [],
+            '制造舱': [],
+            '培养舱': [],
+            '会客室': []
+        };
+
         Object.keys(topRoomMap).forEach(name => {
             const entry = parseConfigEntry(config[name] || 'none');
-            const isMax = entry.elite === '精四' && entry.talents.length === 4;
-            
-            // ★ 核心修改：跳过已满练干员
-            if (isMax) return;
+            const assignedRooms = Array.from(topRoomMap[name]);
+            const targetRoomsForTalents = assignedRooms.filter(r => r !== '总控中枢(低效)');
 
-            const imgSrc = getAgentImgSrc(name);
-            const roomStr = Array.from(topRoomMap[name]).join('/');
-            
-            html += `
-                <div class="dev-top-card" data-name="${name}" title="顶配位置：${roomStr}">
-                    <img src="${imgSrc}" onerror="this.onerror=null; this.src='${AVATAR_FALLBACK}';" alt="${name}">
-                    <div class="name">${escapeHtml(name)}</div>
-                    <div class="badge">需提升</div>
-                </div>
-            `;
+            let missingTargetTalents = [];
+            TALENT_ORDER.forEach(tid => {
+                if (entry.talents.includes(tid)) return;
+                const tList = getTalentList(rawData[name], tid);
+                if (tList.some(t => targetRoomsForTalents.includes(t.舱室))) {
+                    missingTargetTalents.push(tid);
+                }
+            });
+
+            if (missingTargetTalents.length === 0) return;
+
+            let primaryGroup = '';
+            if (targetRoomsForTalents.includes('总控中枢')) primaryGroup = '总控中枢';
+            else if (targetRoomsForTalents.includes('制造舱')) primaryGroup = '制造舱';
+            else if (targetRoomsForTalents.includes('培养舱')) primaryGroup = '培养舱';
+            else if (targetRoomsForTalents.includes('会客室')) primaryGroup = '会客室';
+
+            if (primaryGroup && groups[primaryGroup]) {
+                groups[primaryGroup].push({ name, assignedRooms: targetRoomsForTalents });
+            }
+        });
+
+        let html = '';
+        const groupKeys = ['总控中枢', '制造舱', '培养舱', '会客室'];
+        let isFirstGroup = true;
+
+        groupKeys.forEach(gk => {
+            const list = groups[gk];
+            if (list.length === 0) return;
+
+            if (!isFirstGroup) {
+                html += `<div class="dev-group-divider"></div>`;
+            }
+            isFirstGroup = false;
+
+            list.forEach(item => {
+                const imgSrc = getAgentImgSrc(item.name);
+                const roomStr = item.assignedRooms.join('/');
+                html += `
+                    <div class="dev-top-card" data-name="${item.name}" title="顶配位置：${roomStr}">
+                        <img src="${imgSrc}" onerror="this.onerror=null; this.src='${AVATAR_FALLBACK}';" alt="${item.name}">
+                        <div class="name">${escapeHtml(item.name)}</div>
+                        <div class="badge">需提升</div>
+                    </div>
+                `;
+            });
         });
         
-        // 如果全部已满练
         if (html === '') {
-            html = '<p class="dev-empty" style="grid-column:1/-1; text-align:center; color:#3f7e6b; padding:20px 0;">🎉 顶配排班所需干员均已满练！</p>';
+            html = '<p class="dev-empty" style="grid-column:1/-1; text-align:center; color:#3f7e6b; padding:20px 0;">🎉 顶配排班所需生效天赋均已满练！</p>';
         }
         
         grid.innerHTML = html;
 
-        // 绑定一键升级事件（必须绑在存在的元素上）
         grid.querySelectorAll('.dev-top-card').forEach(card => {
             card.addEventListener('click', () => handleQuickUpgrade(card.dataset.name, rawData));
         });
@@ -335,10 +394,9 @@
         try { config = JSON.parse(raw) || {}; } catch (e) {}
         
         const entry = parseConfigEntry(config[name] || 'none');
-        if (entry.elite === '精四' && entry.talents.length === 4) return;
-
         const rawOpData = rawData[name] || {};
         const assignedRooms = topRoomMap[name] ? Array.from(topRoomMap[name]) : [];
+        const targetRoomsForTalents = assignedRooms.filter(r => r !== '总控中枢(低效)');
         let missingDesc = [];
         
         if (entry.elite === 'none') missingDesc.push('未拥有该干员');
@@ -349,15 +407,13 @@
             TALENT_ORDER.forEach(tid => {
                 if (!currentTalents.has(tid)) {
                     const tList = getTalentList(rawOpData, tid);
-                    // 如果该干员在顶配里，只筛选对应舱室需要点出的天赋
-                    const neededTraits = assignedRooms.length > 0 
-                        ? tList.filter(t => assignedRooms.includes(t.舱室))
+                    const neededTraits = targetRoomsForTalents.length > 0 
+                        ? tList.filter(t => targetRoomsForTalents.includes(t.舱室))
                         : tList;
 
                     if (neededTraits.length > 0) {
                         const tName = (neededTraits[0].name) ? neededTraits[0].name : tid;
-                        const roomHint = assignedRooms.length > 0 ? `[${neededTraits[0].舱室}]` : '';
-                        missingDesc.push(`天赋${roomHint}：${tName}`);
+                        missingDesc.push(`天赋[${neededTraits[0].舱室}]：${tName}`);
                     }
                 }
             });
@@ -365,7 +421,7 @@
 
         if (missingDesc.length === 0) return;
 
-        const confirmMsg = `是否一键将【${name}】提升至精四满天赋？\n\n顶配排班中他将前往：${assignedRooms.join('、') || '任意舱室'}\n\n需要补充：\n${missingDesc.join('\n')}`;
+        const confirmMsg = `是否一键将【${name}】提升至精四满天赋？\n\n顶配排班中他将前往：${targetRoomsForTalents.join('、') || '任意舱室'}\n\n需要补充：\n${missingDesc.join('\n')}`;
         if (!confirm(confirmMsg)) return;
 
         config[name] = { elite: '精四', talents: ['1_1', '2_1', '1_2', '2_2'] };
@@ -375,7 +431,7 @@
         init();
     }
 
-    // ========== 原有分析逻辑 ==========
+    // ========== 原有分析逻辑 (展示全量缺失天赋) ==========
     function analyze(rawData, config) {
         const recommendations = {};
         ROOM_ORDER.forEach(r => recommendations[r] = []);

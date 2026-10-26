@@ -306,6 +306,28 @@
     box-shadow: 0 0 0 3px rgba(63, 126, 107, 0.1);
 }
 
+/* ★ 新增：弹窗内筛选下拉框 */
+.ap-modal-filters {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 14px;
+}
+.ap-modal-filters select {
+    padding: 7px 12px;
+    border-radius: 8px;
+    border: 1px solid #d0d7de;
+    background: #f8fafc;
+    font-size: 0.85rem;
+    color: #333;
+    font-family: inherit;
+    outline: none;
+    cursor: pointer;
+    flex: 1;
+}
+.ap-modal-filters select:focus {
+    border-color: #3f7e6b;
+}
+
 .ap-operator-grid {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
@@ -320,6 +342,7 @@
     cursor: pointer;
     transition: 0.2s;
     text-align: center;
+    border: 2px solid transparent; /* 预留边框位置防跳动 */
 }
 .ap-op-item:hover { background: #f0f6f3; }
 .ap-op-item img {
@@ -346,6 +369,20 @@
     margin-top: 1px;
 }
 .ap-op-item .ap-op-elite.none { color: #bbb; font-weight: 400; }
+
+/* ★ 新增：精四全满干员的高亮外框 */
+.ap-op-item.is-max {
+    border-color: #ffc107;
+    box-shadow: 0 0 10px rgba(255, 193, 7, 0.4);
+    background-color: #fffdf5;
+    transform: translateY(-2px);
+}
+.ap-op-item.is-max img {
+    border-color: #ffc107;
+}
+.ap-op-item.is-max .ap-op-elite {
+    color: #d39e00;
+}
 
 /* 编辑视图 */
 .ap-edit-hero {
