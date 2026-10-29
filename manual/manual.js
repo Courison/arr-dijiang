@@ -314,6 +314,8 @@
         const g2 = isDouble ? calcGroupRate(roomKey, 'round2', productMeta) : null;
 
         const rateOf = g => (1 + g.eff / 100) * (1 + 0.4 * g.N);
+        const activeRates = [g1, g2].filter(g => g && g.N > 0).map(rateOf);
+        const percentText = activeRates.length ? `${((activeRates.reduce((a, b) => a + b, 0) / activeRates.length) * 100).toFixed(2)}%` : '—';
         const cWorkOf = g => C_WORK_BASE * Math.max(0.1, 1 - g.reduce / 100);
 
         const restore1 = computeCentralRestore('round1');
@@ -330,9 +332,10 @@
             const tMax = Math.min(24, 1 / cw, 24 * cRestHigh / (cw + cRestHigh));
             if (hAOverride != null) {
                 const hA = Math.min(hAOverride, 24);
-                return `+${(r * hA).toFixed(2)}%（${hA}h）`;
+                if (roomKey !== 'central') saveRoomTiming(roomKey, hA, 24 - hA);
+                return percentText;
             }
-            return `+${(r * tMax).toFixed(2)}%`;
+            return percentText;
         }
 
         const rA = rateOf(g1), rB = rateOf(g2);
@@ -341,9 +344,8 @@
         if (hAOverride != null) {
             const hA = hAOverride;
             const hB = 24 - hA;
-            const output = rA * hA + rB * hB;
             if (roomKey !== 'central') saveRoomTiming(roomKey, hA, hB);
-            return `+${output.toFixed(2)}%（${hA}h+${hB}h）`;
+            return percentText;
         }
 
         const highIsA = rA >= rB;
@@ -379,13 +381,13 @@
 
         if (!found) {
             const tMax = Math.min(24, 1 / highCw, 24 * cRestHigh / (highCw + cRestHigh));
-            return `+${(highRate * tMax).toFixed(2)}%`;
+            return percentText;
         }
 
         const h1 = highIsA ? bestHHigh : (24 - bestHHigh);
         const h2 = 24 - h1;
         if (roomKey !== 'central') saveRoomTiming(roomKey, h1, h2);
-        return `+${bestOutput.toFixed(2)}%（${h1}h+${h2}h）`;
+        return percentText;
     }
     
     function compute24hOutput(roomKey) {
@@ -395,9 +397,9 @@
             const r1 = computeCentralRestore('round1');
             if (isDouble) {
                 const r2 = computeCentralRestore('round2');
-                return { text: `一轮 +${r1}%/h · 二轮 +${r2}%/h`, isCentral: true, needProduct: false };
+                return { text: `A班 ${r1}%/h · B班 ${r2}%/h`, isCentral: true, needProduct: false };
             }
-            return { text: `+${r1}%/h`, isCentral: true, needProduct: false };
+            return { text: `${r1}%/h`, isCentral: true, needProduct: false };
         }
         
         const isManufact = roomKey === 'manufactA' || roomKey === 'manufactB';
@@ -427,8 +429,7 @@
                 const numeric = full.replace(/（\d+h\+\d+h）$/, '');
                 pieces.push(`${m.effName}${numeric}`);
             }
-            const timeSuffix = `（${hA}h+${24 - hA}h）`;
-            return { text: pieces.join(' / ') + timeSuffix, isCentral: false, needProduct: false };
+            return { text: pieces.join(' / '), isCentral: false, needProduct: false };
         }
         
         if (isMeeting) {
@@ -730,7 +731,7 @@
         if (!container) return;
         const boxes = container.querySelectorAll('.manual-room-box');
         for (const box of boxes) {
-            const header = box.querySelector('.manual-room-header > span:first-child');
+            const header = box.querySelector('.manual-room-header > span:not(.v2-room-icon)');
             if (!header || header.textContent.trim() !== '培养舱') continue;
             const output = compute24hOutput('culture');
             const outEl = box.querySelector('.room-output');
@@ -1018,7 +1019,7 @@
         const isDouble = manualSchedule.mode === 'double';
         
         exportContainer.innerHTML = `
-          <div style="text-align:center;font-size:26px;font-weight:700;margin-bottom:6px;">帝江号手动排班表${isDouble ? '（二轮）' : ''}</div>
+          <div style="text-align:center;font-size:26px;font-weight:700;margin-bottom:6px;">帝江号手动排班表${isDouble ? '（双班）' : ''}</div>
           <div style="text-align:center;font-size:12px;color:#666;margin-bottom:18px;">生成时间 ${dateStr}</div>
           <div id="manualExportGrid" style="display:flex;flex-direction:column;gap:14px;"></div>
           <div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px;font-size:11px;color:#888;text-align:center;">https://arr-dijiang.top/manual/</div>
@@ -1054,13 +1055,14 @@
         
         const buildExportRoom = (roomKey) => {
             const output = compute24hOutput(roomKey);
+            const exportLabels = { ...ROOM_LABELS, manufactA: '制造舱 Ⅰ', manufactB: '制造舱 Ⅱ' };
             let outputText = '';
             if (output.isCentral) outputText = `<div style="font-size:11px;color:#8a6d3b;margin-bottom:6px;text-align:center;">${escapeHtml(output.text)}</div>`;
             else if (output.needProduct) outputText = `<div style="font-size:11px;color:#999;margin-bottom:6px;text-align:center;">未选择素材</div>`;
             else outputText = `<div style="font-size:11px;color:#3f7e6b;margin-bottom:6px;text-align:center;">24h均产${escapeHtml(output.text)}</div>`;
             
             let inner = `<div style="border:1px solid #e0e0e0;border-radius:12px;padding:12px;background:#fafafa;">
-                <div style="font-weight:600;font-size:14px;margin-bottom:10px;text-align:center;">${ROOM_LABELS[roomKey]}</div>${outputText}`;
+                <div style="font-weight:600;font-size:14px;margin-bottom:10px;text-align:center;">${exportLabels[roomKey] || ROOM_LABELS[roomKey]}</div>${outputText}`;
                 
             const buildRoundRow = (rnd) => {
                 const slots = manualSchedule.rooms[roomKey][rnd];
@@ -1068,7 +1070,7 @@
             };
             
             if (isDouble) {
-                inner += `<div style="font-size:11px;color:#666;margin-bottom:4px;">一轮</div>${buildRoundRow('round1')}<div style="font-size:11px;color:#666;margin-top:10px;margin-bottom:4px;">二轮</div>${buildRoundRow('round2')}</div>`;
+                inner += `<div style="font-size:11px;color:#666;margin-bottom:4px;">A班</div>${buildRoundRow('round1')}<div style="font-size:11px;color:#666;margin-top:10px;margin-bottom:4px;">B班</div>${buildRoundRow('round2')}</div>`;
             } else {
                 inner += `${buildRoundRow('round1')}</div>`;
             }

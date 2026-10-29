@@ -1,0 +1,159 @@
+/* ============================================================
+   舱室配色：参考对应天赋技能图标的主色
+   - 总控中枢：central_physical_power 的青蓝
+   - 制造舱：manufact_efficiency 的黄铜
+   - 培养舱：culture_*_efficiency 的嫩绿
+   - 会客室：meeting_clue_efficiency 的紫罗兰
+   只使用低透明度渐变，避免压过干员头像与文字。
+   ============================================================ */
+
+body.dj-v2 {
+  --room-central-rgb: 71, 193, 231;
+  --room-manufact-rgb: 244, 204, 21;
+  --room-culture-rgb: 172, 216, 76;
+  --room-meeting-rgb: 160, 142, 246;
+}
+
+body.dj-v2 .room-box[data-room="central"],
+body.dj-v2 .manual-room-box[data-room="central"],
+body.dj-v2 .rc-card[data-room="central"],
+body.dj-v2 .room-card[data-room="central"] {
+  --room-rgb: var(--room-central-rgb);
+}
+body.dj-v2 .room-box[data-room="manufactA"],
+body.dj-v2 .room-box[data-room="manufactB"],
+body.dj-v2 .manual-room-box[data-room="manufactA"],
+body.dj-v2 .manual-room-box[data-room="manufactB"],
+body.dj-v2 .rc-card[data-room="manufactA"],
+body.dj-v2 .rc-card[data-room="manufactB"],
+body.dj-v2 .room-card[data-room="manufactA"],
+body.dj-v2 .room-card[data-room="manufactB"] {
+  --room-rgb: var(--room-manufact-rgb);
+}
+body.dj-v2 .room-box[data-room="culture"],
+body.dj-v2 .manual-room-box[data-room="culture"],
+body.dj-v2 .rc-card[data-room="culture"],
+body.dj-v2 .room-card[data-room="culture"] {
+  --room-rgb: var(--room-culture-rgb);
+}
+body.dj-v2 .room-box[data-room="meeting"],
+body.dj-v2 .manual-room-box[data-room="meeting"],
+body.dj-v2 .rc-card[data-room="meeting"],
+body.dj-v2 .room-card[data-room="meeting"] {
+  --room-rgb: var(--room-meeting-rgb);
+}
+
+/* 主站舱室卡 */
+body.dj-v2 .room-box[data-room] {
+  background:
+    linear-gradient(135deg, rgba(var(--room-rgb), 0.15) 0%, rgba(var(--room-rgb), 0.04) 42%, rgba(255, 254, 250, 0.94) 100%);
+  border-color: rgba(var(--room-rgb), 0.34);
+  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.75) inset, 0 2px 10px rgba(28, 36, 32, 0.04);
+}
+body.dj-v2 .room-box[data-room] .room-box-header {
+  border-bottom-color: rgba(var(--room-rgb), 0.30);
+}
+body.dj-v2 .room-box[data-room] .product-tag {
+  background: rgba(var(--room-rgb), 0.14);
+  border-color: rgba(var(--room-rgb), 0.32);
+  color: var(--dj-ink-1);
+}
+body.dj-v2 .room-box[data-room] .reserve-area {
+  border-top-color: rgba(var(--room-rgb), 0.24);
+}
+body.dj-v2 .room-box[data-room] .reserve-item {
+  background: rgba(var(--room-rgb), 0.08);
+  border-color: rgba(var(--room-rgb), 0.20);
+}
+
+/* 舱室图标 */
+body.dj-v2 .v2-room-icon {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border-radius: 9px;
+  display: inline-grid;
+  place-items: center;
+  color: rgb(var(--room-rgb));
+  background: rgba(var(--room-rgb), 0.14);
+  border: 1px solid rgba(var(--room-rgb), 0.34);
+  margin-right: 2px;
+}
+body.dj-v2 .v2-room-icon svg {
+  width: 17px;
+  height: 17px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.7;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+body.dj-v2 .v2-room-icon img {
+  width: 19px;
+  height: 19px;
+  object-fit: contain;
+  display: block;
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.65));
+}
+
+/* 手动排班卡 */
+body.dj-v2 .manual-room-box[data-room] {
+  background:
+    linear-gradient(135deg, rgba(var(--room-rgb), 0.13) 0%, rgba(var(--room-rgb), 0.03) 45%, rgba(255, 254, 250, 0.94) 100%);
+  border-color: rgba(var(--room-rgb), 0.32);
+}
+body.dj-v2 .manual-room-box[data-room] .manual-room-header {
+  border-bottom-color: rgba(var(--room-rgb), 0.26);
+}
+body.dj-v2 .manual-room-box[data-room] .manual-room-header > span:not(.v2-room-icon) {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+/* 手动排班第二行只有培养/会客，居中，避免右侧大块留白 */
+@media (min-width: 1101px) {
+  body.dj-v2 .manual-room-row:last-child { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  body.dj-v2 .manual-room-row:last-child .manual-room-box:nth-child(1) { grid-column: 2 / span 2; }
+  body.dj-v2 .manual-room-row:last-child .manual-room-box:nth-child(2) { grid-column: 4 / span 2; }
+}
+
+/* 步进模拟设置卡 */
+body.dj-v2 .rc-card[data-room] {
+  background:
+    linear-gradient(135deg, rgba(var(--room-rgb), 0.12) 0%, rgba(var(--room-rgb), 0.03) 45%, rgba(255, 254, 250, 0.94) 100%);
+  border-color: rgba(var(--room-rgb), 0.28);
+}
+body.dj-v2 .rc-card[data-room] .rc-header {
+  border-bottom-color: rgba(var(--room-rgb), 0.24);
+}
+
+/* 步进模拟实时卡 */
+body.dj-v2 .room-card[data-room] {
+  background:
+    linear-gradient(135deg, rgba(var(--room-rgb), 0.12) 0%, rgba(var(--room-rgb), 0.03) 50%, rgba(255, 254, 250, 0.94) 100%);
+  border-color: rgba(var(--room-rgb), 0.28);
+}
+
+/* 深色模式下降低亮度，避免荧光感 */
+[data-dj-theme="dark"] body.dj-v2 .room-box[data-room],
+[data-dj-theme="dark"] body.dj-v2 .manual-room-box[data-room],
+[data-dj-theme="dark"] body.dj-v2 .rc-card[data-room],
+[data-dj-theme="dark"] body.dj-v2 .room-card[data-room] {
+  background:
+    linear-gradient(135deg, rgba(var(--room-rgb), 0.12) 0%, rgba(var(--room-rgb), 0.03) 45%, rgba(29, 38, 33, 0.96) 100%);
+  border-color: rgba(var(--room-rgb), 0.30);
+}
+
+@media (max-width: 768px) {
+  body.dj-v2 .room-box[data-room] {
+    background:
+      linear-gradient(135deg, rgba(var(--room-rgb), 0.14) 0%, rgba(var(--room-rgb), 0.03) 55%, rgba(255, 254, 250, 0.96) 100%);
+  }
+  body.dj-v2 .v2-room-icon {
+    width: 26px;
+    height: 26px;
+    flex-basis: 26px;
+    border-radius: 8px;
+  }
+}

@@ -96,10 +96,11 @@
     let meetingPriorityEnabled = false;
     let missingClues = new Set();
     let excludedClues = new Set([3, 7]);
+    let underfillRoom = 'culture';
     const ALL_ROOMS = ['central', 'manufactA', 'manufactB', 'culture', 'meeting'];
     
-    const DEFAULT_PRIORITY_ORDER_ROUND1 = ['meeting', 'central', 'manufactA', 'manufactB', 'culture'];
-    const DEFAULT_PRIORITY_ORDER_ROUND2 = ['meeting', 'manufactA', 'manufactB', 'culture', 'central'];
+    const DEFAULT_PRIORITY_ORDER_ROUND1 = ['manufactB', 'manufactA', 'culture', 'meeting', 'central'];
+    const DEFAULT_PRIORITY_ORDER_ROUND2 = ['manufactB', 'manufactA', 'culture', 'meeting', 'central'];
     let roomPriorityOrderRound1 = DEFAULT_PRIORITY_ORDER_ROUND1.slice();
     let roomPriorityOrderRound2 = DEFAULT_PRIORITY_ORDER_ROUND2.slice();
 
@@ -116,9 +117,20 @@
     
     function getRoomPriorityOrder(round) {
         const key = round === 1 ? 'DijiangRoomPriorityOrderRound1' : 'DijiangRoomPriorityOrderRound2';
+        const oldDefault = round === 1
+            ? ['meeting', 'central', 'manufactA', 'manufactB', 'culture']
+            : ['meeting', 'manufactA', 'manufactB', 'culture', 'central'];
+        const newDefault = round === 1 ? DEFAULT_PRIORITY_ORDER_ROUND1 : DEFAULT_PRIORITY_ORDER_ROUND2;
         try {
             const raw = sessionStorage.getItem(key);
-            if (raw) { const arr = JSON.parse(raw); if (Array.isArray(arr) && arr.length === ALL_ROOMS.length) return arr; }
+            if (raw) {
+                const arr = JSON.parse(raw);
+                if (Array.isArray(arr) && arr.length === ALL_ROOMS.length) {
+                    // 旧默认值自动迁移到素材优先级（武器 > 干员经验 > 培养舱）
+                    if (JSON.stringify(arr) === JSON.stringify(oldDefault)) return newDefault.slice();
+                    return arr;
+                }
+            }
         } catch(e) {}
         return round === 1 ? roomPriorityOrderRound1.slice() : roomPriorityOrderRound2.slice();
     }
@@ -513,6 +525,7 @@
         
         const options = {
             mode: getManufactMode(), doubleRooms: doubleRoundRooms, roomModes: roomModes,
+            underfillRoom: underfillRoom,
             emptyRooms: ALL_ROOMS.filter(k => roomModes[k] === 'empty'),
             centralDisabled: false,
             isTrustMode: (trustedAgentIds.length > 0),
@@ -1462,78 +1475,55 @@
         updateTrustTags();
         loadRoomModes();
         renderRoomModesUI();
-        // 1. 初始化状态
+        const savedUnderfill = sessionStorage.getItem('underfillRoom');
+        if (savedUnderfill && ALL_ROOMS.includes(savedUnderfill)) underfillRoom = savedUnderfill;
+        const underfillSelect = document.getElementById('underfillRoomSelect');
+        if (underfillSelect) {
+            underfillSelect.value = underfillRoom;
+            underfillSelect.addEventListener('change', function() {
+                if (!ALL_ROOMS.includes(this.value)) return;
+                underfillRoom = this.value;
+                sessionStorage.setItem('underfillRoom', underfillRoom);
+                generateSchedule();
+            });
+        }
         const savedMeeting = sessionStorage.getItem('meetingPriority');
         if (savedMeeting === 'true') {
             meetingPriorityEnabled = true;
+            document.getElementById('meetingPriorityToggle').classList.add('active');
+            document.getElementById('priorityStatus').textContent = '开启';
             document.getElementById('missingCluesArea').style.display = 'block';
             const savedClues = sessionStorage.getItem('missingClues');
             if (savedClues) {
                 try {
                     missingClues = new Set(JSON.parse(savedClues));
+                    document.querySelectorAll('.clue-btn').forEach(btn => { if (missingClues.has(parseInt(btn.dataset.clue))) btn.classList.add('selected'); });
                 } catch(e) {}
             }
-        } else {
-            meetingPriorityEnabled = false;
-            document.getElementById('missingCluesArea').style.display = 'none';
         }
-
-        // 2. 初始化按钮状态
-        let oldToggle = document.getElementById('meetingPriorityToggle');
-        if (oldToggle) {
-            oldToggle.classList.toggle('active', meetingPriorityEnabled);
-            document.getElementById('priorityStatus').textContent = meetingPriorityEnabled ? '开启' : '关闭';
-        }
-
-        // 3. 生成线索按钮
+        const toggle = document.getElementById('meetingPriorityToggle');
+        const clueArea = document.getElementById('missingCluesArea');
         const clueContainer = document.getElementById('clueButtons');
-        if (clueContainer && clueContainer.children.length === 0) {
+        if (clueContainer.children.length === 0) {
             for (let i = 1; i <= 7; i++) {
-                const btn = document.createElement('div'); 
-                btn.className = 'clue-btn'; 
-                btn.textContent = `线索${i}`; 
-                btn.dataset.clue = i;
-                if (missingClues.has(i)) btn.classList.add('selected');
+                const btn = document.createElement('div'); btn.className = 'clue-btn'; btn.textContent = `线索${i}`; btn.dataset.clue = i;
                 btn.addEventListener('click', function() {
-                    if (!meetingPriorityEnabled) return; 
-                    if (this.classList.contains('disabled')) return;
-                    this.classList.toggle('selected'); 
-                    const num = parseInt(this.dataset.clue);
-                    if (this.classList.contains('selected')) missingClues.add(num); 
-                    else missingClues.delete(num);
-                    sessionStorage.setItem('missingClues', JSON.stringify([...missingClues])); 
-                    generateSchedule();
+                    if (!meetingPriorityEnabled) return; if (this.classList.contains('disabled')) return;
+                    this.classList.toggle('selected'); const num = parseInt(this.dataset.clue);
+                    if (this.classList.contains('selected')) missingClues.add(num); else missingClues.delete(num);
+                    sessionStorage.setItem('missingClues', JSON.stringify([...missingClues])); generateSchedule();
                 });
                 clueContainer.appendChild(btn);
             }
         }
         updateClueAvailability();
 
-        // 4. 绑定开关事件 (使用 cloneNode 清除旧事件，避免多次绑定)
-        if (oldToggle) {
-            const newToggle = oldToggle.cloneNode(true);
-            newToggle.classList.toggle('active', meetingPriorityEnabled); // 重新应用状态
-            oldToggle.parentNode.replaceChild(newToggle, oldToggle);
-            
-            newToggle.addEventListener('click', function() {
-                meetingPriorityEnabled = !meetingPriorityEnabled;
-                if (meetingPriorityEnabled) { 
-                    this.classList.add('active'); 
-                    document.getElementById('priorityStatus').textContent = '开启'; 
-                    document.getElementById('missingCluesArea').style.display = 'block'; 
-                    sessionStorage.setItem('meetingPriority', 'true'); 
-                } else { 
-                    this.classList.remove('active'); 
-                    document.getElementById('priorityStatus').textContent = '关闭'; 
-                    document.getElementById('missingCluesArea').style.display = 'none'; 
-                    missingClues.clear(); 
-                    // ★ 关键：只清除会客室优先的线索选择，不影响下方二轮排除线索
-                    document.querySelectorAll('#clueButtons .clue-btn').forEach(b => b.classList.remove('selected')); 
-                    sessionStorage.setItem('meetingPriority', 'false'); 
-                }
-                generateSchedule();
-            });
-        }
+        toggle.addEventListener('click', function() {
+            meetingPriorityEnabled = !meetingPriorityEnabled;
+            if (meetingPriorityEnabled) { this.classList.add('active'); document.getElementById('priorityStatus').textContent = '开启'; clueArea.style.display = 'block'; sessionStorage.setItem('meetingPriority', 'true'); }
+            else { this.classList.remove('active'); document.getElementById('priorityStatus').textContent = '关闭'; clueArea.style.display = 'none'; missingClues.clear(); document.querySelectorAll('.clue-btn').forEach(b => b.classList.remove('selected')); sessionStorage.setItem('meetingPriority', 'false'); }
+            generateSchedule();
+        });
         
         try {
             const rawDefault = sessionStorage.getItem('DijiangDefaultProduct');
@@ -1790,44 +1780,216 @@
         return formatExportHourRange(rows);
     }
 
+    // ==========================================
+    // ★ 补充模块 2：排班图导出逻辑（手动排班截图同款样式）
+    // ==========================================
     window.DijiangExportSchedule = async function() {
         if (!window._lastQueues) { alert('暂无排班数据'); return; }
-        const version = await getChangelogVersion();
-        const descObj = buildRoomDescription();
-        const exportContainer = document.createElement('div');
-        exportContainer.style.cssText = `position: fixed; left: -9999px; top: 0; width: 800px; background: #ffffff; padding: 20px; font-family: system-ui; color: #222;`;
-        document.body.appendChild(exportContainer);
-        const now = new Date();
-        const dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-        exportContainer.innerHTML = `
-            <div style="text-align:center;font-size:28px;font-weight:700;">帝江号排班表</div>
-            <div style="text-align:center;font-size:13px;color:#555;margin:10px 0 16px;line-height:1.7;">${escapeHtml(descObj.line1)}<br>${escapeHtml(descObj.line2)}</div>
-        `;
+        
         const queues = window._lastQueues;
         const roomKeys = ['central', 'manufactA', 'manufactB', 'culture', 'meeting'];
-        const roomLabels = { central: '总控中枢', manufactA: '制造舱A', manufactB: '制造舱B', culture: '培养舱', meeting: '会客室' };
-        const bodyDiv = document.createElement('div');
-        bodyDiv.style.cssText = 'display:flex;gap:20px;justify-content:center;';
-        exportContainer.appendChild(bodyDiv);
-        const col1 = await createExportColumn(queues, roomKeys, roomLabels, 'round1', '一轮');
-        bodyDiv.appendChild(col1);
-        const col2 = await createExportColumn(queues, roomKeys, roomLabels, 'round2', '二轮');
-        bodyDiv.appendChild(col2);
-        const footerDiv = document.createElement('div');
-        footerDiv.style.cssText = 'margin-top:20px;border-top:1px solid #ddd;padding-top:12px;font-size:12px;color:#666;position:relative;';
-        footerDiv.innerHTML = `
-            <div style="display:flex;justify-content:space-between;align-items:baseline;">
-                <div>帝江号自动排班小工具　<span style="font-size:11px;color:#999;">生成时间 ${dateStr}</span></div>
-                <div style="font-size:11px;color:#888;">${escapeHtml(version)}</div>
+        const roomLabels = { central: '总控中枢', manufactA: '制造舱 A', manufactB: '制造舱 B', culture: '培养舱', meeting: '会客室' };
+        
+        // 1. 收集所有需要加载头像的名字
+        const allNames = new Set();
+        for (const key of roomKeys) {
+            const data = queues[key];
+            if (!data) continue;
+            const isDouble = (window._doubleRooms || []).includes(key);
+            const r1 = isDouble ? (data.round1 || []) : (data.recommend || []);
+            const r2 = isDouble ? (data.round2 || []) : [];
+            [...r1, ...r2].forEach(a => { if (a) allNames.add(a.name); });
+        }
+        
+        // 2. 加载头像 Base64
+        const dataUrlMap = {};
+        await Promise.all([...allNames].map(async name => { dataUrlMap[name] = await loadAvatarAsBase64(name); }));
+        
+        const now = new Date();
+        const dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+        const version = await getChangelogVersion();
+        
+        // 3. 辅助函数：算总控恢复加成
+        const getCentralBonus = (agents) => {
+            let sum = 0;
+            for (const a of agents) {
+                if (a && a.score && a.score.central) sum += a.score.central;
+            }
+            return sum;
+        };
+
+        // 4. 辅助函数：计算总时长
+        function getTotalHours(rows) {
+            if (!rows || rows.length === 0) return 0;
+            let total = 0;
+            for (const r of rows) total += (r.end - r.start);
+            return Math.round(total);
+        }
+
+        // 5. 辅助函数：生成单个干员槽位
+        const buildSlot = (agent) => {
+            if (!agent) return `<div style="flex:1; aspect-ratio:1/1; border-radius:12px; background:#f8fafc; border:1px dashed #d0d7de;"></div>`;
+            const imgSrc = dataUrlMap[agent.name] || '';
+            return `
+                <div style="flex:1; aspect-ratio:1/1; position:relative; border-radius:12px; overflow:hidden; background:#eaeaea;">
+                    <img src="${imgSrc}" style="width:100%; height:100%; object-fit:cover;">
+                    <div style="position:absolute; left:0; right:0; bottom:0; background:linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%); padding:20px 4px 6px; text-align:center;">
+                        <div style="color:#fff; font-size:13px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-shadow:0 1px 2px rgba(0,0,0,0.8);">${escapeHtml(agent.name)}</div>
+                    </div>
+                </div>
+            `;
+        };
+        
+        // 6. 辅助函数：生成舱室卡片
+        const buildRoomCard = (key) => {
+            if (roomModes[key] === 'empty') {
+                return `<div style="width:360px; background:#fafafa; border-radius:16px; border:1px solid #e0e0e0; padding:20px; display:flex; justify-content:center; align-items:center; color:#999; font-weight:600;">${roomLabels[key]}（未启用）</div>`;
+            }
+            const data = queues[key];
+            if (!data) return '';
+            
+            const isDouble = (window._doubleRooms || []).includes(key);
+            const r1 = isDouble ? (data.round1 || []) : (data.recommend || []);
+            const r2 = isDouble ? (data.round2 || []) : [];
+            const timingInfo = queues._timingInfo && queues._timingInfo[key];
+            
+            // 获取时间段数据 (包含总控)
+            let badge1 = '', badge2 = '';
+            if (window.DijiangTiming && typeof window.DijiangTiming.getRoomPeriods === 'function') {
+                const p = window.DijiangTiming.getRoomPeriods(key);
+                if (p) {
+                    if (p.round1) {
+                        const h1 = getTotalHours(p.round1);
+                        const str1 = formatExportHourRange(p.round1);
+                        if (str1) badge1 = `<span style="font-size:11px; font-weight:normal; color:#2a5a4a; background:#e0f0ea; border:1px solid #93c8b1; border-radius:12px; padding:1px 8px; margin-left:8px;">${h1}h ${str1}</span>`;
+                    }
+                    if (p.round2) {
+                        const h2 = getTotalHours(p.round2);
+                        const str2 = formatExportHourRange(p.round2);
+                        if (str2) badge2 = `<span style="font-size:11px; font-weight:normal; color:#8a5e00; background:#fff3cd; border:1px solid #f0d98a; border-radius:12px; padding:1px 8px; margin-left:8px;">${h2}h ${str2}</span>`;
+                    }
+                }
+            }
+
+            // ★ 计算加权平均产出
+            let bonusText = '';
+            const hA = timingInfo ? timingInfo.hA : 24;
+            const hB = timingInfo ? timingInfo.hB : 0;
+
+            if (key === 'central') {
+                if (isDouble) {
+                    const b1 = getCentralBonus(r1);
+                    const b2 = getCentralBonus(r2);
+                    bonusText = `<div style="color:#5cb85c; font-size:14px; text-align:center; margin-bottom:20px; font-weight:500;">A班 +${b1}%/h · B班 +${b2}%/h</div>`;
+                } else {
+                    const b1 = getCentralBonus(r1);
+                    bonusText = `<div style="color:#5cb85c; font-size:14px; text-align:center; margin-bottom:20px; font-weight:500;">单班 +${b1}%/h</div>`;
+                }
+            } else {
+                const calcAvg = (effType) => {
+                    const rawRoom = { manufactA: '制造舱', manufactB: '制造舱', culture: '培养舱', meeting: '会客室' }[key];
+                    let ea = 0, na = 0;
+                    for (const op of r1) { if (op) { na++; (op.mergedTraits||[]).forEach(t => { if(t.舱室===rawRoom && t.类型===effType) ea += t.数值||0; }); } }
+                    let eb = 0, nb = 0;
+                    for (const op of r2) { if (op) { nb++; (op.mergedTraits||[]).forEach(t => { if(t.舱室===rawRoom && t.类型===effType) eb += t.数值||0; }); } }
+                    
+                    const rateA = (1 + ea / 100) * (1 + 0.4 * na);
+                    const rateB = (1 + eb / 100) * (1 + 0.4 * nb);
+                    const weightedRate = (rateA * hA + rateB * hB) / 24;
+                    return Math.round((weightedRate - 1) * 100);
+                };
+
+                if (key === 'manufactA' || key === 'manufactB') {
+                    const mode = getManufactMode();
+                    let effType = '';
+                    if (key === 'manufactA') effType = (mode === 'dual' || mode === 'exp') ? '干员素材效率' : '武器素材效率';
+                    else effType = (mode === 'dual' || mode === 'weapon') ? '武器素材效率' : '干员素材效率';
+                    
+                    const prodName = effType === '干员素材效率' ? '干员经验' : '武器经验';
+                    bonusText = `<div style="color:#5cb85c; font-size:14px; text-align:center; margin-bottom:20px; font-weight:500;">24h均产${prodName}+${calcAvg(effType)}%</div>`;
+                } else if (key === 'meeting') {
+                    bonusText = `<div style="color:#5cb85c; font-size:14px; text-align:center; margin-bottom:20px; font-weight:500;">24h均产线索+${calcAvg('收集线索效率')}%</div>`;
+                } else if (key === 'culture') {
+                    const cultureChecks = getCultureTypes();
+                    const prodMap = { mineral: '矿物', fungi: '菌类', plant: '晶植' };
+                    const effTypeMap = { mineral: '矿物效率', fungi: '菌类效率', plant: '晶植效率' };
+                    const parts = [];
+                    for (const prod of cultureChecks) {
+                        parts.push(`${prodMap[prod]}+${calcAvg(effTypeMap[prod])}%`);
+                    }
+                    bonusText = `<div style="color:#5cb85c; font-size:14px; text-align:center; margin-bottom:20px; font-weight:500;">24h均产${parts.join('/')}</div>`;
+                }
+            }
+            
+            let slotsHtml = '';
+            if (isDouble) {
+                slotsHtml = `
+                    <div style="margin-bottom:24px;">
+                        <div style="display:flex; align-items:center; gap:6px; font-size:14px; color:#2a5a4a; font-weight:700; margin-bottom:12px;">
+                            <div style="width:4px; height:14px; background:#3f7e6b; border-radius:2px;"></div> A班 ${badge1}
+                        </div>
+                        <div style="display:flex; gap:10px;">${[0,1,2].map(i => buildSlot(r1[i])).join('')}</div>
+                    </div>
+                    <div>
+                        <div style="display:flex; align-items:center; gap:6px; font-size:14px; color:#8a5e00; font-weight:700; margin-bottom:12px;">
+                            <div style="width:4px; height:14px; background:#f0b400; border-radius:2px;"></div> B班 ${badge2}
+                        </div>
+                        <div style="display:flex; gap:10px;">${[0,1,2].map(i => buildSlot(r2[i])).join('')}</div>
+                    </div>
+                `;
+            } else {
+                slotsHtml = `
+                    <div>
+                        <div style="display:flex; align-items:center; gap:6px; font-size:14px; color:#2a5a4a; font-weight:700; margin-bottom:12px;">
+                            <div style="width:4px; height:14px; background:#3f7e6b; border-radius:2px;"></div> A班 ${badge1}
+                        </div>
+                        <div style="display:flex; gap:10px;">${[0,1,2].map(i => buildSlot(r1[i])).join('')}</div>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div style="width:360px; background:#fafafa; border-radius:16px; border:1px solid #e0e0e0; padding:24px; box-sizing:border-box;">
+                    <div style="text-align:center; font-size:20px; font-weight:bold; color:#222; margin-bottom:12px;">${roomLabels[key]}</div>
+                    ${bonusText}
+                    ${slotsHtml}
+                </div>
+            `;
+        };
+        
+        // 7. 拼接完整 HTML
+        const topRow = ['central', 'manufactA', 'manufactB'].map(r => buildRoomCard(r)).join('');
+        const bottomRow = ['culture', 'meeting'].map(r => buildRoomCard(r)).join('');
+        
+        const exportContainer = document.createElement('div');
+        exportContainer.style.cssText = `position: fixed; left: -9999px; top: 0; width: 1150px; background: #ffffff; padding: 40px; font-family: system-ui, -apple-system, sans-serif; box-sizing: border-box;`;
+        
+        exportContainer.innerHTML = `
+            <div style="text-align:center; font-size:38px; font-weight:bold; color:#000; margin-bottom:50px;">帝江号排班表</div>
+            
+            <div style="display:flex; gap:40px; justify-content:center; margin-bottom:40px;">
+                ${topRow}
             </div>
-            <div style="font-size:11px;">https://arr-dijiang.top/</div>
-            <div style="font-size:11px;">BiliBili：Courison</div>
+            <div style="display:flex; gap:40px; justify-content:center;">
+                ${bottomRow}
+            </div>
+            
+            <div style="margin-top:60px; border-top:1px solid #ddd; padding-top:16px; font-size:12px; color:#666; position:relative;">
+                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                    <div>帝江号自动排班小工具　<span style="font-size:11px; color:#999;">生成时间 ${dateStr}</span></div>
+                    <div style="font-size:11px; color:#888;">${escapeHtml(version)}</div>
+                </div>
+                <div style="font-size:11px; margin-top:4px;">https://arr-dijiang.top/</div>
+                <div style="font-size:11px;">BiliBili：Courison</div>
+            </div>
         `;
-        exportContainer.appendChild(footerDiv);
+        
+        document.body.appendChild(exportContainer);
+        
         try {
             const canvas = await html2canvas(exportContainer, {
                 scale: 2, useCORS: true, backgroundColor: '#ffffff',
-                width: 800, height: exportContainer.scrollHeight,
+                width: 1150, height: exportContainer.scrollHeight,
             });
             const link = document.createElement('a');
             link.download = `排班图_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.png`;
@@ -2038,6 +2200,7 @@
 
                 obj._strategy = {
                     doubleRoundRooms: doubleRoundRooms.slice(), roomModes: Object.assign({}, roomModes), centralMode: centralMode,
+                    underfillRoom: underfillRoom,
                     trustedAgentIds: trustedAgentIds.slice(), trustAssignMap: Object.assign({}, trustAssignMap),
                     meetingPriorityEnabled: meetingPriorityEnabled, missingClues: [...missingClues], excludedClues: [...excludedClues],
                     manufactProducts: manufactProducts, cultureProducts: cultureProducts,
@@ -2062,6 +2225,12 @@
                         if (strategy.roomModes) { for (const k of ALL_ROOMS) { if (['empty', 'single', 'double'].includes(strategy.roomModes[k])) roomModes[k] = strategy.roomModes[k]; } syncDoubleRooms(); renderRoomModesUI(); }
                         else if (Array.isArray(strategy.doubleRoundRooms)) { doubleRoundRooms = strategy.doubleRoundRooms.filter(v => ['central','manufactA','manufactB','culture','meeting'].includes(v)); }
                         if (typeof strategy.centralMode === 'string' && ['normal','empty','trust'].includes(strategy.centralMode)) centralMode = strategy.centralMode;
+                        if (ALL_ROOMS.includes(strategy.underfillRoom)) {
+                            underfillRoom = strategy.underfillRoom;
+                            const us = document.getElementById('underfillRoomSelect');
+                            if (us) us.value = underfillRoom;
+                            sessionStorage.setItem('underfillRoom', underfillRoom);
+                        }
                         if (Array.isArray(strategy.trustedAgentIds)) trustedAgentIds = strategy.trustedAgentIds.filter(id => operators.some(o => o.id === id));
                         trustAssignMap = {};
                         if (typeof strategy.meetingPriorityEnabled === 'boolean') meetingPriorityEnabled = strategy.meetingPriorityEnabled;

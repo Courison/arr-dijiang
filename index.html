@@ -7,21 +7,21 @@
     <script src="/vendor/marked.min.js"></script>
     <script src="/vendor/html2canvas.min.js"></script>
 
-    <link rel="stylesheet" href="/assets/css/01-base.css?v=202610261124">
-    <link rel="stylesheet" href="/assets/css/02-layout.css?v=202610261124">
-    <link rel="stylesheet" href="/assets/css/03-components.css?v=202610261124">
-    <link rel="stylesheet" href="/assets/css/04-schedule.css?v=202610261124">
-    <link rel="stylesheet" href="/assets/css/05-data-settings.css?v=202610261124">
-    <link rel="stylesheet" href="/assets/css/06-import-wizard.css?v=202610261124">
-    <link rel="stylesheet" href="/assets/css/07-talent.css?v=202610261124">
-    <link rel="stylesheet" href="/assets/css/08-feedback-changelog.css?v=202610261124">
-    <link rel="stylesheet" href="/assets/css/09-responsive.css?v=202610261124">
-    <link rel="stylesheet" href="/assets/css/10-pet.css?v=202610261124">
-    <link rel="stylesheet" href="/assets/css/11-account.css?v=202610261124">
-    <link rel="stylesheet" href="/assets/css/12-onboarding.css?v=202610261124">
-    <link rel="stylesheet" href="/assets/css/13-sidebar.css?v=202610261124">
-    <link rel="stylesheet" href="/assets/css/14-page-common.css?v=202610261124">
-    <link rel="stylesheet" href="/assets/css/18-timing.css?v=202610261124">
+    <link rel="stylesheet" href="/assets/css/01-base.css?v=202610300441">
+    <link rel="stylesheet" href="/assets/css/02-layout.css?v=202610300441">
+    <link rel="stylesheet" href="/assets/css/03-components.css?v=202610300441">
+    <link rel="stylesheet" href="/assets/css/04-schedule.css?v=202610300441">
+    <link rel="stylesheet" href="/assets/css/05-data-settings.css?v=202610300441">
+    <link rel="stylesheet" href="/assets/css/06-import-wizard.css?v=202610300441">
+    <link rel="stylesheet" href="/assets/css/07-talent.css?v=202610300441">
+    <link rel="stylesheet" href="/assets/css/08-feedback-changelog.css?v=202610300441">
+    <link rel="stylesheet" href="/assets/css/09-responsive.css?v=202610300441">
+    <link rel="stylesheet" href="/assets/css/10-pet.css?v=202610300441">
+    <link rel="stylesheet" href="/assets/css/11-account.css?v=202610300441">
+    <link rel="stylesheet" href="/assets/css/12-onboarding.css?v=202610300441">
+    <link rel="stylesheet" href="/assets/css/13-sidebar.css?v=202610300441">
+    <link rel="stylesheet" href="/assets/css/14-page-common.css?v=202610300441">
+    <link rel="stylesheet" href="/assets/css/18-timing.css?v=202610300441">
 </head>
 <body>
 <!-- ========== 引导页 ========== -->
@@ -995,11 +995,29 @@
         </div>
 
         <div class="strategy-section-inner">
-            <h4>🔄 舱室排班模式</h4>
+            <h4>🔄 舱室 / 素材优先级</h4>
             <div class="room-mode-list" id="roomModeList" style="display:flex; flex-direction:column; gap:8px; margin-bottom:12px;">
                 <!-- JS 动态生成 -->
             </div>
-            <div class="info-note" style="margin-top:4px;">选择“空置”该舱室将不分配干员，其生产策略失效。</div>
+            <div class="info-note" style="margin-top:4px;">信赖由总控单独收容，不占数字；数字为 A/B 两班的生产舱顺序，修改后立即重排。默认素材优先级：信赖 &gt; 武器经验 &gt; 干员经验 &gt; 培养舱（晶植 &gt; 矿物 &gt; 菌类）。选择“空置”该舱室将不分配干员。</div>
+        </div>
+
+        <div class="strategy-section-inner">
+            <h4>🧩 可接受不满员</h4>
+            <div class="underfill-row">
+                <span>允许该舱室双班每班少于 3 人：</span>
+                <select id="underfillRoomSelect" class="product-select inline" aria-label="可接受不满员舱室">
+                    <option value="central">总控中枢</option>
+                    <option value="manufactA">制造舱 Ⅰ</option>
+                    <option value="manufactB">制造舱 Ⅱ</option>
+                    <option value="culture" selected>培养舱</option>
+                    <option value="meeting">会客室</option>
+                </select>
+            </div>
+            <div class="info-note" style="margin-top:6px;">
+                开启双班时，总控两班至少各 1 名干员；若总控某班为空，会从该舱室借 1 人，优先借出对该舱室效率损失最小的干员。
+                选择总控时允许总控出现 1+1 / 1+2，高恢复组人数会下降。
+            </div>
         </div>
 
         <div class="strategy-section-inner">
@@ -1174,15 +1192,16 @@
 
 <!-- ========== 外链脚本：按顺序加载 ========== -->
 <script src="/vendor/crypto-js.min.js"></script>
-<script src="/assets/js/scheduler-core.js?v=202610261124"></script>
-<script src="/assets/js/main.js?v=202610261124"></script>
-<script src="/assets/js/modules/enfd-import.js?v=202610261124"></script>
-<script src="/assets/js/modules/hg-token-import.js?v=202610261124"></script>
-<script src="/assets/js/modules/qr-login.js?v=202610261124"></script>
-<script src="/assets/js/modules/pet.js?v=202610261124"></script>
-<script src="/assets/js/modules/account.js?v=202610261124"></script>
-<script src="/assets/js/modules/onboarding.js?v=202610261124"></script>
-<script src="/assets/js/modules/sidebar.js?v=202610261124"></script>
-<script src="/assets/js/modules/schedule-timing.js?v=202610261124"></script>
+<script src="/assets/js/scheduler-core.js?v=202610300441"></script>
+<script src="/assets/js/main.js?v=202610300441"></script>
+<script src="/assets/js/modules/enfd-import.js?v=202610300441"></script>
+<script src="/assets/js/modules/hg-token-import.js?v=202610300441"></script>
+<script src="/assets/js/modules/qr-login.js?v=202610300441"></script>
+<script src="/assets/js/modules/pet.js?v=202610300441"></script>
+<script src="/assets/js/modules/account.js?v=202610300441"></script>
+<script src="/assets/js/modules/onboarding.js?v=202610300441"></script>
+<script src="/assets/js/modules/sidebar.js?v=202610300441"></script>
+<script src="/assets/js/modules/schedule-timing.js?v=202610300441"></script>
+<script src="/assets/js/modules/particle-bg.js?v=202610300441"></script>
 </body>
 </html>

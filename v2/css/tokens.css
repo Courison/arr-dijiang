@@ -1,0 +1,211 @@
+/* ============================================================
+   帝江号 · 设计令牌 v2
+   风格：终末地工业档案（Industrial Archive）
+   - 纸张底色 + 墨色文字 + 苔绿主色 + 黄铜强调
+   - 只用 CSS 变量，不依赖任何框架
+   ============================================================ */
+:root {
+  /* ---------- 字体 ---------- */
+  --dj-font-sans: "Inter", system-ui, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  --dj-font-display: "Noto Serif SC", "Source Han Serif SC", "Songti SC", "STSong", "SimSun", serif;
+  --dj-font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+
+  /* ---------- 纸张 / 表面 ---------- */
+  --dj-paper-0: #f8f5ee;
+  --dj-paper-1: #f1ede3;
+  --dj-paper-2: #e8e2d4;
+  --dj-surface: #fffefa;
+  --dj-surface-raised: #ffffff;
+  --dj-surface-sunken: #f4f0e7;
+
+  /* ---------- 墨色 ---------- */
+  --dj-ink-1: #1c2420;
+  --dj-ink-2: #43514b;
+  --dj-ink-3: #6f7b74;
+  --dj-ink-4: #9aa49d;
+  --dj-ink-inverse: #fbf9f3;
+
+  /* ---------- 边框 ---------- */
+  --dj-line-1: #e3ded0;
+  --dj-line-2: #cfc8b7;
+  --dj-line-strong: #a9b3aa;
+
+  /* ---------- 主色：苔绿 ---------- */
+  --dj-green-900: #1e3f35;
+  --dj-green-800: #2a5a4a;
+  --dj-green-700: #356b59;
+  --dj-green-600: #3f7e6b;
+  --dj-green-500: #5a9583;
+  --dj-green-300: #93c8b1;
+  --dj-green-100: #e0f0ea;
+  --dj-green-50: #eef7f2;
+
+  /* ---------- 强调：黄铜 ---------- */
+  --dj-amber-900: #6f4d1b;
+  --dj-amber-800: #8a5e00;
+  --dj-amber-700: #a97a2a;
+  --dj-amber-600: #c9973f;
+  --dj-amber-300: #f0d98a;
+  --dj-amber-100: #fbf0d2;
+  --dj-amber-50: #fffaf0;
+
+  /* ---------- 语义色 ---------- */
+  --dj-rust-700: #8f3f2e;
+  --dj-rust-600: #b4483a;
+  --dj-rust-100: #f8e4df;
+  --dj-blue-700: #406273;
+  --dj-blue-600: #5a7c8c;
+  --dj-blue-100: #e5eff3;
+  --dj-ok-600: #3f7e6b;
+  --dj-warn-600: #b07a2a;
+  --dj-danger-600: #b4483a;
+
+  /* ---------- 语义映射 ---------- */
+  --dj-bg: var(--dj-paper-0);
+  --dj-fg: var(--dj-ink-1);
+  --dj-fg-muted: var(--dj-ink-3);
+  --dj-border: var(--dj-line-1);
+  --dj-primary: var(--dj-green-600);
+  --dj-primary-hover: var(--dj-green-800);
+  --dj-primary-soft: var(--dj-green-100);
+  --dj-accent: var(--dj-amber-600);
+  --dj-accent-soft: var(--dj-amber-100);
+  --dj-round-a: var(--dj-green-600);
+  --dj-round-a-soft: var(--dj-green-50);
+  --dj-round-a-line: var(--dj-green-300);
+  --dj-round-b: var(--dj-amber-700);
+  --dj-round-b-soft: var(--dj-amber-50);
+  --dj-round-b-line: var(--dj-amber-300);
+
+  /* ---------- 间距（4pt） ---------- */
+  --dj-s-1: 4px;
+  --dj-s-2: 8px;
+  --dj-s-3: 12px;
+  --dj-s-4: 16px;
+  --dj-s-5: 20px;
+  --dj-s-6: 24px;
+  --dj-s-8: 32px;
+  --dj-s-10: 40px;
+  --dj-s-12: 48px;
+
+  /* ---------- 圆角 ---------- */
+  --dj-r-1: 4px;
+  --dj-r-2: 8px;
+  --dj-r-3: 12px;
+  --dj-r-4: 16px;
+  --dj-r-5: 24px;
+  --dj-r-pill: 999px;
+
+  /* ---------- 阴影 ---------- */
+  --dj-shadow-1: 0 1px 2px rgba(28, 36, 32, 0.06);
+  --dj-shadow-2: 0 4px 14px rgba(28, 36, 32, 0.08);
+  --dj-shadow-3: 0 12px 36px rgba(28, 36, 32, 0.14);
+  --dj-shadow-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
+
+  /* ---------- 动效 ---------- */
+  --dj-ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --dj-dur-1: 120ms;
+  --dj-dur-2: 200ms;
+  --dj-dur-3: 320ms;
+
+  /* ---------- 布局 ---------- */
+  --dj-header-h: 64px;
+  --dj-sidebar-w: 236px;
+  --dj-content-max: 1440px;
+  --dj-tap: 44px;
+}
+
+/* 深色（可选）：同一套语义变量，组件无需改样式 */
+[data-dj-theme="dark"] {
+  --dj-paper-0: #141a17;
+  --dj-paper-1: #1a221e;
+  --dj-paper-2: #222b26;
+  --dj-surface: #1d2621;
+  --dj-surface-raised: #232e28;
+  --dj-surface-sunken: #111713;
+  --dj-ink-1: #e9ede7;
+  --dj-ink-2: #c2cbc4;
+  --dj-ink-3: #94a098;
+  --dj-ink-4: #6e7a72;
+  --dj-ink-inverse: #141a17;
+  --dj-line-1: #2c3831;
+  --dj-line-2: #3b4a42;
+  --dj-line-strong: #55645b;
+  --dj-green-100: #1f3830;
+  --dj-green-50: #1a2d26;
+  --dj-amber-100: #3a2f19;
+  --dj-amber-50: #2b2415;
+  --dj-blue-100: #1e2e35;
+  --dj-rust-100: #3a221d;
+  --dj-shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3);
+  --dj-shadow-2: 0 4px 14px rgba(0, 0, 0, 0.35);
+  --dj-shadow-3: 0 12px 36px rgba(0, 0, 0, 0.45);
+}
+
+/* ------------------------------------------------------------
+   基础排版（仅在 .dj-scope 内生效，避免污染旧站）
+   ------------------------------------------------------------ */
+.dj-scope {
+  font-family: var(--dj-font-sans);
+  color: var(--dj-fg);
+  background: var(--dj-bg);
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+.dj-scope *,
+.dj-scope *::before,
+.dj-scope *::after { box-sizing: border-box; }
+.dj-scope :focus-visible {
+  outline: 2px solid var(--dj-primary);
+  outline-offset: 2px;
+  border-radius: var(--dj-r-1);
+}
+.dj-scope img { max-width: 100%; display: block; }
+.dj-scope button { font: inherit; cursor: pointer; }
+.dj-scope a { color: var(--dj-green-800); }
+
+.dj-display {
+  font-family: var(--dj-font-display);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1.2;
+}
+.dj-mono {
+  font-family: var(--dj-font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.dj-eyebrow {
+  font-size: 11px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--dj-ink-3);
+  font-weight: 600;
+}
+.dj-muted { color: var(--dj-ink-3); }
+.dj-sr-only {
+  position: absolute; width: 1px; height: 1px;
+  padding: 0; margin: -1px; overflow: hidden;
+  clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0;
+}
+
+/* 纸张纹理：极轻的网格，避免纯色发闷 */
+.dj-paper-texture {
+  background-image:
+    linear-gradient(rgba(63, 126, 107, 0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(63, 126, 107, 0.035) 1px, transparent 1px);
+  background-size: 24px 24px;
+}
+
+@keyframes dj-fade-up {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .dj-scope *, .dj-scope *::before, .dj-scope *::after {
+    animation-duration: 0.001ms !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
