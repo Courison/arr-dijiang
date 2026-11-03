@@ -46,6 +46,7 @@ const ROUTES = {
   '/development/': 'development/index.html',
   '/help/': 'help/index.html',
   '/log/': 'log/index.html',
+  '/admin/': 'admin/index.html',
 };
 
 const MIME = {
@@ -129,7 +130,7 @@ async function readJson(req) {
 }
 
 function proxyApi(req, res, pathname) {
-  const port = pathname.startsWith('/api/account') ? 5003
+  const port = pathname.startsWith('/api/account') || pathname.startsWith('/api/admin') ? 5003
     : pathname.startsWith('/api/qr') || pathname.startsWith('/api/endfield') ? 5002
     : 5001;
   const target = http.request({

@@ -390,6 +390,16 @@
         return percentText;
     }
     
+    function getTimingSuffix(roomKey) {
+        try {
+            const raw = sessionStorage.getItem(STORAGE_KEY_OPTIMAL_HA);
+            if (!raw) return '';
+            const t = (JSON.parse(raw) || {})[roomKey];
+            if (!t || !Number.isFinite(Number(t.h1)) || !Number.isFinite(Number(t.h2))) return '';
+            return `（${Number(t.h1)}h+${Number(t.h2)}h）`;
+        } catch (e) { return ''; }
+    }
+
     function compute24hOutput(roomKey) {
         const isDouble = manualSchedule.mode === 'double';
         
@@ -682,10 +692,11 @@
     
     function buildOutputArea(roomKey) {
         const output = compute24hOutput(roomKey);
+        const timingSuffix = getTimingSuffix(roomKey);
         if (output.isCentral) return `<div class="room-output central-output">${escapeHtml(output.text)}</div>`;
         if (roomKey === 'culture') {
             if (output.needProduct) return `<div class="room-product-picker">${buildCultureDropdown()}</div>`;
-            return `<div class="room-output-group">${buildCultureDropdown()}<div class="room-output">24h均产${escapeHtml(output.text)}</div></div>`;
+            return `<div class="room-output-group">${buildCultureDropdown()}<div class="room-output">24h均产${escapeHtml(output.text)}${escapeHtml(timingSuffix)}</div></div>`;
         }
         const opts = PRODUCT_OPTIONS[roomKey];
         if (opts) {
@@ -694,9 +705,9 @@
             if (output.needProduct) {
                 return `<div class="room-product-picker"><select class="product-select" data-room="${roomKey}"><option value="">选择素材</option>${optionHtml}</select></div>`;
             }
-            return `<div class="room-output-group"><select class="product-select inline" data-room="${roomKey}">${optionHtml}</select><div class="room-output">24h均产${escapeHtml(output.text)}</div></div>`;
+            return `<div class="room-output-group"><select class="product-select inline" data-room="${roomKey}">${optionHtml}</select><div class="room-output">24h均产${escapeHtml(output.text)}${escapeHtml(timingSuffix)}</div></div>`;
         }
-        return `<div class="room-output">24h均产${escapeHtml(output.text)}</div>`;
+        return `<div class="room-output">24h均产${escapeHtml(output.text)}${escapeHtml(timingSuffix)}</div>`;
     }
     
     function buildCultureDropdown() {
@@ -735,7 +746,7 @@
             if (!header || header.textContent.trim() !== '培养舱') continue;
             const output = compute24hOutput('culture');
             const outEl = box.querySelector('.room-output');
-            if (outEl) outEl.textContent = output.needProduct ? '' : `24h均产${output.text}`;
+            if (outEl) outEl.textContent = output.needProduct ? '' : `24h均产${output.text}${getTimingSuffix('culture')}`;
             const ddBtn = box.querySelector('.product-dropdown-btn');
             if (ddBtn) {
                 const opts = PRODUCT_OPTIONS.culture;

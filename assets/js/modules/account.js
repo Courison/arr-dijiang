@@ -26,6 +26,22 @@
   let currentNickname = null;
   let currentToken = null;
 
+  const SYNC_CONFIG_KEYS = new Set([
+    'DijiangScheduleConfig', 'DijiangDefaultProduct', 'DijiangManualProduct',
+    'DijiangRoomModes', 'DijiangRoomPriorityOrderRound1', 'DijiangRoomPriorityOrderRound2',
+    'DijiangMaterialPriority',
+    'priorityFillEnabled',
+    'DijiangTimingStartHour', 'DijiangTimingStartMinute',
+    'trustedAgentIds', 'underfillRoom', 'meetingPriority', 'missingClues',
+    'DijiangExcludedClues', 'centralMode', 'doubleRoundRooms'
+  ]);
+  let remoteConfig = null;
+  let remoteUpdatedAt = 0;
+  let syncState = 'dirty';
+  let applyingRemote = false;
+  let syncTimer = null;
+  let syncRefreshPromise = null;
+
   function getToken() {
     return localStorage.getItem(TOKEN_KEY) || sessionStorage.getItem(TOKEN_KEY) || null;
   }
@@ -72,6 +88,122 @@
       headerBtn.classList.remove('logged-in');
       headerLabel.textContent = '登录';
       headerBtn.title = '点击登录';
+    }
+    renderSyncBadge();
+  }
+
+  function canonicalConfig(value) {
+    if (Array.isArray(value)) return '[' + value.map(canonicalConfig).join(',') + ']';
+    if (value && typeof value === 'object') {
+      return '{' + Object.keys(value).sort().map(k => JSON.stringify(k) + ':' + canonicalConfig(value[k])).join(',') + '}';
+    }
+    return JSON.stringify(value);
+  }
+
+  function getLocalConfig() {
+    try { return window.DijiangAccount && window.DijiangAccount.getCurrentConfig ? window.DijiangAccount.getCurrentConfig() : {}; }
+    catch (e) { return {}; }
+  }
+
+  function setSyncState(state) {
+    syncState = state;
+    renderSyncBadge();
+    if (state === 'synced') closeSyncPopover();
+  }
+
+  function renderSyncBadge() {
+    const badge = document.getElementById('accountSyncBadge');
+    const text = document.getElementById('accountSyncText');
+    const manageBadge = document.getElementById('manageSyncBadge');
+    if (!badge || !text) return;
+    if (!currentEmail) {
+      badge.hidden = true;
+      if (manageBadge) manageBadge.hidden = true;
+      return;
+    }
+    badge.hidden = false;
+    const label = syncState === 'synced' ? '已同步' : syncState === 'syncing' ? '检查中' : '未同步';
+    text.textContent = label;
+    badge.dataset.state = syncState;
+    badge.classList.toggle('is-clickable', syncState !== 'synced');
+    badge.title = syncState === 'synced' ? '当前配置与账号云端一致' : '当前配置与账号云端不一致，点击处理';
+    if (manageBadge) {
+      manageBadge.hidden = false;
+      manageBadge.dataset.state = syncState;
+      const mt = manageBadge.querySelector('span:last-child');
+      if (mt) mt.textContent = label;
+    }
+  }
+
+  async function refreshSyncState() {
+    if (!currentEmail) { setSyncState('dirty'); return; }
+    if (!currentToken) { setSyncState('dirty'); return; }
+    if (syncRefreshPromise) return syncRefreshPromise;
+    syncRefreshPromise = (async () => {
+      try {
+        const resp = await authFetch('/api/account/config', { cache: 'no-store' });
+        const data = await resp.json();
+        if (!data || !data.ok) { setSyncState('dirty'); return; }
+        remoteConfig = data.config || null;
+        remoteUpdatedAt = data.updated_at || 0;
+        if (!remoteConfig) { setSyncState('dirty'); return; }
+        const same = canonicalConfig(getLocalConfig()) === canonicalConfig(remoteConfig);
+        setSyncState(same ? 'synced' : 'dirty');
+      } catch (e) {
+        setSyncState('dirty');
+      } finally {
+        syncRefreshPromise = null;
+      }
+    })();
+    return syncRefreshPromise;
+  }
+
+  function onLocalConfigChanged() {
+    if (!currentEmail || applyingRemote) return;
+    setSyncState('dirty');
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(() => {
+      if (remoteConfig === null) return;
+      const same = canonicalConfig(getLocalConfig()) === canonicalConfig(remoteConfig);
+      setSyncState(same ? 'synced' : 'dirty');
+    }, 400);
+  }
+
+  function positionSyncPopover() {
+    const pop = document.getElementById('accountSyncPopover');
+    const badge = document.getElementById('accountSyncBadge');
+    if (!pop || !badge || pop.hidden) return;
+    const r = badge.getBoundingClientRect();
+    const width = Math.min(286, window.innerWidth - 16);
+    pop.style.width = width + 'px';
+    pop.style.left = Math.max(8, Math.min(window.innerWidth - width - 8, r.left)) + 'px';
+    pop.style.top = (r.bottom + 8) + 'px';
+  }
+
+  function openSyncPopover() {
+    if (!currentEmail || syncState === 'synced') return;
+    const pop = document.getElementById('accountSyncPopover');
+    if (!pop) return;
+    pop.hidden = false;
+    positionSyncPopover();
+  }
+
+  function closeSyncPopover() {
+    const pop = document.getElementById('accountSyncPopover');
+    if (pop) pop.hidden = true;
+  }
+
+  async function handleSyncAction(action) {
+    closeSyncPopover();
+    if (action === 'download') {
+      const ok = await downloadConfig();
+      if (ok) setSyncState('synced');
+    } else if (action === 'upload') {
+      const ok = await uploadConfig();
+      if (ok) {
+        remoteConfig = getLocalConfig();
+        setSyncState('synced');
+      }
     }
   }
 
@@ -181,6 +313,7 @@
         }));
         // ★ 自动拉取账号配置（非静默：本地已有数据时会询问是否覆盖）
         const autoLoaded = await autoFetchConfig(false);
+        refreshSyncState();
         setTimeout(() => {
           closeLoginModal();
           if (!autoLoaded && typeof window.DijiangPetSay === 'function') {
@@ -329,12 +462,13 @@
     }).catch(() => {});
     document.getElementById('manageStatus').textContent = '';
     document.getElementById('manageStatus').className = 'account-status';
+    renderSyncBadge();
     manageModal.classList.add('open');
   }
   function closeManageModal() { manageModal.classList.remove('open'); }
 
   async function uploadConfig() {
-    if (!window.DijiangAccount) { alert('配置接口未就绪'); return; }
+    if (!window.DijiangAccount) { alert('配置接口未就绪'); return false; }
     const config = window.DijiangAccount.getCurrentConfig();
     const statusEl = document.getElementById('manageStatus');
     setStatus(statusEl, '正在上传…', 'info');
@@ -349,13 +483,19 @@
         // ★ 记录已应用版本，避免下次自动拉取时因 updated_at 变化而弹框
         if (data.updated_at) {
           sessionStorage.setItem(APPLIED_AT_KEY, String(data.updated_at));
+          remoteUpdatedAt = data.updated_at;
         }
+        remoteConfig = getLocalConfig();
+        setSyncState('synced');
         setStatus(statusEl, '✅ 配置已上传到账号', 'ok');
+        return true;
       } else {
         setStatus(statusEl, '❌ ' + data.msg, 'err');
+        return false;
       }
     } catch (e) {
       setStatus(statusEl, '❌ 网络错误', 'err');
+      return false;
     }
   }
 
@@ -365,17 +505,25 @@
     try {
       const resp = await authFetch('/api/account/config');
       const data = await resp.json();
-      if (!data.ok) { setStatus(statusEl, '❌ ' + data.msg, 'err'); return; }
-      if (!data.config) { setStatus(statusEl, '⚠️ 账号暂无保存的配置', 'err'); return; }
-      if (!window.DijiangAccount) { setStatus(statusEl, '❌ 配置接口未就绪', 'err'); return; }
-      window.DijiangAccount.applyConfig(data.config);
-      if (data.updated_at) {
-        sessionStorage.setItem(APPLIED_AT_KEY, String(data.updated_at));
+      if (!data.ok) { setStatus(statusEl, '❌ ' + data.msg, 'err'); return false; }
+      if (!data.config) { setStatus(statusEl, '⚠️ 账号暂无保存的配置', 'err'); return false; }
+      if (!window.DijiangAccount) { setStatus(statusEl, '❌ 配置接口未就绪', 'err'); return false; }
+      applyingRemote = true;
+      try {
+        window.DijiangAccount.applyConfig(data.config);
+      } finally {
+        applyingRemote = false;
       }
+      remoteConfig = data.config;
+      remoteUpdatedAt = data.updated_at || 0;
+      if (data.updated_at) sessionStorage.setItem(APPLIED_AT_KEY, String(data.updated_at));
+      setSyncState('synced');
       const when = data.updated_at ? new Date(data.updated_at * 1000).toLocaleString() : '未知';
       setStatus(statusEl, `✅ 配置已应用（保存于 ${when}）`, 'ok');
+      return true;
     } catch (e) {
       setStatus(statusEl, '❌ 网络错误', 'err');
+      return false;
     }
   }
   
@@ -387,13 +535,16 @@
       const resp = await authFetch('/api/account/config');
       const data = await resp.json();
       if (!data.ok) return false;
-      if (!data.config) return false;
+      if (!data.config) { remoteConfig = null; setSyncState('dirty'); return false; }
 
+      remoteConfig = data.config;
+      remoteUpdatedAt = data.updated_at || 0;
       const accountUpdatedAt = data.updated_at || 0;
       const appliedAt = parseInt(sessionStorage.getItem(APPLIED_AT_KEY) || '0', 10);
 
       // ★ 账号配置没变 → 静默跳过，不弹框、不覆盖
       if (accountUpdatedAt && accountUpdatedAt === appliedAt) {
+        setSyncState(canonicalConfig(getLocalConfig()) === canonicalConfig(remoteConfig) ? 'synced' : 'dirty');
         return false;
       }
 
@@ -427,14 +578,22 @@
         if (!ok) {
           // ★ 用户拒绝后记录版本，避免同一会话反复弹
           sessionStorage.setItem(APPLIED_AT_KEY, String(accountUpdatedAt));
+          setSyncState('dirty');
           return false;
         }
       }
 
       // 应用配置
       if (window.DijiangAccount && typeof window.DijiangAccount.applyConfig === 'function') {
-        window.DijiangAccount.applyConfig(data.config);
+        applyingRemote = true;
+        try {
+          window.DijiangAccount.applyConfig(data.config);
+        } finally {
+          applyingRemote = false;
+        }
         sessionStorage.setItem(APPLIED_AT_KEY, String(accountUpdatedAt));
+        remoteConfig = data.config;
+        setSyncState('synced');
         const when = accountUpdatedAt ? new Date(accountUpdatedAt * 1000).toLocaleString() : '未知';
         console.log(`[账号] 已自动应用账号配置（保存于 ${when}）`);
         if (typeof window.DijiangPetSay === 'function') {
@@ -569,6 +728,45 @@
     }
     updateHeader();
 
+    // 监听所有会进入账号配置的 sessionStorage 写入；覆盖策略、优先级、时间等入口
+    if (!window.__dijiangSyncStoragePatched) {
+      const originalSetItem = Storage.prototype.setItem;
+      Storage.prototype.setItem = function(key, value) {
+        const result = originalSetItem.apply(this, arguments);
+        if (this === sessionStorage && SYNC_CONFIG_KEYS.has(key)) onLocalConfigChanged();
+        return result;
+      };
+      window.__dijiangSyncStoragePatched = true;
+    }
+    window.addEventListener('dijiang:config-changed', onLocalConfigChanged);
+
+    const syncBadge = document.getElementById('accountSyncBadge');
+    if (syncBadge) {
+      syncBadge.addEventListener('click', function(e) {
+        e.stopPropagation();
+        if (!currentEmail || syncState === 'synced') return;
+        if (!document.getElementById('accountSyncPopover')?.hidden) closeSyncPopover();
+        else openSyncPopover();
+      });
+    }
+    const syncPopover = document.getElementById('accountSyncPopover');
+    if (syncPopover) {
+      syncPopover.querySelectorAll('[data-sync-action]').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+          e.stopPropagation();
+          handleSyncAction(this.dataset.syncAction);
+        });
+      });
+    }
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('#accountSyncPopover') && !e.target.closest('#accountSyncBadge')) closeSyncPopover();
+    });
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') closeSyncPopover();
+    });
+    window.addEventListener('resize', positionSyncPopover);
+    window.addEventListener('scroll', closeSyncPopover, { passive: true });
+
     if (headerBtn) {
       headerBtn.addEventListener('click', () => {
         if (currentEmail) openManageModal();
@@ -626,7 +824,7 @@
     // ★ 已登录用户：等主站就绪后自动拉取账号配置（干员库 + 生产策略）
     if (currentToken) {
       const runAutoFetch = () => {
-        autoFetchConfig(false).catch(() => {});
+        autoFetchConfig(false).catch(() => {}).finally(() => { refreshSyncState(); });
       };
       if (window.__DIJIANG_READY__ === true) {
         // main.js 已就绪（比如用户先登录再访问，或刷新后 main.js 先执行完）

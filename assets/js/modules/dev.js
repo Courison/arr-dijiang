@@ -227,6 +227,20 @@
         }
 
         const maxOps = [];
+        const liveOps = (window.DijiangAPI && typeof window.DijiangAPI.getOperators === 'function')
+            ? window.DijiangAPI.getOperators().filter(op => op.eliteLevel !== 'none')
+            : [];
+        if (liveOps.length) {
+            const fullTalents = { '1_1': true, '2_1': true, '1_2': true, '2_2': true };
+            for (const op of liveOps) {
+                maxOps.push({
+                    ...op,
+                    eliteLevel: '精四',
+                    activatedTalents: { ...fullTalents },
+                    mergedTraits: calcMergedTraits(op.name, fullTalents, rawData)
+                });
+            }
+        } else {
         for (const [name, val] of Object.entries(config)) {
             const entry = parseConfigEntry(val);
             if (entry.elite === 'none') continue;
@@ -237,6 +251,7 @@
                 activatedTalents: fullTalents,
                 mergedTraits: calcMergedTraits(name, fullTalents, rawData)
             });
+        }
         }
 
         if (maxOps.length === 0) {
@@ -263,15 +278,34 @@
         let meetingPriority = false;
         try { meetingPriority = sessionStorage.getItem('meetingPriority') === 'true'; } catch (e) {}
 
-        const options = {
+        // 与自动排班页共用同一份策略解析，避免预览页使用旧默认值。
+        let options;
+        if (typeof window.DijiangBuildOptions === 'function') {
+            options = window.DijiangBuildOptions();
+        } else {
+            try {
+                const rawSnap = sessionStorage.getItem('DijiangLastStrategySnapshot');
+                if (rawSnap) {
+                    const snap = JSON.parse(rawSnap);
+                    snap.missingClues = new Set(Array.isArray(snap.missingClues) ? snap.missingClues : []);
+                    snap.excludedClues = new Set(Array.isArray(snap.excludedClues) ? snap.excludedClues : [3,7]);
+                    snap.trustedAgentIds = Array.isArray(snap.trustedAgentIds) ? snap.trustedAgentIds : [];
+                    options = snap;
+                }
+            } catch (e) {}
+        }
+        if (!options) {
+        options = {
             mode: manufMode, doubleRooms: Object.keys(roomModes).filter(k => roomModes[k] === 'double'),
             roomModes: roomModes, emptyRooms: Object.keys(roomModes).filter(k => roomModes[k] === 'empty'),
             centralDisabled: (roomModes.central === 'empty'), isTrustMode: false, trustedAgentIds: [], trustAssignMap: {},
             priorityOrderRound1: p1, priorityOrderRound2: p2, meetingPriorityEnabled: meetingPriority,
-            missingClues: new Set(), excludedClues: new Set(),
+            missingClues: new Set(), excludedClues: new Set([3,7]),
+            materialPriority: ['clue','weapon','exp','culture'], priorityFillEnabled: false, underfillRoom: 'central',
             cultureTypes: ['plant', 'mineral', 'fungi'], culturePriority: ['plant', 'mineral', 'fungi'],
             priorityWeights: [1.0, 0.6, 0.3], cRestHigh: 12 * 1.48
         };
+        }
 
         let queues = null;
         try { queues = window.DijiangScheduler.generateSchedule(maxOps, options); } catch (err) {

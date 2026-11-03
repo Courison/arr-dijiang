@@ -266,7 +266,6 @@ function collectQueues() {
   if (!q) return null;
   const keys = ['central', 'manufactA', 'manufactB', 'culture', 'meeting'];
   const assigned = new Set();
-  const reserve = new Set();
   let centralA = 0, centralB = 0;
   let active = 0;
   for (const k of keys) {
@@ -277,14 +276,54 @@ function collectQueues() {
     const rec = room.recommend || [];
     if (r1.length || r2.length || rec.length) active++;
     for (const op of [...r1, ...r2, ...rec]) if (op?.name) assigned.add(op.name);
-    for (const op of room.reserve || []) if (op?.name) reserve.add(op.name);
     if (k === 'central') {
       centralA = centralRestoreOf(r1);
       centralB = centralRestoreOf(r2);
     }
   }
-  return { assigned: assigned.size, reserve: reserve.size, centralA, centralB, active, warnings: q._warnings || [] };
+  let unassigned = [];
+  try {
+    const all = window.DijiangAPI?.getOperators?.() || [];
+    unassigned = all.filter(op => op && op.eliteLevel !== 'none' && !assigned.has(op.name));
+  } catch (e) {}
+  return { assigned: assigned.size, reserve: unassigned.length, unassigned, centralA, centralB, active, warnings: q._warnings || [] };
 }
+
+function openReservePool() {
+  const data = collectQueues();
+  if (!data) return;
+  document.getElementById('reservePoolOverlay')?.remove();
+  const overlay = el('div', { class: 'modal-overlay reserve-pool-overlay open', id: 'reservePoolOverlay' });
+  const modal = el('div', { class: 'batch-modal reserve-pool-modal' });
+  const head = el('div', { class: 'batch-header' });
+  head.appendChild(el('h2', {}, `备选池 · ${data.unassigned.length} 人`));
+  const close = el('button', { class: 'close-btn', type: 'button', 'aria-label': '关闭' }, '✕');
+  close.addEventListener('click', () => overlay.remove());
+  head.appendChild(close);
+  modal.appendChild(head);
+  const hint = el('div', { class: 'reserve-pool-hint' }, '以下干员已拥有，但未被列入本次自动排班。');
+  modal.appendChild(hint);
+  const list = el('div', { class: 'reserve-pool-list' });
+  if (!data.unassigned.length) {
+    list.appendChild(el('div', { class: 'reserve-pool-empty' }, '没有未排班干员'));
+  } else {
+    const sorted = data.unassigned.slice().sort((a, b) => String(a.name).localeCompare(String(b.name), 'zh'));
+    for (const op of sorted) {
+      const row = el('div', { class: 'reserve-pool-item' });
+      row.appendChild(el('span', { class: 'reserve-pool-name' }, op.name || '—'));
+      const meta = [];
+      if (op.star) meta.push(String(op.star));
+      if (op.eliteLevel && op.eliteLevel !== 'none') meta.push(op.eliteLevel);
+      row.appendChild(el('span', { class: 'reserve-pool-meta' }, meta.join(' · ')));
+      list.appendChild(row);
+    }
+  }
+  modal.appendChild(list);
+  overlay.appendChild(modal);
+  overlay.addEventListener('click', e => { if (e.target === overlay) overlay.remove(); });
+  document.body.appendChild(overlay);
+}
+
 
 function addOverview() {
   if (page !== 'home') return;
@@ -295,8 +334,18 @@ function addOverview() {
   wrap.innerHTML = `
     <div class="v2-kpi"><div class="label">在岗干员</div><div class="value" data-k="assigned">—</div><div class="hint">全站去重</div></div>
     <div class="v2-kpi amber"><div class="label">总控恢复 A / B</div><div class="value" data-k="central">—</div><div class="hint">每班只生效本班加成</div></div>
-    <div class="v2-kpi"><div class="label">备选池</div><div class="value" data-k="reserve">—<small>人</small></div><div class="hint">可手动替换</div></div>
+    <div class="v2-kpi"><div class="label">备选池</div><div class="value" data-k="reserve">—<small>人</small></div><div class="hint">点击查看未排班干员</div></div>
     <div class="v2-kpi"><div class="label">校验</div><div class="value" data-k="check" style="font-size:17px">等待</div><div class="hint">重复 / 信赖 / 备选</div></div>`;
+  const reserveKpi = wrap.querySelector('[data-k="reserve"]')?.closest('.v2-kpi');
+  if (reserveKpi) {
+    reserveKpi.classList.add('is-clickable');
+    reserveKpi.setAttribute('role', 'button');
+    reserveKpi.setAttribute('tabindex', '0');
+    reserveKpi.addEventListener('click', openReservePool);
+    reserveKpi.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); openReservePool(); }
+    });
+  }
   const notice = el('div', { class: 'v2-notice', id: 'v2Notice', role: 'status', 'aria-live': 'polite' },
     '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>设置策略后将自动排班。</span>');
   grid.parentNode.insertBefore(wrap, grid);

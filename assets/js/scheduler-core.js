@@ -24,11 +24,17 @@
   'use strict';
 
   const VERSION = '2.0.0';
+  try { if (typeof window !== 'undefined') window.__DIJIANG_SCHEDULER_BUILD = '202610312400'; } catch (e) {}
   const ROOM_KEYS = ['central', 'manufactA', 'manufactB', 'culture', 'meeting'];
   const PRODUCTION_KEYS = ['manufactA', 'manufactB', 'culture', 'meeting'];
   const DEFAULT_PRIORITY_WEIGHTS = [1.0, 0.6, 0.3];
   const DEFAULT_CULTURE_PRIORITY = ['plant', 'mineral', 'fungi'];
-  const MOOD_WEIGHT = 0.3;
+  const DEFAULT_MATERIAL_PRIORITY = ['clue', 'weapon', 'exp', 'culture'];
+  const MATERIAL_KEYS = ['clue', 'weapon', 'exp', 'culture'];
+  const MOOD_WEIGHT = 0.25;
+// 线索概率没有直接效率数值：给一个低于效率、但稳定高于心情的基础值。
+const CLUE_PROB_BASE = 8;
+const CLUE_PROB_VALUE_WEIGHT = 0.4;
   const C_WORK_BASE = 7.2;      // %/h
   const C_REST_BASE = 12;       // %/h
   const CENTRAL_VALUE_WEIGHT = 0.15;
@@ -55,6 +61,14 @@
     return op && (op.opId !== undefined ? op.opId : op.id);
   }
 
+  function clueValueOf(s) {
+    return s && s.score ? (s.score.clue || 0) : 0;
+  }
+
+  function meetingValueOf(s) {
+    return s && s.score ? ((s.score.meeting || 0) + (s.score.clue || 0) * 0.2 + (s.score.moodReduce || 0) * 0.1) : 0;
+  }
+
   function isCluePower(type) {
     return type === '线索概率提升' || type === '线索概率小幅提升';
   }
@@ -69,7 +83,7 @@
     }
     const emptyRooms = ROOM_KEYS.filter(k => roomModes[k] === 'empty');
     const doubleRooms = ROOM_KEYS.filter(k => roomModes[k] === 'double');
-    const underfillRoom = ROOM_KEYS.includes(o.underfillRoom) ? o.underfillRoom : 'culture';
+    const underfillRoom = ROOM_KEYS.includes(o.underfillRoom) ? o.underfillRoom : 'central';
 
     let cultureTypes = Array.isArray(o.cultureTypes) && o.cultureTypes.length
       ? o.cultureTypes.slice()
@@ -89,8 +103,30 @@
       ? o.priorityWeights.slice()
       : DEFAULT_PRIORITY_WEIGHTS.slice();
 
+    let materialPriority = Array.isArray(o.materialPriority)
+      ? o.materialPriority.filter(k => MATERIAL_KEYS.includes(k))
+      : DEFAULT_MATERIAL_PRIORITY.slice();
+    for (const k of DEFAULT_MATERIAL_PRIORITY) {
+      if (!materialPriority.includes(k)) materialPriority.push(k);
+    }
+    materialPriority = materialPriority.slice(0, MATERIAL_KEYS.length);
+
     return {
       mode: ['exp', 'weapon', 'dual'].includes(o.mode) ? o.mode : 'dual',
+      manufactProducts: (() => {
+        const p = o.manufactProducts || {};
+        const valid = v => v === 'exp' || v === 'weapon';
+        if (valid(p.manufactA) || valid(p.manufactB)) {
+          return {
+            manufactA: valid(p.manufactA) ? p.manufactA : null,
+            manufactB: valid(p.manufactB) ? p.manufactB : null,
+          };
+        }
+        const m = ['exp', 'weapon', 'dual'].includes(o.mode) ? o.mode : 'dual';
+        if (m === 'exp') return { manufactA: 'exp', manufactB: 'exp' };
+        if (m === 'weapon') return { manufactA: 'weapon', manufactB: 'weapon' };
+        return { manufactA: 'exp', manufactB: 'weapon' };
+      })(),
       roomModes,
       doubleRooms,
       emptyRooms,
@@ -99,11 +135,13 @@
       trustedAgentIds: toSet(o.trustedAgentIds),
       priorityOrderRound1: (Array.isArray(o.priorityOrderRound1)
         ? o.priorityOrderRound1.slice()
-        : ['manufactB', 'manufactA', 'culture', 'meeting', 'central']).filter(k => ROOM_KEYS.includes(k)),
+        : ['meeting', 'central', 'manufactB', 'manufactA', 'culture']).filter(k => ROOM_KEYS.includes(k)),
       priorityOrderRound2: (Array.isArray(o.priorityOrderRound2)
         ? o.priorityOrderRound2.slice()
-        : ['manufactB', 'manufactA', 'culture', 'meeting', 'central']).filter(k => ROOM_KEYS.includes(k)),
+        : ['meeting', 'manufactB', 'manufactA', 'culture', 'central']).filter(k => ROOM_KEYS.includes(k)),
       meetingPriorityEnabled: !!o.meetingPriorityEnabled,
+      priorityFillEnabled: !!o.priorityFillEnabled,
+      materialPriority,
       missingClues: toSet(o.missingClues),
       excludedClues: o.excludedClues === undefined ? new Set([3, 7]) : toSet(o.excludedClues),
       cultureTypes,
@@ -132,7 +170,7 @@
         id: op.id,
         name: op.name,
         mergedTraits: isBasic ? [] : (op.mergedTraits || []),
-        score: { central: 0, meeting: 0, culture: 0, manufact: 0, expScore: 0, weaponScore: 0, moodReduce: 0 },
+        score: { central: 0, meeting: 0, culture: 0, manufact: 0, expScore: 0, weaponScore: 0, moodReduce: 0, clue: 0 },
         isBasic,
       };
       if (!isBasic) {
@@ -142,6 +180,12 @@
           else if (room === '会客室') {
             if (type === '收集线索效率') row.score.meeting += val;
             else if (type === '心情消耗减少') { row.score.meeting += val * MOOD_WEIGHT; row.score.moodReduce += val; }
+            else if (isCluePower(type)) {
+              const n = parseInt(t.线索编号, 10);
+              if (opt.missingClues.has(n) || !opt.excludedClues.has(n)) {
+                row.score.clue += val;
+              }
+            }
           } else if (room === '培养舱') {
             if (type === '心情消耗减少') { row.score.culture += val * MOOD_WEIGHT; row.score.moodReduce += val; }
             else {
@@ -209,13 +253,11 @@
         } else if (room === '制造舱') {
           if (t.类型 === '心情消耗减少') { c.manufactA.reduce += val; c.manufactB.reduce += val; }
           else if (t.类型 === '干员素材效率') {
-            // dual：A=干员经验；纯 exp：A/B 都吃干员效率；纯 weapon：不吃
-            if (opt.mode === 'dual') c.manufactA.eff += val;
-            else if (opt.mode === 'exp') { c.manufactA.eff += val; c.manufactB.eff += val; }
+            if (opt.manufactProducts.manufactA === 'exp') c.manufactA.eff += val;
+            if (opt.manufactProducts.manufactB === 'exp') c.manufactB.eff += val;
           } else if (t.类型 === '武器素材效率') {
-            // dual：B=武器经验；纯 weapon：A/B 都吃武器效率；纯 exp：不吃
-            if (opt.mode === 'dual') c.manufactB.eff += val;
-            else if (opt.mode === 'weapon') { c.manufactA.eff += val; c.manufactB.eff += val; }
+            if (opt.manufactProducts.manufactA === 'weapon') c.manufactA.eff += val;
+            if (opt.manufactProducts.manufactB === 'weapon') c.manufactB.eff += val;
           }
         }
       }
@@ -367,12 +409,18 @@
   // ------------------------------------------------------------
   // 5. 初始贪心分配
   // ------------------------------------------------------------
-  function fieldFor(roomKey, mode) {
+  function fieldFor(roomKey, modeOrOpt) {
     if (roomKey === 'central') return 'central';
     if (roomKey === 'meeting') return 'meeting';
     if (roomKey === 'culture') return 'culture';
-    if (roomKey === 'manufactA') return mode === 'weapon' ? 'weaponScore' : 'expScore';
-    if (roomKey === 'manufactB') return mode === 'exp' ? 'expScore' : 'weaponScore';
+    if (roomKey === 'manufactA' || roomKey === 'manufactB') {
+      if (modeOrOpt && typeof modeOrOpt === 'object' && modeOrOpt.manufactProducts) {
+        return modeOrOpt.manufactProducts[roomKey] === 'weapon' ? 'weaponScore' : 'expScore';
+      }
+      const mode = modeOrOpt;
+      if (roomKey === 'manufactA') return mode === 'weapon' ? 'weaponScore' : 'expScore';
+      return mode === 'exp' ? 'expScore' : 'weaponScore';
+    }
     return 'manufact';
   }
 
@@ -387,6 +435,73 @@
       }
     }
     return false;
+  }
+
+  function hasMeetingCore(s, opt) {
+    for (const t of s.mergedTraits || []) {
+      if (t.舱室 !== '会客室') continue;
+      if (t.类型 === '收集线索效率') return true;
+      if (isCluePower(t.类型)) {
+        const n = parseInt(t.线索编号, 10);
+        if (opt.missingClues.has(n) || !opt.excludedClues.has(n)) return true;
+      }
+    }
+    return false;
+  }
+
+  function meetingInfoOf(s, opt) {
+    let eff = 0, mood = 0, clue = 0, missing = false, excluded = false;
+    for (const t of s.mergedTraits || []) {
+      if (t.舱室 !== '会客室') continue;
+      if (t.类型 === '收集线索效率') eff += t.数值 || 0;
+      else if (t.类型 === '心情消耗减少') mood += t.数值 || 0;
+      else if (isCluePower(t.类型)) {
+        const n = parseInt(t.线索编号, 10);
+        if (opt.missingClues.has(n)) missing = true;
+        else if (opt.excludedClues.has(n)) excluded = true;
+        else clue += t.数值 || 0;
+      }
+    }
+    return { eff, mood, clue, missing, excluded };
+  }
+
+  function meetingTierOf(s, opt, roundKey) {
+    const info = meetingInfoOf(s, opt);
+    if (info.eff > 0) return 5;
+    if (info.clue > 0 || info.missing) {
+      if (roundKey === 'r2') {
+        if (info.missing) return 4;
+        if (info.clue > 0) return 3;
+      } else {
+        if (info.missing) return 3;
+        if (info.clue > 0) return 2;
+      }
+    }
+    // 有总控恢复天赋、但没有会客室效率/线索的干员，优先留给总控；
+    // 心情减耗不能压过总控恢复，否则会被会客室先拿走。
+    if ((s.score.central || 0) > 0 && info.mood > 0) return 1;
+    if (roundKey === 'r2') {
+      if (info.missing) return 4;
+      if (info.clue > 0) return 3;
+      if (info.mood > 0) return 2;
+    } else {
+      if (info.mood > 0) return 4;
+      if (info.missing) return 3;
+      if (info.clue > 0) return 2;
+    }
+    if (info.excluded) return -1;
+    if (!hasAnyBenefit(s)) return 1;
+    return 0;
+  }
+
+  function meetingRankOf(s, opt, roundKey) {
+    const info = meetingInfoOf(s, opt);
+    // 两轮使用不同的心情有效权重：一轮心情高于线索概率，二轮线索概率高于心情。
+    const moodWeight = roundKey === 'r2' ? 0.5 : 2.5;
+    return meetingTierOf(s, opt, roundKey) * 1e6 +
+      info.eff * 100 + (info.missing ? 80 : 0) +
+      (info.clue > 0 ? CLUE_PROB_BASE + info.clue * CLUE_PROB_VALUE_WEIGHT : 0) +
+      info.mood * moodWeight;
   }
 
   function hasAnyMeetingTrait(s) {
@@ -405,24 +520,34 @@
     return out;
   }
 
-  function productionOrder(opt, round) {
-    const base = round === 1 ? opt.priorityOrderRound1 : opt.priorityOrderRound2;
-    let order = base.filter(k => k !== 'central' && opt.roomModes[k] !== 'empty');
-    if (round === 2) order = order.filter(k => opt.doubleRooms.includes(k));
-    if (opt.meetingPriorityEnabled) {
-      order = ['meeting'].concat(order.filter(k => k !== 'meeting'));
-    } else {
-      // “会客室优先”关闭时，会客室不参与数字顺序，统一放最后，
-      // 避免旧配置把会客室设为 1 抢走制造舱专家。
-      order = order.filter(k => k !== 'meeting');
-      order.push('meeting');
+  function materialRooms(material, opt) {
+    const active = k => opt.roomModes[k] !== 'empty';
+    if (material === 'clue') return active('meeting') ? ['meeting'] : [];
+    if (material === 'culture') return active('culture') ? ['culture'] : [];
+    if (material === 'weapon') {
+      return ['manufactA', 'manufactB'].filter(k => active(k) && opt.manufactProducts[k] === 'weapon');
     }
-    // 任何被漏掉的启用舱室都补在末尾，避免策略列表旧数据导致整舱不排
-    const active = ROOM_KEYS.filter(k =>
-      k !== 'central' && opt.roomModes[k] !== 'empty' &&
-      (round === 1 || opt.doubleRooms.includes(k))
-    );
-    for (const k of active) if (!order.includes(k)) order.push(k);
+    if (material === 'exp') {
+      return ['manufactA', 'manufactB'].filter(k => active(k) && opt.manufactProducts[k] === 'exp');
+    }
+    return [];
+  }
+
+  function productionOrder(opt, round) {
+    const order = [];
+    const add = k => {
+      if (k !== 'central' && opt.roomModes[k] !== 'empty' &&
+          (round === 1 || opt.doubleRooms.includes(k)) &&
+          !order.includes(k)) order.push(k);
+    };
+
+    // 材料优先级 → 生产舱顺序；未启用/未选择的材料自动从链路剔除。
+    for (const material of opt.materialPriority) {
+      for (const k of materialRooms(material, opt)) add(k);
+    }
+
+    // 防御：任何启用但未映射的生产舱补在末尾。
+    for (const k of PRODUCTION_KEYS) add(k);
     return order;
   }
 
@@ -431,24 +556,30 @@
     const trust = opt.trustedAgentIds;
     const pool = scores.filter(s => !trust.has(opIdOf(s)));
 
-    const pickBest = (key, candidates, pass) => {
+    const pickBest = (key, candidates, pass, roundKey) => {
       if (!candidates.length) return null;
+      const moodWeight = roundKey === 'r2' ? 0 : MOOD_WEIGHT;
+      const productivityWeight = roundKey === 'r2' ? 0 : 0.6;
+      const meetingSel = s => (s.score.meeting || 0) - (MOOD_WEIGHT - moodWeight) * (s.score.moodReduce || 0);
+      const cultureSel = s => (s.score.culture || 0) - (MOOD_WEIGHT - moodWeight) * (s.score.moodReduce || 0);
       const scored = candidates.map(s => {
         let v = 0;
         if (pass === 'specialist') {
-          if (key === 'meeting') v = (hasMeetingTalent(s, opt) ? 1e6 : 0) + (s.score.meeting || 0);
-          else if (key === 'culture') v = s.score.culture || 0;
-          else v = s.score[fieldFor(key, opt.mode)] || 0;
+          if (key === 'meeting') {
+            v = meetingRankOf(s, opt, roundKey);
+          } else if (key === 'culture') v = cultureSel(s);
+          else v = s.score[fieldFor(key, opt)] || 0;
         } else if (pass === 'mood') {
-          v = s.score.moodReduce || 0;
+          v = (s.score.moodReduce || 0) * moodWeight;
+          if (key === 'meeting') v = meetingRankOf(s, opt, roundKey);
         } else {
           // 兜底：优先不抢总控恢复人才，再看生产分数
           v = (s.score.central || 0) > 0 ? -1e6 : 0;
-          v += productionValue(s, opt);
+          v += productionValue(s, opt, productivityWeight);
         }
         return { s, v };
       });
-      scored.sort((a, b) => b.v - a.v || productionValue(a.s, opt) - productionValue(b.s, opt));
+      scored.sort((a, b) => b.v - a.v || productionValue(a.s, opt, productivityWeight) - productionValue(b.s, opt, productivityWeight));
       return scored[0].s;
     };
 
@@ -460,15 +591,24 @@
             let cands = pool.filter(s => !assigned.has(s.opId));
             if (pass === 'specialist') {
               cands = cands.filter(s => {
-                if (key === 'meeting') return hasMeetingTalent(s, opt) || (s.score.meeting || 0) > 0;
+                if (key === 'meeting') {
+                  if (roundKey === 'r2') return hasMeetingCore(s, opt);
+                  return hasMeetingTalent(s, opt) || (s.score.meeting || 0) > 0;
+                }
                 if (key === 'culture') return (s.score.culture || 0) > 0;
-                return (s.score[fieldFor(key, opt.mode)] || 0) > 0;
+                return (s.score[fieldFor(key, opt)] || 0) > 0;
               });
             } else if (pass === 'mood') {
               cands = cands.filter(s => (s.score.moodReduce || 0) > 0);
+              if (key === 'meeting') {
+                cands = cands.filter(s => roundKey === 'r2' ? hasMeetingCore(s, opt) : hasMeetingTalent(s, opt));
+              }
+            } else if (key === 'meeting') {
+              // 会客室兜底只接受会客室天赋或无增益干员；排除线索干员不进入平铺。
+              cands = cands.filter(s => (!hasAnyBenefit(s) || hasMeetingTalent(s, opt)) && !hasExcludedClueOnly(s, opt));
             }
             if (!cands.length) break;
-            const picked = pickBest(key, cands, pass);
+            const picked = pickBest(key, cands, pass, roundKey);
             if (!picked) break;
             arr.push(picked);
             assigned.add(picked.opId);
@@ -479,17 +619,9 @@
       const hasMeeting = order.includes('meeting');
       const primary = order.filter(k => k !== 'meeting');
 
-      // 会客室优先开启：会客室按原顺序先拿人。
-      // 关闭：先把制造/培养的专家、心情、兜底全部排完，再排会客室，
-      // 避免会客室用“线索天赋”抢走制造舱的跨舱专家。
-      if (opt.meetingPriorityEnabled) {
-        for (const pass of ['specialist', 'mood', 'generic']) runPass(pass, order);
-      } else {
-        for (const pass of ['specialist', 'mood', 'generic']) runPass(pass, primary);
-        if (hasMeeting) runPass('specialist', ['meeting']);
-        if (hasMeeting) runPass('mood', ['meeting']);
-        if (hasMeeting) runPass('generic', ['meeting']);
-      }
+      // 按 productionOrder 严格顺序执行；会客室在素材优先级第一时先选，
+      // 不再为了制造舱把会客室心情干员推迟到最后。
+      for (const pass of ['specialist', 'mood', 'generic']) runPass(pass, order);
     };
 
     fillRound('r1', productionOrder(opt, 1));
@@ -498,16 +630,107 @@
   }
 
   // ------------------------------------------------------------
-  // 6. 总控独立分配
+  // 6. 优先满舱：按“最低 1+1 → 高优先级补满 → 低优先级保底”构建全局方案
   // ------------------------------------------------------------
-  function productionValue(s, opt) {
-    // 用“最擅长的生产舱分数”近似机会成本：越高越应该留在生产
+  function assignPriorityPlan(state, scores, opt, warnings, contrib) {
+    const used = new Set();
+    const add = (s, key, round) => {
+      if (!s || used.has(opIdOf(s))) return false;
+      if (state[key][round].length >= CAP) return false;
+      state[key][round].push(s);
+      used.add(opIdOf(s));
+      return true;
+    };
+    const candidates = () => scores.filter(s => !used.has(opIdOf(s)));
+
+    const roleValue = (s, key) => {
+      if (!s || !s.score) return -1e9;
+      if (key === 'meeting') return (s.score.meeting || 0) + (s.score.clue || 0) * 0.12 + (s.score.moodReduce || 0) * 0.25;
+      if (key === 'culture') return (s.score.culture || 0) + (s.score.moodReduce || 0) * 0.2;
+      if (key === 'manufactA' || key === 'manufactB') return (s.score[fieldFor(key, opt)] || 0) + (s.score.moodReduce || 0) * 0.15;
+      if (key === 'central') return s.score.central || 0;
+      return 0;
+    };
+    const fitValue = (s, key) => {
+      if (!s || !s.score) return -1e9;
+      if (key === 'meeting') return (s.score.meeting || 0) + (s.score.clue || 0) * 0.1;
+      if (key === 'culture') return s.score.culture || 0;
+      if (key === 'manufactA' || key === 'manufactB') return s.score[fieldFor(key, opt)] || 0;
+      if (key === 'central') return s.score.central || 0;
+      return 0;
+    };
+    const pick = (key, allowFallback) => {
+      const all = candidates();
+      if (!all.length) return null;
+      const isGeneric = s => !(s.score.expScore || 0) && !(s.score.weaponScore || 0) && !(s.score.culture || 0) && !(s.score.meeting || 0);
+      const allowed = all.filter(s => fitValue(s, key) > 0 || isGeneric(s));
+      const list = allowed.length ? allowed : (allowFallback ? all : []);
+      if (!list.length) return null;
+      list.sort((a, b) => fitValue(b, key) - fitValue(a, key) || roleValue(b, key) - roleValue(a, key) || productionValue(a, opt) - productionValue(b, opt));
+      return list[0];
+    };
+
+    // 总控：B 高恢复组，A 低恢复组。
+    if (!opt.centralDisabled && opt.roomModes.central !== 'empty') {
+      const centralScores = scores.filter(s => (s.score.central || 0) > 0)
+        .sort((a, b) => (b.score.central || 0) - (a.score.central || 0) || clueValueOf(a) - clueValueOf(b) || productionValue(a, opt) - productionValue(b, opt));
+      const centralTrust = scores.filter(s => opt.trustedAgentIds.has(opIdOf(s)));
+      const centralPool = opt.doubleRooms.includes('central')
+        ? [...centralTrust, ...centralScores]
+        : [...centralTrust, ...centralScores];
+      for (const s of centralPool) {
+        if (state.central.r2.length >= CAP) break;
+        add(s, 'central', 'r2');
+      }
+      // A 班低恢复：优先低恢复、无线索概率的纯恢复干员，至少 1 人。
+      const lowPool = candidates()
+        .filter(s => (s.score.central || 0) > 0)
+        .sort((a, b) => (a.score.central || 0) - (b.score.central || 0) || meetingRankOf(a, opt, 'r2') - meetingRankOf(b, opt, 'r2') || clueValueOf(a) - clueValueOf(b) || productionValue(a, opt) - productionValue(b, opt));
+      if (lowPool.length) add(lowPool[0], 'central', 'r1');
+      else {
+        const any = pick('central', true);
+        if (any) add(any, 'central', 'r1');
+      }
+    }
+
+    // 先给每个生产舱每班留 1 人；从最低优先级开始，保留高优先级专家。
+    const order = productionOrder(opt, 1);
+    const giveMin = (key) => {
+      const rounds = opt.doubleRooms.includes(key) ? ['r1', 'r2'] : ['r1'];
+      for (const round of rounds) {
+        if (state[key][round].length > 0) continue;
+        const s = pick(key, true);
+        if (s) add(s, key, round);
+      }
+    };
+    for (const key of order.slice().reverse()) giveMin(key);
+
+    // 按材料优先级高→低补满；低优先级只保留 1+1。
+    for (const key of order) {
+      const rounds = opt.doubleRooms.includes(key) ? ['r1', 'r2'] : ['r1'];
+      for (const round of rounds) {
+        while (state[key][round].length < CAP) {
+          const s = pick(key, false);
+          if (!s) break;
+          add(s, key, round);
+        }
+      }
+    }
+
+    return used;
+  }
+
+
+  function productionValue(s, opt, moodWeight) {
+    // 用“最擅长的生产舱分数 + 心情减耗机会成本”近似机会成本。
     const mode = opt.mode;
+    const mw = typeof moodWeight === 'number' ? moodWeight : 0.6;
     const m = Math.max(
       mode === 'weapon' ? 0 : (s.score.expScore || 0),
       mode === 'exp' ? 0 : (s.score.weaponScore || 0),
       s.score.meeting || 0,
-      s.score.culture || 0
+      s.score.culture || 0,
+      (s.score.moodReduce || 0) * mw
     );
     return m;
   }
@@ -549,15 +772,18 @@
       // A 班：无天赋信赖优先收容，再放剩余有天赋/普通人
       low = noTalent.filter(s => trust.has(opIdOf(s))).slice(0, CAP);
       const lowIds = new Set(low.map(opIdOf));
-      const rest = withTalent.filter(s => !highIds.has(opIdOf(s)) && !lowIds.has(opIdOf(s)));
+      const rest = withTalent
+        .filter(s => !highIds.has(opIdOf(s)) && !lowIds.has(opIdOf(s)))
+        .sort((a, b) => (a.score.central || 0) - (b.score.central || 0) || clueValueOf(a) - clueValueOf(b) || productionValue(a, opt) - productionValue(b, opt));
       for (const s of rest) { if (low.length >= CAP) break; low.push(s); }
       for (const s of noTalent) {
         if (low.length >= CAP) break;
         if (lowIds.has(opIdOf(s)) || highIds.has(opIdOf(s))) continue;
         low.push(s);
       }
-      state.central.r2 = high;
-      state.central.r1 = low;
+      // A 班（第一班）优先高恢复组；B 班（第二班）最后用剩余人员。
+      state.central.r1 = high;
+      state.central.r2 = low;
     } else {
       // 单轮总控：信赖优先收容（用户明确选择），再用恢复量最高的补位
       const trustSpare = spare
@@ -593,9 +819,7 @@
     const slots = [c.r1, c.r2];
     const emptySlots = slots.filter(a => a.length === 0);
     if (emptySlots.length === 0) {
-      if (centralRestoreOf(c.r2) < centralRestoreOf(c.r1)) {
-        const tmp = c.r1; c.r1 = c.r2; c.r2 = tmp;
-      }
+      // A 班保留高恢复组；B 班允许更低，不再交换 A/B。
       return;
     }
 
@@ -646,16 +870,531 @@
       picked.arr.splice(picked.arr.indexOf(picked.s), 1);
       target.push(picked.s);
     }
+  }
 
-    // 保持 B 班（round2）恢复量不低于 A 班；借入恢复型干员后仍成立
-    if (centralRestoreOf(c.r2) < centralRestoreOf(c.r1)) {
-      const tmp = c.r1; c.r1 = c.r2; c.r2 = tmp;
+  // 选择总控为“可接受不满员”时，高恢复组最多 2 人，允许 1+2 / 1+1。
+  function enforceCentralUnderfill(state, opt) {
+    if (opt.underfillRoom !== 'central' || !opt.doubleRooms.includes('central')) return;
+    const c = state.central;
+    while (c.r1.length > 2 && c.r2.length < CAP) c.r2.push(c.r1.pop());
+  }
+
+  // 总控 A 班优先拿高恢复组：从已在生产舱/总控 B 班的人员中，
+  // 用更高恢复的干员替换 A 班较弱的非信赖成员，不改变总人数。
+  function improveCentralA(state, opt, scores, contrib) {
+    if (opt.centralDisabled || opt.roomModes.central === 'empty') return;
+    const target = state.central.r1;
+    const trust = opt.trustedAgentIds;
+    const allSlots = [];
+    for (const key of ROOM_KEYS) {
+      if (opt.roomModes[key] === 'empty') continue;
+      // 会客室选人优先级高于总控 A 的恢复微调，不能从这里抢走线索干员。
+      if (key === 'meeting') continue;
+      for (const round of ['r1', 'r2']) {
+        if (round === 'r2' && !opt.doubleRooms.includes(key)) continue;
+        if (key === 'central' && round === 'r1') continue;
+        state[key][round].forEach((s, idx) => allSlots.push({ key, round, idx, s }));
+      }
+    }
+    const top = scores
+      .filter(s => (s.score.central || 0) > 0 && !target.some(x => opIdOf(x) === opIdOf(s)))
+      .sort((a, b) => (b.score.central || 0) - (a.score.central || 0) || productionValue(a, opt) - productionValue(b, opt));
+
+    for (const cand of top) {
+      const existing = target.some(x => opIdOf(x) === opIdOf(cand));
+      if (existing) continue;
+      const slot = allSlots.find(x => opIdOf(x.s) === opIdOf(cand));
+      if (target.length < CAP) {
+        if (slot) {
+          const arr = state[slot.key][slot.round];
+          const at = arr.findIndex(x => opIdOf(x) === opIdOf(cand));
+          if (at >= 0) arr.splice(at, 1);
+        }
+        target.push(cand);
+        continue;
+      }
+      const weak = target
+        .filter(s => !trust.has(opIdOf(s)))
+        .sort((a, b) => (a.score.central || 0) - (b.score.central || 0))[0];
+      if (!weak) break;
+      if ((cand.score.central || 0) <= (weak.score.central || 0)) break;
+      if (!slot) continue;
+      const sourceArr = state[slot.key][slot.round];
+      const targetIdx = target.indexOf(weak);
+      sourceArr[slot.idx] = weak;
+      target[targetIdx] = cand;
+      allSlots.forEach(x => { if (x.s === weak) { x.key = 'central'; x.round = 'r1'; x.idx = targetIdx; } });
     }
   }
 
-  // ------------------------------------------------------------
-  // 7. 目标函数与局部搜索
-  // ------------------------------------------------------------
+  // 双轮舱室至少每班 1 人，否则无法开启二轮；空班从其它舱借人。
+  function enforceDoubleMinimums(state, opt, warnings, contrib) {
+    const active = ROOM_KEYS.filter(k => opt.roomModes[k] !== 'empty');
+    for (const key of active) {
+      const rounds = opt.doubleRooms.includes(key) ? ['r1', 'r2'] : ['r1'];
+      for (const round of rounds) {
+        const target = state[key][round];
+        if (target.length > 0) continue;
+        // 二轮保底优先从本舱另一轮转移，避免把 3+1 拆成 2+2，也不跨舱抢人。
+        if (opt.doubleRooms.includes(key)) {
+          const otherRound = round === 'r1' ? 'r2' : 'r1';
+          const ownDonor = state[key][otherRound];
+          if (ownDonor.length > 1) {
+            target.push(ownDonor.pop());
+            continue;
+          }
+        }
+        const candidates = [];
+        for (const sourceKey of active) {
+          if (sourceKey === key) continue;
+          if (sourceKey === 'central') continue;
+          const sourceRounds = opt.doubleRooms.includes(sourceKey) ? ['r1', 'r2'] : ['r1'];
+          for (const sourceRound of sourceRounds) {
+            const arr = state[sourceKey][sourceRound];
+            if (arr.length <= 1) continue;
+            const before = groupStats(arr, sourceKey, opt, contrib).rate;
+            for (const s of arr) {
+              const fit = canFillTarget(s, key, opt) ? 1 : 0;
+              const after = groupStats(arr.filter(x => x !== s), sourceKey, opt, contrib).rate;
+              candidates.push({ sourceKey, arr, s, fit, loss: before - after, production: productionValue(s, opt) });
+            }
+          }
+        }
+        if (!candidates.length) {
+          warnings.push(`“${RAW_ROOM[key] || key}”二轮已开启，但没有可用干员补足空班。`);
+          continue;
+        }
+        candidates.sort((a, b) => b.fit - a.fit || a.loss - b.loss || a.production - b.production);
+        const picked = candidates[0];
+        picked.arr.splice(picked.arr.indexOf(picked.s), 1);
+        target.push(picked.s);
+      }
+    }
+  }
+
+  // 策略靠前的生产舱尽可能补满；只从优先级更低的舱室借人，并保留来源至少 1 人。
+  function enforcePriorityFill(state, opt, warnings, contrib) {
+    const order = productionOrder(opt, 1);
+    for (const key of order) {
+      if (opt.roomModes[key] === 'empty') continue;
+      const idx = order.indexOf(key);
+      const rounds = opt.doubleRooms.includes(key) ? ['r1', 'r2'] : ['r1'];
+      for (const round of rounds) {
+        const target = state[key][round];
+        while (target.length < CAP) {
+          const candidates = [];
+          const targetBefore = groupStats(target, key, opt, contrib).rate;
+          for (const sourceKey of order.slice(idx + 1)) {
+            if (opt.roomModes[sourceKey] === 'empty') continue;
+            const sourceRounds = opt.doubleRooms.includes(sourceKey) ? ['r1', 'r2'] : ['r1'];
+            for (const sourceRound of sourceRounds) {
+              const arr = state[sourceKey][sourceRound];
+              if (arr.length <= 1) continue;
+              const before = groupStats(arr, sourceKey, opt, contrib).rate;
+              for (const s of arr) {
+                if (!canFillTarget(s, key, opt)) continue;
+                const after = groupStats(arr.filter(x => x !== s), sourceKey, opt, contrib).rate;
+                const gain = groupStats(target.concat(s), key, opt, contrib).rate - targetBefore;
+                candidates.push({
+                  arr, s,
+                  sourcePriority: order.indexOf(sourceKey),
+                  loss: before - after,
+                  gain,
+                  production: productionValue(s, opt),
+                });
+              }
+            }
+          }
+          if (!candidates.length) break;
+          candidates.sort((a, b) =>
+            b.sourcePriority - a.sourcePriority ||
+            a.loss - b.loss ||
+            b.gain - a.gain ||
+            a.production - b.production
+          );
+          const picked = candidates[0];
+          picked.arr.splice(picked.arr.indexOf(picked.s), 1);
+          target.push(picked.s);
+        }
+      }
+    }
+  }
+
+
+  function canFillTarget(s, target, opt) {
+    const generic = productionValue(s, opt) === 0;
+    if (target === 'meeting') return meetingRankOf(s, opt, 'r2') > 0;
+    if (target === 'culture') return generic || (s.score.culture || 0) > 0;
+    if (target === 'manufactA' || target === 'manufactB') {
+      return generic || (s.score[fieldFor(target, opt)] || 0) > 0;
+    }
+    return true;
+  }
+
+  function improveClueSwap(state, opt) {
+    // A 班是低恢复组：只在这里做线索交换；B 班高恢复组保持不动。
+    const centralArrs = [state.central.r1];
+    const meetingArrs = opt.doubleRooms.includes('meeting')
+      ? [state.meeting.r1, state.meeting.r2]
+      : [state.meeting.r1];
+
+    for (const cArr of centralArrs) {
+      for (let ci = 0; ci < cArr.length; ci++) {
+        const c = cArr[ci];
+        if (clueValueOf(c) <= 0) continue;
+        for (const mArr of meetingArrs) {
+          for (let mi = 0; mi < mArr.length; mi++) {
+            const m = mArr[mi];
+            if (clueValueOf(m) >= clueValueOf(c)) continue;
+            cArr[ci] = m;
+            mArr[mi] = c;
+            return;
+          }
+        }
+      }
+    }
+  }
+
+  function balanceCentralLow(state, opt) {
+    if (opt.centralDisabled || opt.roomModes.central === 'empty') return;
+    const lowArr = state.central.r1;
+    const sources = [];
+    for (const key of PRODUCTION_KEYS) {
+      if (opt.roomModes[key] === 'empty') continue;
+      const rounds = opt.doubleRooms.includes(key) ? ['r1', 'r2'] : ['r1'];
+      for (const round of rounds) {
+        state[key][round].forEach((s, idx) => sources.push({ key, round, idx, s }));
+      }
+    }
+    sources.sort((a, b) =>
+      centralRestoreOf([a.s]) - centralRestoreOf([b.s]) ||
+      clueValueOf(a.s) - clueValueOf(b.s) ||
+      productionValue(a.s, opt) - productionValue(b.s, opt)
+    );
+    const withCentral = sources.filter(x => centralRestoreOf([x.s]) > 0);
+    const pool = withCentral.length ? withCentral : sources;
+    for (let i = 0; i < lowArr.length && pool.length; i++) {
+      const current = lowArr[i];
+      const candidate = pool[0];
+      if (!candidate) break;
+      if (centralRestoreOf([candidate.s]) >= centralRestoreOf([current])) continue;
+      const srcArr = state[candidate.key][candidate.round];
+      const srcIdx = srcArr.indexOf(candidate.s);
+      if (srcIdx < 0) { pool.shift(); i--; continue; }
+      srcArr[srcIdx] = current;
+      lowArr[i] = candidate.s;
+      pool.shift();
+    }
+  }
+
+  function improveMeetingMood(state, opt) {
+    if (opt.roomModes.meeting === 'empty') return;
+    const targets = opt.doubleRooms.includes('meeting') ? [state.meeting.r1, state.meeting.r2] : [state.meeting.r1];
+    const sources = [];
+    for (const key of PRODUCTION_KEYS) {
+      if (key === 'meeting' || opt.roomModes[key] === 'empty') continue;
+      const rounds = opt.doubleRooms.includes(key) ? ['r1', 'r2'] : ['r1'];
+      for (const round of rounds) {
+        state[key][round].forEach((s, idx) => {
+          if ((s.score.moodReduce || 0) > 0 || (s.score.meeting || 0) > 0) sources.push({ key, round, idx, s });
+        });
+      }
+    }
+    sources.sort((a, b) => (b.s.score.meeting || 0) - (a.s.score.meeting || 0) || (b.s.score.moodReduce || 0) - (a.s.score.moodReduce || 0));
+
+    for (const target of targets.slice().sort((a, b) => a.length - b.length)) {
+      for (const candidate of sources.slice()) {
+        const sourceArr = state[candidate.key][candidate.round];
+        if (sourceArr.length <= 1) continue;
+        const sourceIdx = sourceArr.indexOf(candidate.s);
+        if (sourceIdx < 0) continue;
+        const weakestIdx = target
+          .map((s, i) => ({ i, v: (s.score.meeting || 0) + (s.score.moodReduce || 0) * 0.5 }))
+          .sort((a, b) => a.v - b.v)[0];
+        const candidateValue = (candidate.s.score.meeting || 0) + (candidate.s.score.moodReduce || 0) * 0.5;
+        if (target.length >= CAP) {
+          if (!weakestIdx || candidateValue <= weakestIdx.v) continue;
+          sourceArr[sourceIdx] = target[weakestIdx.i];
+          target[weakestIdx.i] = candidate.s;
+        } else {
+          sourceArr.splice(sourceIdx, 1);
+          target.push(candidate.s);
+        }
+        break;
+      }
+    }
+  }
+
+  function improveMeetingClue(state, opt) {
+    if (opt.roomModes.meeting === 'empty') return;
+    const targets = opt.doubleRooms.includes('meeting') ? [state.meeting.r1, state.meeting.r2] : [state.meeting.r1];
+    const sources = [];
+    for (const key of PRODUCTION_KEYS) {
+      if (key === 'meeting' || opt.roomModes[key] === 'empty') continue;
+      const rounds = opt.doubleRooms.includes(key) ? ['r1', 'r2'] : ['r1'];
+      for (const round of rounds) {
+        state[key][round].forEach((s, idx) => {
+          if (clueValueOf(s) > 0) sources.push({ key, round, idx, s });
+        });
+      }
+    }
+    sources.sort((a, b) => clueValueOf(b.s) - clueValueOf(a.s));
+    for (const target of targets.slice().sort((a, b) => a.length - b.length)) {
+      for (const candidate of sources.slice()) {
+        const sourceArr = state[candidate.key][candidate.round];
+        if (sourceArr.length <= 1) continue;
+        const sourceIdx = sourceArr.indexOf(candidate.s);
+        if (sourceIdx < 0) continue;
+        let weakestIdx = -1, weakestValue = Infinity;
+        target.forEach((s, i) => {
+          const v = clueValueOf(s);
+          if (v < weakestValue) { weakestValue = v; weakestIdx = i; }
+        });
+        if (target.length >= CAP) {
+          if (clueValueOf(candidate.s) <= weakestValue) continue;
+          sourceArr[sourceIdx] = target[weakestIdx];
+          target[weakestIdx] = candidate.s;
+        } else {
+          sourceArr.splice(sourceIdx, 1);
+          target.push(candidate.s);
+        }
+        break;
+      }
+    }
+  }
+
+  function swapCentralClueWithMeeting(state, opt) {
+    if (opt.centralDisabled || opt.roomModes.central === 'empty' || opt.roomModes.meeting === 'empty') return;
+    const a = state.central.r1;
+    // 总控 A 是一轮，和会客室 A 做同轮交换；不能拿一轮心情去和二轮线索跨轮比较。
+    const meetingArrs = [state.meeting.r1];
+    const meetingRounds = ['r1'];
+    for (let ci = 0; ci < a.length; ci++) {
+      const c = a[ci];
+      if (opt.trustedAgentIds.has(opIdOf(c))) continue;
+      for (let ri = 0; ri < meetingArrs.length; ri++) {
+        const mArr = meetingArrs[ri];
+        const roundKey = meetingRounds[ri];
+        const cr = meetingRankOf(c, opt, roundKey);
+        if (cr <= 0) continue;
+        for (let mi = 0; mi < mArr.length; mi++) {
+          const m = mArr[mi];
+          const mr = meetingRankOf(m, opt, roundKey);
+          if (mr >= cr) continue;
+          a[ci] = m;
+          mArr[mi] = c;
+          return;
+        }
+      }
+    }
+  }
+
+  function fillMeetingFromCentral(state, opt) {
+    if (opt.centralDisabled || opt.roomModes.central === 'empty' || opt.roomModes.meeting === 'empty') return;
+    const rounds = opt.doubleRooms.includes('meeting') ? ['r1', 'r2'] : ['r1'];
+    for (const round of rounds) {
+      const target = state.meeting[round];
+      while (target.length < CAP) {
+        const candidates = [];
+        for (const cround of ['r1', 'r2']) {
+          if (cround === 'r2' && !opt.doubleRooms.includes('central')) continue;
+          for (const s of state.central[cround]) {
+            if (state.central[cround].length <= 1) continue; // 总控每班至少保留 1 人。
+            if (opt.trustedAgentIds.has(opIdOf(s))) continue;
+            const rank = meetingRankOf(s, opt, round);
+            if (rank > 0) candidates.push({ s, cround, rank });
+          }
+        }
+        if (!candidates.length) break;
+        candidates.sort((a, b) => b.rank - a.rank);
+        const pick = candidates[0];
+        const arr = state.central[pick.cround];
+        arr.splice(arr.indexOf(pick.s), 1);
+        target.push(pick.s);
+      }
+    }
+  }
+
+  function rebalanceMeetingRounds(state, opt) {
+    if (!opt.doubleRooms.includes('meeting')) return;
+    const all = [...state.meeting.r1, ...state.meeting.r2];
+    if (all.length < 2) return;
+    all.sort((a, b) =>
+      ((b.score.meeting || 0) + (b.score.clue || 0) * 0.2 + (b.score.moodReduce || 0) * 0.5) -
+      ((a.score.meeting || 0) + (a.score.clue || 0) * 0.2 + (a.score.moodReduce || 0) * 0.5)
+    );
+    state.meeting.r1 = all.slice(0, CAP);
+    state.meeting.r2 = all.slice(CAP, CAP * 2);
+    // 保留双轮保底：若总数不足 6，也至少要保证 A/B 各 1 人。
+    if (all.length >= 2 && state.meeting.r2.length === 0) {
+      state.meeting.r2.push(state.meeting.r1.pop());
+    }
+  }
+
+  // 统一班次轮转：总控 A/B 在最终结果中反向放置，保持高恢复组仍是高恢复组。
+  function swapCentralRounds(state) {
+    const r1 = state.central.r1;
+    state.central.r1 = state.central.r2;
+    state.central.r2 = r1;
+  }
+
+  // “会客室优先”开启时，最后检查会客室空位，并从其它生产舱借出
+  function enforceMeetingFill(state, opt, warnings, contrib) {
+    if (!opt.meetingPriorityEnabled || opt.roomModes.meeting === 'empty') return;
+    const targetRounds = opt.doubleRooms.includes('meeting') ? [state.meeting.r1, state.meeting.r2] : [state.meeting.r1];
+
+    for (const target of targetRounds) {
+      while (target.length < CAP) {
+        const candidates = [];
+        const targetBefore = groupStats(target, 'meeting', opt, contrib).rate;
+
+        for (const sourceKey of PRODUCTION_KEYS) {
+          if (sourceKey === 'meeting' || opt.roomModes[sourceKey] === 'empty') continue;
+          const sourceRounds = opt.doubleRooms.includes(sourceKey)
+            ? [state[sourceKey].r1, state[sourceKey].r2]
+            : [state[sourceKey].r1];
+          for (const arr of sourceRounds) {
+            // 保留来源舱至少 1 人，避免“补会客室”把来源舱直接抽空。
+            if (arr.length <= 1) continue;
+            const before = groupStats(arr, sourceKey, opt, contrib).rate;
+            for (const s of arr) {
+              const fit = canFillTarget(s, 'meeting', opt) ? 1 : 0;
+              const after = groupStats(arr.filter(x => x !== s), sourceKey, opt, contrib).rate;
+              const targetAfter = groupStats(target.concat(s), 'meeting', opt, contrib).rate;
+              candidates.push({
+                sourceKey, arr, s, fit,
+                loss: before - after,
+                gain: targetAfter - targetBefore,
+                production: productionValue(s, opt),
+              });
+            }
+          }
+        }
+
+        if (!candidates.length) break;
+        candidates.sort((a, b) => {
+          if (b.fit !== a.fit) return b.fit - a.fit;
+          if (Math.abs(a.loss - b.loss) > 1e-9) return a.loss - b.loss;
+          if (Math.abs(b.gain - a.gain) > 1e-9) return b.gain - a.gain;
+          return a.production - b.production;
+        });
+
+        const picked = candidates[0];
+        picked.arr.splice(picked.arr.indexOf(picked.s), 1);
+        target.push(picked.s);
+      }
+    }
+
+    const remaining = targetRounds.reduce((n, arr) => n + Math.max(0, CAP - arr.length), 0);
+    if (remaining > 0) {
+      warnings.push(`“会客室优先”已开启，但其它舱室可借出的干员不足，会客室仍有 ${remaining} 个空位。`);
+    }
+  }
+
+
+  function openSlotsOutside(state, opt, skipKey) {
+    let open = 0;
+    for (const key of ROOM_KEYS) {
+      if (key === skipKey || opt.roomModes[key] === 'empty') continue;
+      const rounds = opt.doubleRooms.includes(key) ? ['r1', 'r2'] : ['r1'];
+      for (const round of rounds) open += Math.max(0, CAP - state[key][round].length);
+    }
+    return open;
+  }
+
+  function underfillContribution(s, key, opt) {
+    if (key === 'culture') {
+      // 培养舱按已设置的产物优先级加权；高优先级产物天赋必须优先保留。
+      return (s.score.culture || 0) + (s.score.moodReduce || 0) * MOOD_WEIGHT;
+    }
+    if (key === 'meeting') {
+      return meetingRankOf(s, opt, 'r2');
+    }
+    if (key === 'manufactA' || key === 'manufactB') {
+      return (s.score[fieldFor(key, opt)] || 0) + (s.score.moodReduce || 0) * MOOD_WEIGHT;
+    }
+    if (key === 'central') return s.score.central || 0;
+    return productionValue(s, opt);
+  }
+
+  function releaseUnderfillExtras(state, opt, maxRelease) {
+    const key = opt.underfillRoom;
+    if (!key || !ROOM_KEYS.includes(key) || opt.roomModes[key] === 'empty') return [];
+    // 信赖干员必须收容在总控，不能因“允许总控不满”被抽出。
+    if (key === 'central' && opt.trustedAgentIds.size > 0) return [];
+    const limit = Math.max(0, maxRelease == null ? Infinity : maxRelease);
+    const rounds = opt.doubleRooms.includes(key) ? ['r1', 'r2'] : ['r1'];
+    const all = [];
+    for (const round of rounds) all.push(...state[key][round]);
+    if (!all.length) return [];
+    const minKeep = rounds.length > 1 ? 2 : 1;
+    const keepCount = Math.max(minKeep, all.length - limit);
+    // 保留本舱贡献最高的干员；低优先级产物/低贡献先释放。
+    all.sort((a, b) => underfillContribution(b, key, opt) - underfillContribution(a, key, opt));
+    const keep = all.slice(0, Math.min(all.length, keepCount));
+    const released = all.slice(keep.length);
+    if (rounds.length > 1) {
+      state[key].r1 = keep.length ? [keep[0]] : [];
+      state[key].r2 = keep.length > 1 ? [keep[1]] : [];
+      // 若还有保留名额，后续补回 A 班，保证不会因为分轮丢人。
+      for (let i = 2; i < keep.length; i++) state[key].r1.push(keep[i]);
+    } else {
+      state[key].r1 = keep.length ? [keep[0]] : [];
+      state[key].r2 = [];
+    }
+    return released;
+  }
+
+  function moverTargetScore(s, key, opt) {
+    if (!s || !s.score) return -Infinity;
+    if (key === 'meeting') return meetingRankOf(s, opt, 'r2');
+    if (key === 'culture') return s.score.culture || 0;
+    if (key === 'manufactA' || key === 'manufactB') return s.score[fieldFor(key, opt)] || 0;
+    if (key === 'central') return s.score.central || 0;
+    return 0;
+  }
+
+  function placeReleased(state, released, opt) {
+    if (!released.length) return;
+    // 总控特殊询问：只执行一次。非总控允许不满舱时，若总控双轮且人数≤3，
+    // 先向总控转移 1 人。总控按会客室规则取最低分，优先收容排除线索干员。
+    if (opt.underfillRoom !== 'central' && !opt.centralDisabled &&
+        opt.roomModes.central !== 'empty' && opt.doubleRooms.includes('central') &&
+        state.central.r1.length + state.central.r2.length <= 3) {
+      const target = state.central.r1.length < CAP ? state.central.r1 : state.central.r2;
+      if (target.length < CAP) {
+        let lowIdx = 0;
+        for (let i = 1; i < released.length; i++) {
+          if (moverTargetScore(released[i], 'meeting', opt) < moverTargetScore(released[lowIdx], 'meeting', opt)) lowIdx = i;
+        }
+        target.push(released.splice(lowIdx, 1)[0]);
+      }
+    }
+    const targets = productionOrder(opt, 1);
+    for (const key of targets) {
+      if (key === opt.underfillRoom || opt.roomModes[key] === 'empty') continue;
+      const rounds = opt.doubleRooms.includes(key) ? ['r1', 'r2'] : ['r1'];
+      for (const round of rounds) {
+        const arr = state[key][round];
+        while (arr.length < CAP && released.length) {
+          // 每到一个目标舱，按该舱二轮权重重新排序，高分先移动。
+          released.sort((a, b) => moverTargetScore(b, key, opt) - moverTargetScore(a, key, opt));
+          const s = released[0];
+          if (key === 'meeting' && moverTargetScore(s, key, opt) <= 0) break;
+          arr.push(released.shift());
+        }
+      }
+    }
+  }
+
+  function fitValueFor(s, key, opt) {
+    if (!s || !s.score) return 0;
+    if (key === 'meeting') return Math.max(0, meetingRankOf(s, opt, 'r2'));
+    if (key === 'culture') return s.score.culture || 0;
+    if (key === 'manufactA' || key === 'manufactB') return s.score[fieldFor(key, opt)] || 0;
+    return 0;
+  }
+
   function evaluateState(state, opt, contrib) {
     const r = restRates(state);
     let total = 0;
@@ -738,6 +1477,7 @@
         const arrA = arrOf(state, a);
         for (let j = i + 1; j < slots.length; j++) {
           const b = slots[j];
+          if (a.key !== b.key) continue; // 选人阶段已决定舱室归属，微调只做同舱 A/B 交换。
           if (a.key === b.key && a.round === b.round) continue;
           const arrB = arrOf(state, b);
           const oa = arrA[a.idx], ob = arrB[b.idx];
@@ -753,7 +1493,8 @@
 
       // 7.2 与未排班干员替换
       const used = inState();
-      const free = scores.filter(s => !used.has(opIdOf(s)));
+      // 选人阶段已确定舱室归属；微调不再用自由池替换，避免把会客室线索干员换到总控。
+      const free = [];
       for (const slot of slots) {
         const arr = arrOf(state, slot);
         const old = arr[slot.idx];
@@ -777,6 +1518,7 @@
         const op = arr[slot.idx];
         if (!op) continue;
         for (const key of ROOM_KEYS) {
+          if (key !== slot.key) continue; // 禁止全局微调跨舱搬人。
           if (opt.roomModes[key] === 'empty') continue;
           if (key === 'central' && opt.centralDisabled) continue;
           if (trust.has(opIdOf(op)) && key !== 'central') continue;
@@ -812,6 +1554,332 @@
   // ------------------------------------------------------------
   // 8. 时间参数（总控恢复量真实耦合）
   // ------------------------------------------------------------
+  function optimizeRoundPartitions(state, opt, contrib) {
+    if (!opt.doubleRooms.length) return;
+    const rates = restRates(state);
+    for (const key of ['manufactA', 'manufactB', 'culture', 'meeting']) {
+      if (!opt.doubleRooms.includes(key) || opt.roomModes[key] === 'empty') continue;
+      const all = [...state[key].r1, ...state[key].r2];
+      if (all.length < 2) continue;
+      let best = null;
+      const n = all.length;
+      for (let mask = 1; mask < (1 << n) - 1; mask++) {
+        const A = [], B = [];
+        for (let i = 0; i < n; i++) ((mask >> i) & 1 ? A : B).push(all[i]);
+        if (!A.length || !B.length || A.length > CAP || B.length > CAP) continue;
+        let value;
+        if (key === 'culture') {
+          value = cultureOutput(A, B, opt, contrib, rates.high, rates.low);
+        } else {
+          value = pairOutput(
+            groupStats(A, key, opt, contrib),
+            groupStats(B, key, opt, contrib),
+            rates.high, rates.low
+          );
+        }
+        if (key === 'meeting') {
+          // 会客室线索概率占小幅权重，避免纯时长交换丢掉线索干员。
+          for (const arr of [A, B]) for (const s of arr) value += (s.score.clue || 0) * 0.01;
+        }
+        if (!best || value > best.value) best = { A, B, value };
+      }
+      if (best) {
+        state[key].r1 = best.A;
+        state[key].r2 = best.B;
+      }
+    }
+  }
+
+
+  function roomObjective(state, key, opt, contrib) {
+    const rates = restRates(state);
+    const A = state[key].r1, B = state[key].r2;
+    if (!opt.doubleRooms.includes(key) || !A.length || !B.length) {
+      return singleOutput(A.length ? A : B, key, opt, contrib);
+    }
+    let value = key === 'culture'
+      ? cultureOutput(A, B, opt, contrib, rates.high, rates.low)
+      : pairOutput(groupStats(A, key, opt, contrib), groupStats(B, key, opt, contrib), rates.high, rates.low);
+    if (key === 'meeting') {
+      for (const arr of [A, B]) for (const s of arr) value += (s.score.clue || 0) * 0.01;
+    }
+    return value;
+  }
+
+  function optimizeUnassignedReplacements(state, opt, contrib, scores) {
+    const used = new Set();
+    for (const key of ROOM_KEYS) {
+      for (const round of ['r1', 'r2']) {
+        if (round === 'r2' && !opt.doubleRooms.includes(key)) continue;
+        for (const s of state[key][round]) used.add(opIdOf(s));
+      }
+    }
+    const free = scores.filter(s => !used.has(opIdOf(s)) && !opt.trustedAgentIds.has(opIdOf(s)));
+    if (!free.length) return;
+    for (let pass = 0; pass < 8; pass++) {
+      let best = null;
+      for (const key of ['manufactA', 'manufactB', 'culture', 'meeting']) {
+        if (opt.roomModes[key] === 'empty') continue;
+        const rounds = opt.doubleRooms.includes(key) ? ['r1', 'r2'] : ['r1'];
+        const before = roomObjective(state, key, opt, contrib);
+        for (const round of rounds) {
+          const arr = state[key][round];
+          for (let i = 0; i < arr.length; i++) {
+            if (opt.trustedAgentIds.has(opIdOf(arr[i]))) continue;
+            const old = arr[i];
+            for (const cand of free) {
+              if (used.has(opIdOf(cand))) continue;
+              if (key !== 'central' && fitValueFor(cand, key, opt) <= 0) continue;
+              arr[i] = cand;
+              const value = roomObjective(state, key, opt, contrib);
+              arr[i] = old;
+              if (value > (best?.value ?? before) + 1e-6) {
+                best = { key, round, i, old, cand, value };
+              }
+            }
+          }
+        }
+      }
+      if (!best) break;
+      const arr = state[best.key][best.round];
+      const idx = arr.indexOf(best.old);
+      if (idx < 0) break;
+      arr[idx] = best.cand;
+      used.delete(opIdOf(best.old));
+      used.add(opIdOf(best.cand));
+    }
+  }
+
+  function optimizeProductionSwaps(state, opt, contrib) {
+    const prodSlots = [];
+    for (const key of ['manufactA', 'manufactB']) {
+      if (opt.roomModes[key] === 'empty') continue;
+      state[key].r1.forEach((op, idx) => prodSlots.push({ key, round: 'r1', idx }));
+      if (opt.doubleRooms.includes(key)) {
+        state[key].r2.forEach((op, idx) => prodSlots.push({ key, round: 'r2', idx }));
+      }
+    }
+    let base = evaluateState(state, opt, contrib).total;
+    let iter = 0;
+    while (iter++ < 6) {
+      let best = null;
+      let bestValue = base + 1e-6;
+      for (let i = 0; i < prodSlots.length; i++) {
+        for (let j = i + 1; j < prodSlots.length; j++) {
+          const sa = prodSlots[i], sb = prodSlots[j];
+          if (sa.key === sb.key && sa.round === sb.round) continue;
+          const aa = state[sa.key][sa.round], ab = state[sb.key][sb.round];
+          const oa = aa[sa.idx], ob = ab[sb.idx];
+          if (!oa || !ob) continue;
+          aa[sa.idx] = ob; ab[sb.idx] = oa;
+          const v = evaluateState(state, opt, contrib).total;
+          aa[sa.idx] = oa; ab[sb.idx] = ob;
+          if (v > bestValue) { bestValue = v; best = { sa, sb, oa, ob }; }
+        }
+      }
+      if (!best) break;
+      const aa = state[best.sa.key][best.sa.round], ab = state[best.sb.key][best.sb.round];
+      aa[best.sa.idx] = best.ob; ab[best.sb.idx] = best.oa;
+      base = bestValue;
+    }
+  }
+
+  function hasAnyBenefit(s) {
+    if (!s || !s.score) return false;
+    return (s.score.central || 0) > 0 ||
+      (s.score.expScore || 0) > 0 ||
+      (s.score.weaponScore || 0) > 0 ||
+      (s.score.culture || 0) > 0 ||
+      (s.score.meeting || 0) > 0;
+  }
+
+  function hasExcludedClueOnly(s, opt) {
+    let hasClue = false, hasUsableClue = false;
+    for (const t of s.mergedTraits || []) {
+      if (t.舱室 !== '会客室' || !isCluePower(t.类型)) continue;
+      hasClue = true;
+      const n = parseInt(t.线索编号, 10);
+      if (opt.missingClues.has(n) || !opt.excludedClues.has(n)) hasUsableClue = true;
+    }
+    if (!hasClue || hasUsableClue) return false;
+    return !(hasAnyBenefit(s) && (s.score.meeting || 0) > 0);
+  }
+
+  function fillRemainingSlots(state, opt, scores) {
+    const used = new Set();
+    for (const key of ROOM_KEYS) {
+      for (const round of ['r1', 'r2']) {
+        if (round === 'r2' && !opt.doubleRooms.includes(key)) continue;
+        for (const s of state[key][round]) used.add(opIdOf(s));
+      }
+    }
+    let free = scores.filter(s => !used.has(opIdOf(s)) && !opt.trustedAgentIds.has(opIdOf(s)));
+    if (!free.length) return;
+
+    const ordered = productionOrder(opt, 1).slice();
+    if (opt.underfillRoom && ordered.includes(opt.underfillRoom)) {
+      ordered.splice(ordered.indexOf(opt.underfillRoom), 1);
+      ordered.push(opt.underfillRoom);
+    }
+    if (!opt.centralDisabled && opt.roomModes.central !== 'empty') ordered.push('central');
+
+    for (const key of ordered) {
+      if (key === 'central' && opt.centralDisabled) continue;
+      const rounds = key === 'central'
+        ? ['r2', 'r1']
+        : (opt.doubleRooms.includes(key) ? ['r1', 'r2'] : ['r1']);
+      for (const round of rounds) {
+        const arr = state[key][round];
+        while (arr.length < CAP) {
+          if (!free.length) return;
+          const fit = free.filter(s => fitValueFor(s, key, opt) > 0);
+          let pick;
+          if (fit.length) {
+            fit.sort((a, b) => fitValueFor(b, key, opt) - fitValueFor(a, key, opt) || productionValue(a, opt) - productionValue(b, opt));
+            pick = fit[0];
+          } else {
+            // 无增益干员最后补位；会客室不优先塞入被排除线索的干员。
+            let pool = key === 'meeting'
+              ? free.filter(s => !hasAnyBenefit(s))
+              : free;
+            if (key === 'central') {
+              // 总控溢出位只接收“任何舱室都没有增益”的干员，避免抢走有培养/生产天赋的人。
+              pool = free.filter(s => !hasAnyBenefit(s));
+            }
+            const fallback = pool.length ? pool : (key === 'central' ? [] : free);
+            if (!fallback.length) break;
+            fallback.sort((a, b) =>
+              (hasAnyBenefit(a) ? 1 : 0) - (hasAnyBenefit(b) ? 1 : 0) ||
+              (hasExcludedClueOnly(a, opt) ? 1 : 0) - (hasExcludedClueOnly(b, opt) ? 1 : 0) ||
+              productionValue(a, opt) - productionValue(b, opt)
+            );
+            pick = fallback[0];
+          }
+          if (!pick) break;
+          arr.push(pick);
+          free = free.filter(s => s !== pick);
+        }
+      }
+    }
+  }
+
+  function optimizeMeetingByRank(state, opt, scores) {
+    const used = new Set();
+    for (const key of ROOM_KEYS) for (const round of ['r1', 'r2']) {
+      if (round === 'r2' && !opt.doubleRooms.includes(key)) continue;
+      for (const s of state[key][round]) used.add(opIdOf(s));
+    }
+    let free = scores.filter(s => !used.has(opIdOf(s)) && !opt.trustedAgentIds.has(opIdOf(s)));
+    for (const round of ['r1', 'r2']) {
+      if (round === 'r2' && !opt.doubleRooms.includes('meeting')) continue;
+      const arr = state.meeting[round];
+      for (let i = 0; i < arr.length; i++) {
+        const current = arr[i];
+        if (opt.trustedAgentIds.has(opIdOf(current))) continue;
+        let best = null;
+        for (const cand of free) {
+          if (meetingRankOf(cand, opt, round) <= meetingRankOf(current, opt, round) + 1e-6) continue;
+          if (!best || meetingRankOf(cand, opt, round) > meetingRankOf(best, opt, round)) best = cand;
+        }
+        if (!best) continue;
+        arr[i] = best;
+        free = free.filter(s => s !== best);
+        used.delete(opIdOf(current));
+        used.add(opIdOf(best));
+        free.push(current);
+      }
+    }
+  }
+
+  function optimizeCentralPartition(state, opt) {
+    if (opt.centralDisabled || opt.roomModes.central === 'empty' || !opt.doubleRooms.includes('central')) return;
+    const all = [...state.central.r1, ...state.central.r2];
+    if (all.length < 2) return;
+    // B 班放恢复最高的 1-3 人，A 班至少留 1 人。
+    all.sort((a, b) => centralRestoreOf([b]) - centralRestoreOf([a]));
+    const bCount = Math.min(CAP, all.length - 1);
+    const b = all.slice(0, bCount);
+    const a = all.slice(bCount);
+    state.central.r2 = b;
+    state.central.r1 = a;
+  }
+
+  function enforceTrustedCentral(state, opt, scores) {
+    if (opt.centralDisabled || opt.trustedAgentIds.size === 0) return;
+    const inCentral = new Set([...state.central.r1, ...state.central.r2].map(opIdOf));
+    for (const s of scores) {
+      const id = opIdOf(s);
+      if (!opt.trustedAgentIds.has(id) || inCentral.has(id)) continue;
+      let placed = false;
+      for (const key of ROOM_KEYS) {
+        if (key === 'central') continue;
+        for (const round of ['r1', 'r2']) {
+          const arr = state[key][round];
+          const at = arr.findIndex(x => opIdOf(x) === id);
+          if (at >= 0) { arr.splice(at, 1); }
+        }
+      }
+      for (const round of ['r2', 'r1']) {
+        if (state.central[round].length < CAP) {
+          state.central[round].push(s);
+          inCentral.add(id);
+          placed = true;
+          break;
+        }
+      }
+      if (!placed) {
+        const target = state.central.r2.length ? state.central.r2 : state.central.r1;
+        const weak = target.find(x => !opt.trustedAgentIds.has(opIdOf(x)));
+        if (weak) target[target.indexOf(weak)] = s;
+      }
+    }
+  }
+
+  function fillPriorityRooms(state, opt) {
+    if (!opt.priorityFillEnabled) return;
+    const order = productionOrder(opt, 1);
+    for (const key of order) {
+      if (key === opt.underfillRoom || opt.roomModes[key] === 'empty') continue;
+      const rounds = opt.doubleRooms.includes(key) ? ['r1', 'r2'] : ['r1'];
+      for (const round of rounds) {
+        const target = state[key][round];
+        while (target.length < CAP) {
+          const candidates = [];
+          for (let si = order.indexOf(key) + 1; si < order.length; si++) {
+            const sourceKey = order[si];
+            if (sourceKey === opt.underfillRoom || opt.roomModes[sourceKey] === 'empty') continue;
+            const sourceRounds = opt.doubleRooms.includes(sourceKey) ? ['r1', 'r2'] : ['r1'];
+            for (const sr of sourceRounds) {
+              const arr = state[sourceKey][sr];
+              if (arr.length <= 1) continue;
+              for (const s of arr) {
+                const ts = moverTargetScore(s, key, opt);
+                if (key === 'meeting' && ts < 0) continue;
+                candidates.push({ arr, s, targetScore: ts, loss: underfillContribution(s, sourceKey, opt) });
+              }
+            }
+          }
+          if (!candidates.length) break;
+          candidates.sort((a, b) => b.targetScore - a.targetScore || a.loss - b.loss);
+          const pick = candidates[0];
+          pick.arr.splice(pick.arr.indexOf(pick.s), 1);
+          target.push(pick.s);
+        }
+      }
+    }
+  }
+
+  function sortHighEfficiencyToA(state, opt, contrib) {
+    for (const key of ['manufactA', 'manufactB', 'culture', 'meeting']) {
+      if (!opt.doubleRooms.includes(key) || opt.roomModes[key] === 'empty') continue;
+      const A = state[key].r1, B = state[key].r2;
+      if (!A.length || !B.length) continue;
+      const a = groupStats(A, key, opt, contrib).rate;
+      const b = groupStats(B, key, opt, contrib).rate;
+      if (a < b) { state[key].r1 = B; state[key].r2 = A; }
+    }
+  }
+
   function sortRoundsByEfficiency(state, opt, contrib) {
     for (const key of ['manufactA', 'manufactB', 'meeting']) {
       if (!opt.doubleRooms.includes(key)) continue;
@@ -880,18 +1948,30 @@
     const map = {};
     for (const key of ROOM_KEYS) {
       if (opt.roomModes[key] === 'empty') { map[key] = []; continue; }
-      const field = fieldFor(key, opt.mode);
-      let cand = reservePool.filter(s => (s.score[field] || 0) > 0);
-      cand.sort((a, b) => (b.score[field] || 0) - (a.score[field] || 0));
+      const field = fieldFor(key, opt);
+      const manufMood = s => {
+        let n = 0;
+        for (const t of s.mergedTraits || []) {
+          if (t.舱室 === '制造舱' && t.类型 === '心情消耗减少') n += t.数值 || 0;
+        }
+        return n;
+      };
+      let cand;
       if (key === 'meeting') {
-        cand = cand.filter(s => {
-          let hasOther = false;
-          for (const t of s.mergedTraits || []) {
-            if (t.舱室 === '会客室' && (t.类型 === '收集线索效率' || t.类型 === '心情消耗减少')) { hasOther = true; break; }
-          }
-          if (!hasOther && (s.mergedTraits || []).some(t => t.舱室 === '会客室' && isCluePower(t.类型))) return false;
-          return true;
+        // 会客室储备：收集线索效率、会客室心情、有效线索概率都纳入。
+        cand = reservePool.filter(s => (s.score.meeting || 0) > 0 || hasMeetingCore(s, opt));
+        cand.sort((a, b) => meetingRankOf(b, opt, 'r2') - meetingRankOf(a, opt, 'r2'));
+      } else {
+        cand = reservePool.filter(s => (s.score[field] || 0) > 0 ||
+          ((key === 'manufactA' || key === 'manufactB') && manufMood(s) > 0));
+        cand.sort((a, b) => {
+          const av = (a.score[field] || 0) * 100 + manufMood(a);
+          const bv = (b.score[field] || 0) * 100 + manufMood(b);
+          return bv - av;
         });
+      }
+      if (key === 'meeting') {
+        cand = cand.filter(s => !hasExcludedClueOnly(s, opt));
       }
       map[key] = cand.slice(0, 5);
     }
@@ -920,6 +2000,9 @@
     const contrib = buildContribMap(scores, opt);
     assignProduction(state, scores, opt);
     const centralInfo = assignCentral(state, scores, opt);
+    const search = localSearch(state, scores, opt, contrib);
+    normalizeRounds(state, opt);
+    sortRoundsByEfficiency(state, opt, contrib);
 
     if (opt.centralDisabled && opt.trustedAgentIds.size > 0) {
       warnings.push('总控中枢为空置，信赖干员没有可排入的舱室；请启用总控或取消信赖选择。');
@@ -928,12 +2011,82 @@
       warnings.push(`总控容量不足，${centralInfo.unassignedTrust.length} 名信赖干员未能排入总控。`);
     }
 
-    const search = localSearch(state, scores, opt, contrib);
-    normalizeRounds(state, opt);
-    sortRoundsByEfficiency(state, opt, contrib);
-
-    // 双班总控至少每班 1 人；不足时按“可接受不满员”舱室借人
+    // 总控 A 班先维持高恢复组，最终再反向放置为 B 高恢复组。
+    improveCentralA(state, opt, scores, contrib);
+    // 双轮舱室至少每班 1 人。
+    enforceDoubleMinimums(state, opt, warnings, contrib);
+    // 优先满舱关闭时，不处理允许不满舱。
+    if (opt.priorityFillEnabled) {
+      // 其它舱室没有空位时不释放任何干员。
+      const openOutside = openSlotsOutside(state, opt, opt.underfillRoom);
+      const releasedByUnderfill = openOutside > 0
+        ? releaseUnderfillExtras(state, opt, openOutside)
+        : [];
+      if (releasedByUnderfill.length) placeReleased(state, releasedByUnderfill, opt);
+    }
+    // 优先满舱的补位只由“允许不满舱”释放驱动，不再额外从其它舱室迁移。
+    // if (opt.priorityFillEnabled) enforcePriorityFill(state, opt, warnings, contrib);
+    // 双班总控至少每班 1 人。
     enforceCentralMinimum(state, opt, warnings, contrib);
+    enforceCentralUnderfill(state, opt);
+    // 会客室优先由材料优先级/优先满舱处理，不再单独强制拉人。
+    if (opt.meetingPriorityEnabled) enforceMeetingFill(state, opt, warnings, contrib);
+    if (!opt.centralDisabled && opt.roomModes.central !== 'empty' && opt.doubleRooms.includes('central')) {
+      swapCentralRounds(state);
+    }
+    swapCentralClueWithMeeting(state, opt);
+    fillMeetingFromCentral(state, opt);
+    sortRoundsByEfficiency(state, opt, contrib);
+    optimizeRoundPartitions(state, opt, contrib);
+    optimizeUnassignedReplacements(state, opt, contrib, scores);
+    optimizeRoundPartitions(state, opt, contrib);
+    // 6 人满舱 / 制造同产物 12 人跨舱交换，使用真实 24h 目标。
+    optimizeProductionSwaps(state, opt, contrib);
+    optimizeRoundPartitions(state, opt, contrib);
+    fillRemainingSlots(state, opt, scores);
+    fillPriorityRooms(state, opt);
+    optimizeRoundPartitions(state, opt, contrib);
+    sortHighEfficiencyToA(state, opt, contrib);
+    if (!opt.centralDisabled && opt.roomModes.central !== 'empty' && opt.doubleRooms.includes('central')) {
+      if (centralRestoreOf(state.central.r2) < centralRestoreOf(state.central.r1)) {
+        swapCentralRounds(state);
+      }
+    }
+
+    // 总控最后一次效率调整：B 班放高恢复组，A 班保留至少 1 人。
+    optimizeCentralPartition(state, opt);
+    enforceTrustedCentral(state, opt, scores);
+    // 防御性去重：任何后置优化都不允许同一干员占用多个槽位。
+    const seenAssigned = new Set();
+    for (const key of ROOM_KEYS) {
+      for (const round of ['r1', 'r2']) {
+        if (round === 'r2' && !opt.doubleRooms.includes(key)) continue;
+        state[key][round] = state[key][round].filter(s => {
+          const id = opIdOf(s);
+          if (seenAssigned.has(id)) return false;
+          seenAssigned.add(id);
+          return true;
+        });
+      }
+    }
+    // 所有后置修正结束后，最终再保证总控 B 为高恢复组。
+    if (!opt.centralDisabled && opt.roomModes.central !== 'empty' && opt.doubleRooms.includes('central')) {
+      if (state.central.r1.length === 0 && state.central.r2.length > 0) state.central.r1.push(state.central.r2.pop());
+      if (state.central.r2.length === 0 && state.central.r1.length > 1) state.central.r2.push(state.central.r1.pop());
+      if (centralRestoreOf(state.central.r2) < centralRestoreOf(state.central.r1)) {
+        swapCentralRounds(state);
+      }
+    }
+
+    // 二轮保底之后再做一次效率微调；补位/保底不能成为最终低效结果。
+    optimizeProductionSwaps(state, opt, contrib);
+    optimizeRoundPartitions(state, opt, contrib);
+    sortHighEfficiencyToA(state, opt, contrib);
+    if (!opt.centralDisabled && opt.roomModes.central !== 'empty' && opt.doubleRooms.includes('central')) {
+      if (centralRestoreOf(state.central.r2) < centralRestoreOf(state.central.r1)) {
+        swapCentralRounds(state);
+      }
+    }
 
     // 局部搜索可能再次调整总控人员，未排入的信赖干员必须以最终状态为准
     const finalTrustAssigned = new Set([

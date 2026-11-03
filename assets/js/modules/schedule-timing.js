@@ -798,6 +798,7 @@
             h.addEventListener('input', () => { 
                 h.dataset.touched = '1'; 
                 sessionStorage.setItem('DijiangTimingStartHour', h.value); 
+                window.dispatchEvent(new CustomEvent('dijiang:config-changed'));
                 run(); 
             });
         }
@@ -805,7 +806,27 @@
             m.addEventListener('input', () => { 
                 m.dataset.touched = '1'; 
                 sessionStorage.setItem('DijiangTimingStartMinute', m.value); 
+                window.dispatchEvent(new CustomEvent('dijiang:config-changed'));
                 run(); 
+            });
+        }
+
+        const nowBtn = document.getElementById('timingNowBtn');
+        if (nowBtn) {
+            nowBtn.addEventListener('click', () => {
+                const t = new Date();
+                if (h) {
+                    h.dataset.touched = '1';
+                    h.value = String(t.getHours()).padStart(2, '0');
+                    sessionStorage.setItem('DijiangTimingStartHour', h.value);
+                }
+                if (m) {
+                    m.dataset.touched = '1';
+                    m.value = String(t.getMinutes()).padStart(2, '0');
+                    sessionStorage.setItem('DijiangTimingStartMinute', m.value);
+                }
+                window.dispatchEvent(new CustomEvent('dijiang:config-changed'));
+                run();
             });
         }
     }

@@ -2,3 +2,13 @@
 node_modules/
 .DS_Store
 *.log
+
+# local runtime data and backups
+account-server/userdata/*.db
+account-server/userdata/*.db-*
+account-server/userdata/*.db.bak*
+account-server/venv/
+account-server/__pycache__/
+**/__pycache__/
+*.pyc
+*.bak.*
