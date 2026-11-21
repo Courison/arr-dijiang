@@ -345,6 +345,8 @@
         const g2 = isDouble ? calcGroupRate(roomKey, 'round2', productMeta) : null;
 
         const rateOf = g => (1 + g.eff / 100) * (1 + 0.4 * g.N);
+        const activeRates = [g1, g2].filter(g => g && g.N > 0).map(rateOf);
+        const percentText = activeRates.length ? `${((activeRates.reduce((a, b) => a + b, 0) / activeRates.length) * 100).toFixed(2)}%` : '—';
         const cWorkOf = g => C_WORK_BASE * Math.max(0.1, 1 - g.reduce / 100);
         const pctOf = (hA, hB) => {
             let weighted = 0;
