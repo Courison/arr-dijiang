@@ -1,0 +1,15 @@
+{
+  "name": "dijiang-v2-local",
+  "version": "2.0.0-local.1",
+  "private": true,
+  "description": "帝江号排班系统 · 方案 A 初版可访问页（原生多页 + 共享 v2 外壳/算法）",
+  "type": "module",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
+    "check": "node tools/check.mjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <title>帝江号 · 管理员后台</title>
+  <link rel="stylesheet" href="/admin/admin.css?v=202611010016">
+</head>
+<body>
+  <div id="loginView" class="login-wrap">
+    <form id="loginForm" class="login-card">
+      <div class="brand">帝江号 <span>ADMIN</span></div>
+      <h1>管理员登录</h1>
+      <p class="sub">该入口不对外公开，请使用管理员账号登录。</p>
+      <label>邮箱<input id="loginEmail" type="email" autocomplete="username" required></label>
+      <label>密码<input id="loginPassword" type="password" autocomplete="current-password" required></label>
+      <button type="submit">登录</button>
+      <div id="loginError" class="error"></div>
+    </form>
+  </div>
+
+  <div id="appView" class="app" hidden>
+    <header class="topbar">
+      <div class="brand">帝江号 <span>ADMIN</span></div>
+      <div class="top-actions">
+        <span id="who"></span>
+        <button id="logoutBtn" class="ghost">退出</button>
+      </div>
+    </header>
+
+    <main>
+      <section id="stats" class="stats"></section>
+
+      <section class="panel">
+        <div class="panel-head">
+          <h2>用户情况</h2>
+          <div class="tools">
+            <input id="searchInput" type="search" placeholder="搜索邮箱或昵称">
+            <button id="searchBtn">搜索</button>
+          </div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr>
+              <th>ID</th><th>邮箱</th><th>昵称</th><th>注册时间</th><th>最后登录</th>
+              <th>配置</th><th>配置更新时间</th><th>管理员</th>
+            </tr></thead>
+            <tbody id="usersBody"></tbody>
+          </table>
+        </div>
+        <div class="pager">
+          <button id="prevBtn" class="ghost">上一页</button>
+          <span id="pageInfo"></span>
+          <button id="nextBtn" class="ghost">下一页</button>
+        </div>
+      </section>
+
+      <section id="adminPanel" class="panel" hidden>
+        <div class="panel-head">
+          <h2>管理员账号</h2>
+        </div>
+        <div class="admin-add">
+          <input id="newAdminEmail" type="email" placeholder="输入已注册主站账号的邮箱">
+          <button id="addAdminBtn">添加管理员</button>
+        </div>
+        <div id="adminError" class="error"></div>
+        <ul id="adminList" class="admin-list"></ul>
+      </section>
+    </main>
+  </div>
+
+  <script src="/admin/admin.js?v=202611010016"></script>
+</body>
+</html>

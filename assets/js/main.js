@@ -12,6 +12,31 @@
         const tmBtn = document.getElementById('openTimingPanelBtn');
         const opClose = document.getElementById('operatorPanelCloseBtn');
         const stClose = document.getElementById('strategyPanelCloseBtn');
+        const exportStrategyBtn = document.getElementById('exportStrategyBtn');
+        if (exportStrategyBtn) {
+            exportStrategyBtn.addEventListener('click', function() {
+                try {
+                    const cfg = window.DijiangAccount && typeof window.DijiangAccount.getCurrentConfig === 'function'
+                        ? window.DijiangAccount.getCurrentConfig()
+                        : {};
+                    const text = JSON.stringify(cfg, null, 2);
+                    const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    const d = new Date();
+                    const stamp = `${d.getFullYear()}${String(d.getMonth()+1).padStart(2,'0')}${String(d.getDate()).padStart(2,'0')}`;
+                    a.href = url;
+                    a.download = `帝江号_生产策略_${stamp}.json`;
+                    document.body.appendChild(a);
+                    a.click();
+                    a.remove();
+                    setTimeout(() => URL.revokeObjectURL(url), 1000);
+                } catch (err) {
+                    console.error('[帝江号] 导出策略失败', err);
+                    alert('导出策略失败，请打开控制台查看错误。');
+                }
+            });
+        }
         const tmClose = document.getElementById('timingPanelCloseBtn');
 
         function openModal(m) { if (m) m.classList.add('open'); }
@@ -94,14 +119,20 @@
     let trustedAgentIds = [];
     let trustAssignMap = {}; // 已废弃：信赖干员轮次由核心按天赋评分自动分配
     let meetingPriorityEnabled = false;
+    let priorityFillEnabled = false;
     let missingClues = new Set();
     let excludedClues = new Set([3, 7]);
+    let underfillRoom = 'central';
     const ALL_ROOMS = ['central', 'manufactA', 'manufactB', 'culture', 'meeting'];
     
-    const DEFAULT_PRIORITY_ORDER_ROUND1 = ['meeting', 'central', 'manufactA', 'manufactB', 'culture'];
-    const DEFAULT_PRIORITY_ORDER_ROUND2 = ['meeting', 'manufactA', 'manufactB', 'culture', 'central'];
+    const DEFAULT_PRIORITY_ORDER_ROUND1 = ['meeting', 'central', 'manufactB', 'manufactA', 'culture'];
+    const DEFAULT_PRIORITY_ORDER_ROUND2 = ['meeting', 'manufactB', 'manufactA', 'culture', 'central'];
     let roomPriorityOrderRound1 = DEFAULT_PRIORITY_ORDER_ROUND1.slice();
     let roomPriorityOrderRound2 = DEFAULT_PRIORITY_ORDER_ROUND2.slice();
+
+    const DEFAULT_MATERIAL_PRIORITY = ['clue', 'weapon', 'exp', 'culture'];
+    const MATERIAL_LABELS = { clue: '线索', weapon: '武器经验', exp: '干员经验', culture: '培养物' };
+    let materialPriority = DEFAULT_MATERIAL_PRIORITY.slice();
 
     let roomModes = { central: 'double', manufactA: 'double', manufactB: 'double', culture: 'double', meeting: 'double' };
     let doubleRoundRooms = ALL_ROOMS.filter(k => roomModes[k] === 'double');
@@ -116,9 +147,20 @@
     
     function getRoomPriorityOrder(round) {
         const key = round === 1 ? 'DijiangRoomPriorityOrderRound1' : 'DijiangRoomPriorityOrderRound2';
+        const oldDefault = round === 1
+            ? ['meeting', 'central', 'manufactA', 'manufactB', 'culture']
+            : ['meeting', 'manufactA', 'manufactB', 'culture', 'central'];
+        const newDefault = round === 1 ? DEFAULT_PRIORITY_ORDER_ROUND1 : DEFAULT_PRIORITY_ORDER_ROUND2;
         try {
             const raw = sessionStorage.getItem(key);
-            if (raw) { const arr = JSON.parse(raw); if (Array.isArray(arr) && arr.length === ALL_ROOMS.length) return arr; }
+            if (raw) {
+                const arr = JSON.parse(raw);
+                if (Array.isArray(arr) && arr.length === ALL_ROOMS.length) {
+                    // 旧默认值自动迁移到素材优先级（武器 > 干员经验 > 培养舱）
+                    if (JSON.stringify(arr) === JSON.stringify(oldDefault)) return newDefault.slice();
+                    return arr;
+                }
+            }
         } catch(e) {}
         return round === 1 ? roomPriorityOrderRound1.slice() : roomPriorityOrderRound2.slice();
     }
@@ -126,6 +168,30 @@
         const key = round === 1 ? 'DijiangRoomPriorityOrderRound1' : 'DijiangRoomPriorityOrderRound2';
         sessionStorage.setItem(key, JSON.stringify(order));
         if (round === 1) roomPriorityOrderRound1 = order; else roomPriorityOrderRound2 = order;
+        notifyConfigChanged();
+        generateSchedule();
+    }
+
+    function getMaterialPriority() {
+        try {
+            const raw = sessionStorage.getItem('DijiangMaterialPriority');
+            if (raw) {
+                const arr = JSON.parse(raw);
+                if (Array.isArray(arr) && arr.length) {
+                    const clean = arr.filter(k => Object.prototype.hasOwnProperty.call(MATERIAL_LABELS, k));
+                    for (const k of DEFAULT_MATERIAL_PRIORITY) if (!clean.includes(k)) clean.push(k);
+                    return clean.slice(0, 4);
+                }
+            }
+        } catch (e) {}
+        return DEFAULT_MATERIAL_PRIORITY.slice();
+    }
+
+    function saveMaterialPriority(order) {
+        materialPriority = order.slice();
+        sessionStorage.setItem('DijiangMaterialPriority', JSON.stringify(materialPriority));
+        notifyConfigChanged();
+        renderMaterialPriorityUI();
         generateSchedule();
     }
 
@@ -136,6 +202,40 @@
         const e = expCheck.checked, w = weaponCheck.checked;
         if (e === w) return 'dual';
         return e ? 'exp' : 'weapon';
+    }
+    function getManufactProducts() {
+        const expCheck = document.querySelector('#manufactProducts input[value="exp"]');
+        const weaponCheck = document.querySelector('#manufactProducts input[value="weapon"]');
+        if (!expCheck || !weaponCheck) return { manufactA: 'exp', manufactB: 'weapon' };
+        const selected = [];
+        if (expCheck.checked) selected.push('exp');
+        if (weaponCheck.checked) selected.push('weapon');
+        if (!selected.length) return { manufactA: null, manufactB: null };
+        if (selected.length === 1) {
+            return { manufactA: selected[0], manufactB: selected[0] };
+        }
+        const rank = m => {
+            const i = materialPriority.indexOf(m);
+            return i < 0 ? 99 : i;
+        };
+        const high = rank('exp') <= rank('weapon') ? 'exp' : 'weapon';
+        const low = high === 'exp' ? 'weapon' : 'exp';
+        const active = ['manufactA', 'manufactB'].filter(k => roomModes[k] !== 'empty');
+        if (active.length === 1) {
+            return active[0] === 'manufactA'
+                ? { manufactA: high, manufactB: null }
+                : { manufactA: null, manufactB: high };
+        }
+        const single = active.find(k => roomModes[k] === 'single');
+        const dbl = active.find(k => roomModes[k] === 'double');
+        if (single && dbl) {
+            return {
+                manufactA: active.includes('manufactA') ? (dbl === 'manufactA' ? high : low) : null,
+                manufactB: active.includes('manufactB') ? (dbl === 'manufactB' ? high : low) : null,
+            };
+        }
+        // 双制造舱均正常开启时，固定 A=干员、B=武器；材料优先级只决定排序，不反转舱室产物。
+        return { manufactA: 'exp', manufactB: 'weapon' };
     }
     function getCultureTypes() {
         try {
@@ -151,6 +251,16 @@
     }
     function getCulturePriority() {
         try {
+            const globalRaw = localStorage.getItem('DijiangCulturePriority');
+            if (globalRaw) {
+                const gp = JSON.parse(globalRaw);
+                if (Array.isArray(gp) && gp.length) {
+                    const checks = getCultureTypes();
+                    const filtered = gp.filter(x => checks.includes(x));
+                    for (const x of DEFAULT_CULTURE_PRIORITY) if (checks.includes(x) && !filtered.includes(x)) filtered.push(x);
+                    if (filtered.length) return filtered;
+                }
+            }
             const raw = sessionStorage.getItem('DijiangManualProduct');
             if (!raw) return DEFAULT_CULTURE_PRIORITY.slice();
             const p = JSON.parse(raw);
@@ -346,6 +456,35 @@
             return dataUrl;
         } catch (e) { avatarBase64Cache[name] = null; return null; }
     }
+    // 导出专用：先裁成正方形，避免 html2canvas 对 object-fit:cover 的裁切出现黑线。
+    const avatarSquareBase64Cache = {};
+    async function loadAvatarAsSquareBase64(name) {
+        if (name in avatarSquareBase64Cache) return avatarSquareBase64Cache[name];
+        const raw = await loadAvatarAsBase64(name);
+        if (!raw) { avatarSquareBase64Cache[name] = null; return null; }
+        try {
+            const img = await new Promise((resolve, reject) => {
+                const el = new Image();
+                el.onload = () => resolve(el);
+                el.onerror = reject;
+                el.src = raw;
+            });
+            const size = 512;
+            const side = Math.min(img.naturalWidth || size, img.naturalHeight || size);
+            const sx = Math.max(0, ((img.naturalWidth || side) - side) / 2);
+            const sy = Math.max(0, ((img.naturalHeight || side) - side) / 2);
+            const canvas = document.createElement('canvas');
+            canvas.width = size; canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(img, sx, sy, side, side, 0, 0, size, size);
+            const out = canvas.toDataURL('image/png');
+            avatarSquareBase64Cache[name] = out;
+            return out;
+        } catch (e) {
+            avatarSquareBase64Cache[name] = raw;
+            return raw;
+        }
+    }
     async function preloadAllAvatars(names, concurrency = 6) {
         const ok = await loadSprite();
         if (ok) return;
@@ -376,16 +515,24 @@
         for (const name of order) {
             const info = rawOperatorsData[name];
             if (info) {
-                operators.push({ id: nextId++, name, star: info.star || '未知', attribute: info.attribute || '未知', eliteLevel: 'none', activatedTalents: emptyTalents(), mergedTraits: [] });
+                operators.push({
+                    id: nextId++, name, charId: info.charId || info.id || name,
+                    engName: info.engName || '', star: info.star || '未知', attribute: info.attribute || '未知',
+                    eliteLevel: 'none', activatedTalents: emptyTalents(), mergedTraits: []
+                });
             }
         }
         updateAllMergedTraits();
         renderOperatorStatus();
     }
+    function notifyConfigChanged() {
+        try { window.dispatchEvent(new CustomEvent('dijiang:config-changed')); } catch (e) {}
+    }
     function saveConfigToSessionStorage() {
         const config = {};
         for (const op of operators) config[op.name] = { elite: op.eliteLevel, talents: TALENT_ORDER.filter(tid => op.activatedTalents[tid]) };
         sessionStorage.setItem(STORAGE_KEY, JSON.stringify(config));
+        notifyConfigChanged();
     }
     function normalizeElite(elite) {
         if (elite === '未拥有' || elite === 'none' || elite == null || elite === '') return 'none';
@@ -443,6 +590,7 @@
             const culturePriority = (all.culture && Array.isArray(all.culture.priority)) ? all.culture.priority.filter(x => cultureTypes.includes(x)) : null;
             all.culture = { products: cultureTypes, priority: (culturePriority && culturePriority.length > 0) ? culturePriority : null };
             sessionStorage.setItem('DijiangManualProduct', JSON.stringify(all));
+            notifyConfigChanged();
         } catch (e) { console.warn('[帝江号] 保存产品配置失败：', e); }
     }
     
@@ -468,6 +616,7 @@
     function syncDoubleRooms() {
         doubleRoundRooms = ALL_ROOMS.filter(k => roomModes[k] === 'double');
         sessionStorage.setItem('DijiangRoomModes', JSON.stringify(roomModes));
+        notifyConfigChanged();
     }
 
     function collectClueNumbers() {
@@ -507,22 +656,143 @@
     }
 
     // ========== 核心触发点 ==========
-    function generateSchedule() {
-        window.__DIJIANG_ROOM_TIMING__ = {};
-        updateClueAvailability();
-        
-        const options = {
-            mode: getManufactMode(), doubleRooms: doubleRoundRooms, roomModes: roomModes,
+    function syncCluesFromUI() {
+        const exWrap = document.getElementById('excludedCluesButtons');
+        if (exWrap && exWrap.querySelectorAll('.clue-btn').length) {
+            excludedClues = new Set();
+            exWrap.querySelectorAll('.clue-btn.selected').forEach(btn => {
+                const n = parseInt(btn.dataset.clue, 10);
+                if (n >= 1 && n <= 7) excludedClues.add(n);
+            });
+            try { sessionStorage.setItem('DijiangExcludedClues', JSON.stringify([...excludedClues])); } catch (e) {}
+        }
+        const missWrap = document.getElementById('clueButtons');
+        if (missWrap && missWrap.querySelectorAll('.clue-btn').length) {
+            missingClues = new Set();
+            missWrap.querySelectorAll('.clue-btn.selected').forEach(btn => {
+                const n = parseInt(btn.dataset.clue, 10);
+                if (n >= 1 && n <= 7) missingClues.add(n);
+            });
+            try { sessionStorage.setItem('missingClues', JSON.stringify([...missingClues])); } catch (e) {}
+        }
+    }
+
+    function readJsonStorage(key, fallback) {
+        try {
+            const raw = sessionStorage.getItem(key);
+            if (!raw) return fallback;
+            const v = JSON.parse(raw);
+            return v == null ? fallback : v;
+        } catch (e) { return fallback; }
+    }
+
+    function buildAdviceOptions() {
+        const snapshot = readJsonStorage('DijiangLastStrategySnapshot', null);
+        if (snapshot && typeof snapshot === 'object') {
+            return {
+                ...snapshot,
+                missingClues: new Set(Array.isArray(snapshot.missingClues) ? snapshot.missingClues : []),
+                excludedClues: new Set(Array.isArray(snapshot.excludedClues) ? snapshot.excludedClues : [3,7]),
+                trustedAgentIds: Array.isArray(snapshot.trustedAgentIds) ? snapshot.trustedAgentIds : []
+            };
+        }
+        const defaultModes = { central:'double', manufactA:'double', manufactB:'double', culture:'double', meeting:'double' };
+        const modes = Object.assign(defaultModes, readJsonStorage('DijiangRoomModes', {}));
+        const storedProducts = readJsonStorage('DijiangDefaultProduct', null);
+        let products;
+        if (storedProducts && (storedProducts.manufactA || storedProducts.manufactB)) {
+            products = {
+                manufactA: storedProducts.manufactA === 'weapon' ? 'weapon' : (storedProducts.manufactA === 'exp' ? 'exp' : null),
+                manufactB: storedProducts.manufactB === 'weapon' ? 'weapon' : (storedProducts.manufactB === 'exp' ? 'exp' : null)
+            };
+        } else {
+            products = { manufactA:'exp', manufactB:'weapon' };
+        }
+        const cultureCfg = readJsonStorage('DijiangManualProduct', {});
+        const cultureObj = cultureCfg && cultureCfg.culture;
+        const cultureTypes = cultureObj && Array.isArray(cultureObj.products) && cultureObj.products.length
+            ? cultureObj.products.slice()
+            : ['mineral','fungi','plant'];
+        let culturePriority = cultureObj && Array.isArray(cultureObj.priority) && cultureObj.priority.length
+            ? cultureObj.priority.filter(x => cultureTypes.includes(x))
+            : [];
+        if (!culturePriority.length) {
+            try {
+                const gp = JSON.parse(localStorage.getItem('DijiangCulturePriority') || '[]');
+                if (Array.isArray(gp)) culturePriority = gp.filter(x => cultureTypes.includes(x));
+            } catch (e) {}
+        }
+        if (!culturePriority.length) culturePriority = ['plant','mineral','fungi'].filter(x => cultureTypes.includes(x));
+        const ex = readJsonStorage('DijiangExcludedClues', [3,7]);
+        const miss = readJsonStorage('missingClues', []);
+        const material = readJsonStorage('DijiangMaterialPriority', ['clue','weapon','exp','culture']);
+        const p1 = readJsonStorage('DijiangRoomPriorityOrderRound1', ['meeting','central','manufactB','manufactA','culture']);
+        const p2 = readJsonStorage('DijiangRoomPriorityOrderRound2', ['meeting','manufactB','manufactA','culture','central']);
+        return {
+            mode: 'dual',
+            manufactProducts: products,
+            doubleRooms: Object.keys(modes).filter(k => modes[k] === 'double'),
+            roomModes: modes,
+            underfillRoom: sessionStorage.getItem('underfillRoom') || 'central',
+            emptyRooms: Object.keys(modes).filter(k => modes[k] === 'empty'),
+            centralDisabled: modes.central === 'empty',
+            isTrustMode: false,
+            trustedAgentIds: [],
+            trustAssignMap: {},
+            priorityOrderRound1: p1,
+            priorityOrderRound2: p2,
+            materialPriority: Array.isArray(material) && material.length ? material : ['clue','weapon','exp','culture'],
+            priorityFillEnabled: sessionStorage.getItem('priorityFillEnabled') === 'true',
+            meetingPriorityEnabled: false,
+            missingClues: new Set(Array.isArray(miss) ? miss : []),
+            excludedClues: new Set(Array.isArray(ex) ? ex : [3,7]),
+            cultureTypes,
+            culturePriority,
+            priorityWeights: getPriorityWeights(),
+            cRestHigh: getCRestHigh()
+        };
+    }
+
+    function buildScheduleOptions() {
+        if (location.pathname.includes('/development') && window.__DIJIANG_LAST_SCHEDULE_OPTIONS) {
+            return window.__DIJIANG_LAST_SCHEDULE_OPTIONS;
+        }
+        if (location.pathname.includes('/development')) return buildAdviceOptions();
+        return {
+            mode: getManufactMode(), manufactProducts: getManufactProducts(),
+            doubleRooms: doubleRoundRooms, roomModes: roomModes,
+            underfillRoom: underfillRoom,
             emptyRooms: ALL_ROOMS.filter(k => roomModes[k] === 'empty'),
             centralDisabled: false,
             isTrustMode: (trustedAgentIds.length > 0),
             trustedAgentIds: trustedAgentIds,
             trustAssignMap: trustAssignMap,
             priorityOrderRound1: getRoomPriorityOrder(1), priorityOrderRound2: getRoomPriorityOrder(2),
+            materialPriority: materialPriority.slice(),
+            priorityFillEnabled: priorityFillEnabled,
             meetingPriorityEnabled: meetingPriorityEnabled, missingClues: missingClues, excludedClues: excludedClues,
             cultureTypes: getCultureTypes(), culturePriority: getCulturePriority(),
             priorityWeights: getPriorityWeights(), cRestHigh: getCRestHigh()
         };
+    }
+    window.DijiangBuildOptions = buildScheduleOptions;
+
+    function generateSchedule() {
+        // UI 按钮是线索配置的唯一事实来源，避免账号/会话残留造成“界面未选、算法排除”。
+        syncCluesFromUI();
+        window.__DIJIANG_ROOM_TIMING__ = {};
+        updateClueAvailability();
+        
+        const options = buildScheduleOptions();
+        window.__DIJIANG_LAST_SCHEDULE_OPTIONS = options;
+        window.__DIJIANG_LAST_SCHEDULE_OPERATORS = operators;
+        try {
+            sessionStorage.setItem('DijiangLastStrategySnapshot', JSON.stringify({
+                ...options,
+                missingClues: [...(options.missingClues || [])],
+                excludedClues: [...(options.excludedClues || [])]
+            }));
+        } catch (e) {}
 
         let queues = null;
         if (window.DijiangScheduler) { queues = window.DijiangScheduler.generateSchedule(operators, options); }
@@ -586,9 +856,23 @@
         const roomKeys = ['central', 'manufactA', 'manufactB', 'culture', 'meeting'];
         const roomRaw = { central:'总控中枢', manufactA:'制造舱', manufactB:'制造舱', culture:'培养舱', meeting:'会客室' };
         const mode = getManufactMode();
+        const manufProducts = getManufactProducts();
         const cultureChecks = getCultureTypes();
         const cultureText = cultureChecks.map(v => v==='mineral'?'矿物':v==='fungi'?'菌类':'晶植').join('、');
         const doubleRooms = doubleRoundRooms;
+
+        // 备选池只展示最终仍未排班的干员，防止旧 reserve 快照混入已排班人员。
+        const assignedNames = new Set();
+        for (const room of roomKeys) {
+            const roomData = queues[room];
+            if (!roomData) continue;
+            for (const round of ['round1', 'round2']) {
+                for (const op of (roomData[round] || [])) if (op && op.name) assignedNames.add(op.name);
+            }
+            if (!doubleRooms.includes(room)) {
+                for (const op of (roomData.recommend || [])) if (op && op.name) assignedNames.add(op.name);
+            }
+        }
 
         const buildRecommendItem = (m, rawRoom, manufactType, cultureChecks) => {
             if (!m) return `<div class="recommend-item"><div class="empty-placeholder"><span>空位</span></div></div>`;
@@ -627,8 +911,11 @@
             const data = queues[room];
             if (!data) continue;
             let productTag = '', manufactType = null;
-            if (room === 'manufactA') { if (mode === 'dual' || mode === 'exp') { productTag = '⚙️ 干员'; manufactType = 'exp'; } else { productTag = '⚙️ 武器'; manufactType = 'weapon'; } }
-            else if (room === 'manufactB') { if (mode === 'dual' || mode === 'weapon') { productTag = '⚙️ 武器'; manufactType = 'weapon'; } else { productTag = '⚙️ 干员'; manufactType = 'exp'; } }
+            if (room === 'manufactA' || room === 'manufactB') {
+                const p = manufProducts[room];
+                if (p === 'exp') { productTag = '⚙️ 干员'; manufactType = 'exp'; }
+                else if (p === 'weapon') { productTag = '⚙️ 武器'; manufactType = 'weapon'; }
+            }
             else if (room === 'culture') { productTag = `🌱 ${cultureText}`; }
             else if (room === 'meeting' && meetingPriorityEnabled) { productTag = `📄 优先线索`; }
 
@@ -652,18 +939,20 @@
                 const t1 = getRoomTimingText(room, 'round1');
                 const badge1 = t1 ? `<span class="round-timing-badge">${escapeHtml(t1)}</span>` : '';
                 recommendHTML = `<div style="margin-bottom:8px;"><div class="round-label">A 班${badge1}</div><div class="recommend-area">${items}</div></div>`;
-                const reserveList = data.reserve || [];
-                let reserveHTML = '';
-                if (reserveList.length === 0) { reserveHTML = '<div style="font-size:0.7rem; color:#999; padding:4px 0;">无储备</div>'; }
-                else {
-                    reserveHTML = reserveList.map(m => {
-                        const imgSrc = getAgentImgSrc(m);
-                        const desc = getTraitDescriptionForRoom(m.mergedTraits, roomRaw[room], manufactType, cultureChecks, false);
-                        return `<div class="reserve-item"><img class="mini-avatar" src="${imgSrc}" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'28\' height=\'28\'%3E%3Crect width=\'28\' height=\'28\' fill=\'%23eaeaea\'/%3E%3C/svg%3E';"><span class="reserve-trait">${escapeHtml(m.name)}: ${escapeHtml(desc)}</span></div>`;
-                    }).join('');
-                }
-                recommendHTML += `<div class="reserve-area">${reserveHTML}</div>`;
             }
+            // 双轮舱室同样展示备选推荐；心情减耗也是对应舱室的有效天赋。
+            const reserveList = (data.reserve || []).filter(m => m && !assignedNames.has(m.name));
+            let reserveHTML = '';
+            if (reserveList.length === 0) {
+                reserveHTML = '<div style="font-size:0.7rem; color:#999; padding:4px 0;">无储备</div>';
+            } else {
+                reserveHTML = reserveList.map(m => {
+                    const imgSrc = getAgentImgSrc(m);
+                    const desc = getTraitDescriptionForRoom(m.mergedTraits, roomRaw[room], manufactType, cultureChecks, false);
+                    return `<div class="reserve-item"><img class="mini-avatar" src="${imgSrc}" onerror="this.onerror=null; this.src='data:image/svg+xml,%3Csvg xmlns=\'http://www.w3.org/2000/svg\' width=\'28\' height=\'28\'%3E%3Crect width=\'28\' height=\'28\' fill=\'%23eaeaea\'/%3E%3C/svg%3E';"><span class="reserve-trait">${escapeHtml(m.name)}: ${escapeHtml(desc)}</span></div>`;
+                }).join('');
+            }
+            recommendHTML += `<div class="reserve-area">${reserveHTML}</div>`;
             roomHTML[room] = `<div class="room-box" data-room="${room}"><div class="room-box-header"><span>${DISPLAY_NAMES[room]}</span>${productTag ? `<span class="product-tag">${productTag}</span>` : ''}</div>${recommendHTML}</div>`;
         }
 
@@ -800,27 +1089,16 @@
         modalDiv.querySelector('#singleCloseBtn').addEventListener('click', () => { modalDiv.remove(); modalDiv = null; });
     }
 
-    // ========== 舱室优先级 UI ==========
+    // ========== 舱室设置 / 材料优先级 UI ==========
     function renderRoomModesUI() {
         const container = document.getElementById('roomModeList');
         if (!container) return;
-        const LABELS = { central: '总控中枢', manufactA: '制造舱 A', manufactB: '制造舱 B', culture: '培养舱', meeting: '会客室' };
-        const order1 = getRoomPriorityOrder(1), order2 = getRoomPriorityOrder(2);
+        const LABELS = { central: '总控中枢', manufactA: '制造舱 Ⅰ', manufactB: '制造舱 Ⅱ', culture: '培养舱', meeting: '会客室' };
         let html = '';
         for (const rk of ALL_ROOMS) {
-            const idx1 = order1.indexOf(rk), idx2 = order2.indexOf(rk);
-            let optionsHtml1 = '', optionsHtml2 = '';
-            for (let i = 0; i < ALL_ROOMS.length; i++) {
-                optionsHtml1 += `<option value="${i}" ${idx1 === i ? 'selected' : ''}>${i+1}</option>`;
-                optionsHtml2 += `<option value="${i}" ${idx2 === i ? 'selected' : ''}>${i+1}</option>`;
-            }
-            html += `<div style="display:flex; align-items:center; justify-content:space-between; padding:4px 0; border-bottom:1px dashed #e0e0e0;">
-                <div style="display:flex; align-items:center; gap:6px;">
-                    <select class="prio-select" data-round="1" data-room="${rk}" style="font-size:0.75rem; padding:1px 2px; border-radius:4px; border:1px solid #d0d7de; background:#f8fafc; color:#333;">${optionsHtml1}</select>
-                    <select class="prio-select" data-round="2" data-room="${rk}" style="font-size:0.75rem; padding:1px 2px; border-radius:4px; border:1px solid #d0d7de; background:#f8fafc; color:#333;">${optionsHtml2}</select>
-                    <span style="font-size:0.9rem; font-weight:500; margin-left:4px;">${LABELS[rk]}</span>
-                </div>
-                <select class="room-mode-select" data-room="${rk}" style="border:1px solid #d0d7de; border-radius:6px; padding:2px 8px; font-size:0.85rem;">
+            html += `<div class="room-mode-row">
+                <span class="room-mode-name">${LABELS[rk]}</span>
+                <select class="room-mode-select" data-room="${rk}" aria-label="${LABELS[rk]}排班方式">
                     <option value="double" ${roomModes[rk] === 'double' ? 'selected' : ''}>二轮排班</option>
                     <option value="single" ${roomModes[rk] === 'single' ? 'selected' : ''}>单轮排班</option>
                     <option value="empty" ${roomModes[rk] === 'empty' ? 'selected' : ''}>空置 (停用)</option>
@@ -834,17 +1112,54 @@
                 if (roomModes[rk] === 'empty' && trustedAgentIds.length > 0 && rk === 'central') {
                     trustedAgentIds = []; trustAssignMap = {}; sessionStorage.removeItem('trustedAgentIds'); sessionStorage.removeItem('trustAssignMap'); updateTrustTags(); closeTrustModal(); closeTrustAssignModal();
                 }
+                renderMaterialPriorityUI();
                 generateSchedule();
             });
         });
-        container.querySelectorAll('.prio-select').forEach(sel => {
+    }
+
+    function renderMaterialPriorityUI() {
+        const container = document.getElementById('materialPriorityList');
+        if (!container) return;
+        const order = materialPriority.length ? materialPriority : getMaterialPriority();
+        const products = getManufactProducts();
+        const usedProducts = new Set(Object.values(products).filter(Boolean));
+        const disabledMaterial = m => {
+            if (m === 'exp') return !usedProducts.has('exp');
+            if (m === 'weapon') return !usedProducts.has('weapon');
+            if (m === 'clue') return roomModes.meeting === 'empty';
+            if (m === 'culture') return roomModes.culture === 'empty';
+            return false;
+        };
+        let html = '';
+        for (const material of order) {
+            if (disabledMaterial(material)) {
+                html += `<div class="material-priority-row is-disabled">
+                    <span class="material-priority-name"><span class="material-priority-dot"></span>${MATERIAL_LABELS[material] || material}</span>
+                    <span class="material-prio-slash" aria-label="不参与排班">/</span>
+                </div>`;
+                continue;
+            }
+            let options = '';
+            for (let i = 0; i < DEFAULT_MATERIAL_PRIORITY.length; i++) {
+                options += `<option value="${i}" ${i === order.indexOf(material) ? 'selected' : ''}>${i + 1}</option>`;
+            }
+            html += `<div class="material-priority-row">
+                <span class="material-priority-name"><span class="material-priority-dot"></span>${MATERIAL_LABELS[material] || material}</span>
+                <select class="material-prio-select" data-material="${material}" aria-label="${MATERIAL_LABELS[material] || material}优先级">${options}</select>
+            </div>`;
+        }
+        container.innerHTML = html;
+        container.querySelectorAll('.material-prio-select').forEach(sel => {
             sel.addEventListener('change', function() {
-                const round = parseInt(this.dataset.round); const rk = this.dataset.room; const newIndex = parseInt(this.value);
-                const currentOrder = round === 1 ? getRoomPriorityOrder(1) : getRoomPriorityOrder(2);
-                const oldIndex = currentOrder.indexOf(rk);
-                if (oldIndex === newIndex) return;
-                currentOrder.splice(oldIndex, 1); currentOrder.splice(newIndex, 0, rk);
-                saveRoomPriorityOrder(round, currentOrder); renderRoomModesUI();
+                const material = this.dataset.material;
+                const newIndex = parseInt(this.value, 10);
+                const next = materialPriority.slice();
+                const oldIndex = next.indexOf(material);
+                if (oldIndex < 0 || oldIndex === newIndex) return;
+                next.splice(oldIndex, 1);
+                next.splice(newIndex, 0, material);
+                saveMaterialPriority(next);
             });
         });
     }
@@ -864,6 +1179,14 @@
                 }
             }
         } catch (e) {}
+        if (!local.priority) {
+            try {
+                const g = JSON.parse(localStorage.getItem('DijiangCulturePriority') || 'null');
+                if (Array.isArray(g) && g.length) local.priority = g.filter(x => local.products.includes(x));
+            } catch (e) {}
+        } else {
+            try { localStorage.setItem('DijiangCulturePriority', JSON.stringify(local.priority)); } catch (e) {}
+        }
         const labels = Array.from(container.querySelectorAll('label.checkbox-label'));
         labels.forEach(label => { const cb = label.querySelector('input'); cb.checked = local.products.includes(cb.value); });
         function getEffectivePriority() {
@@ -895,6 +1218,7 @@
         function persist() {
             const products = labels.map(l => l.querySelector('input')).filter(cb => cb.checked).map(cb => cb.value);
             const priority = local.priority ? getEffectivePriority() : null;
+            try { if (priority && priority.length) localStorage.setItem('DijiangCulturePriority', JSON.stringify(priority)); } catch (e) {}
             try { let all = {}; const raw = sessionStorage.getItem('DijiangManualProduct'); if (raw) all = JSON.parse(raw); all.culture = { products, priority }; sessionStorage.setItem('DijiangManualProduct', JSON.stringify(all)); } catch (e) {}
             saveProductConfigToSession();
         }
@@ -921,6 +1245,18 @@
             });
         });
         updateBadges();
+    }
+
+    function syncClueSelectionUI() {
+        document.querySelectorAll('#excludedCluesButtons .clue-btn').forEach(btn => {
+            const n = parseInt(btn.dataset.clue, 10);
+            btn.classList.toggle('selected', excludedClues.has(n));
+        });
+        document.querySelectorAll('#clueButtons .clue-btn').forEach(btn => {
+            const n = parseInt(btn.dataset.clue, 10);
+            btn.classList.toggle('selected', missingClues.has(n));
+        });
+        updateClueAvailability();
     }
 
     // ========== 排除线索 UI ==========
@@ -1175,9 +1511,17 @@
         return config;
     }
 
+    function getConfigEntryForOperator(config, op) {
+        if (!config || !op) return null;
+        // 旧数据库/旧导出使用中文名；新结构允许 charId 主键。双读保证原数据无需迁移。
+        if (config[op.name] != null) return config[op.name];
+        if (op.charId && config[op.charId] != null) return config[op.charId];
+        return null;
+    }
+
     function applyConfig(config) {
         for (const op of operators) {
-            const v = config[op.name];
+            const v = getConfigEntryForOperator(config, op);
             if (!v) {
                 op.eliteLevel = 'none';
                 op.activatedTalents = emptyTalents();
@@ -1461,79 +1805,64 @@
         trustAssignMap = {};
         updateTrustTags();
         loadRoomModes();
+        materialPriority = getMaterialPriority();
         renderRoomModesUI();
-        // 1. 初始化状态
-        const savedMeeting = sessionStorage.getItem('meetingPriority');
-        if (savedMeeting === 'true') {
-            meetingPriorityEnabled = true;
-            document.getElementById('missingCluesArea').style.display = 'block';
-            const savedClues = sessionStorage.getItem('missingClues');
-            if (savedClues) {
-                try {
-                    missingClues = new Set(JSON.parse(savedClues));
-                } catch(e) {}
-            }
-        } else {
-            meetingPriorityEnabled = false;
-            document.getElementById('missingCluesArea').style.display = 'none';
-        }
+        renderMaterialPriorityUI();
 
-        // 2. 初始化按钮状态
-        let oldToggle = document.getElementById('meetingPriorityToggle');
-        if (oldToggle) {
-            oldToggle.classList.toggle('active', meetingPriorityEnabled);
-            document.getElementById('priorityStatus').textContent = meetingPriorityEnabled ? '开启' : '关闭';
+        const savedPriorityFill = sessionStorage.getItem('priorityFillEnabled');
+        priorityFillEnabled = savedPriorityFill === 'true';
+        const priorityFillToggle = document.getElementById('priorityFillToggle');
+        const priorityFillStatus = document.getElementById('priorityFillStatus');
+        const syncPriorityFillUI = () => {
+            if (priorityFillToggle) priorityFillToggle.classList.toggle('active', priorityFillEnabled);
+            if (priorityFillStatus) priorityFillStatus.textContent = priorityFillEnabled ? '开启' : '关闭';
+            const underfillSection = document.getElementById('underfillSection');
+            if (underfillSection) underfillSection.style.display = priorityFillEnabled ? 'block' : 'none';
+        };
+        syncPriorityFillUI();
+        if (priorityFillToggle) {
+            priorityFillToggle.addEventListener('click', function() {
+                priorityFillEnabled = !priorityFillEnabled;
+                sessionStorage.setItem('priorityFillEnabled', priorityFillEnabled ? 'true' : 'false');
+                syncPriorityFillUI();
+                generateSchedule();
+            });
         }
-
-        // 3. 生成线索按钮
+        const savedUnderfill = sessionStorage.getItem('underfillRoom');
+        if (savedUnderfill && ALL_ROOMS.includes(savedUnderfill)) underfillRoom = savedUnderfill;
+        const underfillSelect = document.getElementById('underfillRoomSelect');
+        if (underfillSelect) {
+            underfillSelect.value = underfillRoom;
+            underfillSelect.addEventListener('change', function() {
+                if (!ALL_ROOMS.includes(this.value)) return;
+                underfillRoom = this.value;
+                sessionStorage.setItem('underfillRoom', underfillRoom);
+                generateSchedule();
+            });
+        }
+        // “会客室优先”开关已移除：线索优先级最高时由材料优先级/优先满舱自动补会客室。
+        meetingPriorityEnabled = false;
+        const savedClues = sessionStorage.getItem('missingClues');
+        if (savedClues) {
+            try {
+                missingClues = new Set(JSON.parse(savedClues));
+                document.querySelectorAll('.clue-btn').forEach(btn => { if (missingClues.has(parseInt(btn.dataset.clue))) btn.classList.add('selected'); });
+            } catch(e) {}
+        }
         const clueContainer = document.getElementById('clueButtons');
-        if (clueContainer && clueContainer.children.length === 0) {
+        if (clueContainer.children.length === 0) {
             for (let i = 1; i <= 7; i++) {
-                const btn = document.createElement('div'); 
-                btn.className = 'clue-btn'; 
-                btn.textContent = `线索${i}`; 
-                btn.dataset.clue = i;
-                if (missingClues.has(i)) btn.classList.add('selected');
+                const btn = document.createElement('div'); btn.className = 'clue-btn'; btn.textContent = `线索${i}`; btn.dataset.clue = i;
                 btn.addEventListener('click', function() {
-                    if (!meetingPriorityEnabled) return; 
                     if (this.classList.contains('disabled')) return;
-                    this.classList.toggle('selected'); 
-                    const num = parseInt(this.dataset.clue);
-                    if (this.classList.contains('selected')) missingClues.add(num); 
-                    else missingClues.delete(num);
-                    sessionStorage.setItem('missingClues', JSON.stringify([...missingClues])); 
-                    generateSchedule();
+                    this.classList.toggle('selected'); const num = parseInt(this.dataset.clue);
+                    if (this.classList.contains('selected')) missingClues.add(num); else missingClues.delete(num);
+                    sessionStorage.setItem('missingClues', JSON.stringify([...missingClues])); generateSchedule();
                 });
                 clueContainer.appendChild(btn);
             }
         }
         updateClueAvailability();
-
-        // 4. 绑定开关事件 (使用 cloneNode 清除旧事件，避免多次绑定)
-        if (oldToggle) {
-            const newToggle = oldToggle.cloneNode(true);
-            newToggle.classList.toggle('active', meetingPriorityEnabled); // 重新应用状态
-            oldToggle.parentNode.replaceChild(newToggle, oldToggle);
-            
-            newToggle.addEventListener('click', function() {
-                meetingPriorityEnabled = !meetingPriorityEnabled;
-                if (meetingPriorityEnabled) { 
-                    this.classList.add('active'); 
-                    document.getElementById('priorityStatus').textContent = '开启'; 
-                    document.getElementById('missingCluesArea').style.display = 'block'; 
-                    sessionStorage.setItem('meetingPriority', 'true'); 
-                } else { 
-                    this.classList.remove('active'); 
-                    document.getElementById('priorityStatus').textContent = '关闭'; 
-                    document.getElementById('missingCluesArea').style.display = 'none'; 
-                    missingClues.clear(); 
-                    // ★ 关键：只清除会客室优先的线索选择，不影响下方二轮排除线索
-                    document.querySelectorAll('#clueButtons .clue-btn').forEach(b => b.classList.remove('selected')); 
-                    sessionStorage.setItem('meetingPriority', 'false'); 
-                }
-                generateSchedule();
-            });
-        }
         
         try {
             const rawDefault = sessionStorage.getItem('DijiangDefaultProduct');
@@ -1549,9 +1878,11 @@
         document.querySelectorAll('#manufactProducts input').forEach(cb => {
             cb.addEventListener('change', () => {
                 saveProductConfigToSession();
+                renderMaterialPriorityUI();
                 generateSchedule();
             });
         });
+        renderMaterialPriorityUI();
 
         const trustBtn = document.getElementById('openTrustModalBtn');
         if (trustBtn) {
@@ -1580,6 +1911,7 @@
         saveProductConfigToSession();
         initCulturePriorityUI();
         initExcludedCluesUI();
+        syncClueSelectionUI();
     }
 
     // ---------- 启动 ----------
@@ -1790,44 +2122,218 @@
         return formatExportHourRange(rows);
     }
 
+    // ==========================================
+    // ★ 补充模块 2：排班图导出逻辑（手动排班截图同款样式）
+    // ==========================================
     window.DijiangExportSchedule = async function() {
         if (!window._lastQueues) { alert('暂无排班数据'); return; }
-        const version = await getChangelogVersion();
-        const descObj = buildRoomDescription();
-        const exportContainer = document.createElement('div');
-        exportContainer.style.cssText = `position: fixed; left: -9999px; top: 0; width: 800px; background: #ffffff; padding: 20px; font-family: system-ui; color: #222;`;
-        document.body.appendChild(exportContainer);
-        const now = new Date();
-        const dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
-        exportContainer.innerHTML = `
-            <div style="text-align:center;font-size:28px;font-weight:700;">帝江号排班表</div>
-            <div style="text-align:center;font-size:13px;color:#555;margin:10px 0 16px;line-height:1.7;">${escapeHtml(descObj.line1)}<br>${escapeHtml(descObj.line2)}</div>
-        `;
+        
         const queues = window._lastQueues;
         const roomKeys = ['central', 'manufactA', 'manufactB', 'culture', 'meeting'];
-        const roomLabels = { central: '总控中枢', manufactA: '制造舱A', manufactB: '制造舱B', culture: '培养舱', meeting: '会客室' };
-        const bodyDiv = document.createElement('div');
-        bodyDiv.style.cssText = 'display:flex;gap:20px;justify-content:center;';
-        exportContainer.appendChild(bodyDiv);
-        const col1 = await createExportColumn(queues, roomKeys, roomLabels, 'round1', '一轮');
-        bodyDiv.appendChild(col1);
-        const col2 = await createExportColumn(queues, roomKeys, roomLabels, 'round2', '二轮');
-        bodyDiv.appendChild(col2);
-        const footerDiv = document.createElement('div');
-        footerDiv.style.cssText = 'margin-top:20px;border-top:1px solid #ddd;padding-top:12px;font-size:12px;color:#666;position:relative;';
-        footerDiv.innerHTML = `
-            <div style="display:flex;justify-content:space-between;align-items:baseline;">
-                <div>帝江号自动排班小工具　<span style="font-size:11px;color:#999;">生成时间 ${dateStr}</span></div>
-                <div style="font-size:11px;color:#888;">${escapeHtml(version)}</div>
+        const roomLabels = { central: '总控中枢', manufactA: '制造舱 A', manufactB: '制造舱 B', culture: '培养舱', meeting: '会客室' };
+        
+        // 1. 收集所有需要加载头像的名字
+        const allNames = new Set();
+        for (const key of roomKeys) {
+            const data = queues[key];
+            if (!data) continue;
+            const isDouble = (window._doubleRooms || []).includes(key);
+            const r1 = isDouble ? (data.round1 || []) : (data.recommend || []);
+            const r2 = isDouble ? (data.round2 || []) : [];
+            [...r1, ...r2].forEach(a => { if (a) allNames.add(a.name); });
+        }
+        
+        // 2. 加载头像 Base64（预先裁切为正方形，避免导出黑线）
+        const dataUrlMap = {};
+        await Promise.all([...allNames].map(async name => { dataUrlMap[name] = await loadAvatarAsSquareBase64(name); }));
+        
+        const now = new Date();
+        const dateStr = now.getFullYear() + '-' + String(now.getMonth()+1).padStart(2,'0') + '-' + String(now.getDate()).padStart(2,'0') + ' ' + String(now.getHours()).padStart(2,'0') + ':' + String(now.getMinutes()).padStart(2,'0');
+        const version = await getChangelogVersion();
+        
+        // 3. 辅助函数：算总控恢复加成
+        const getCentralBonus = (agents) => {
+            let sum = 0;
+            for (const a of agents) {
+                if (a && a.score && a.score.central) sum += a.score.central;
+            }
+            return sum;
+        };
+
+        // 4. 辅助函数：计算总时长
+        function getTotalHours(rows) {
+            if (!rows || rows.length === 0) return 0;
+            let total = 0;
+            for (const r of rows) total += (r.end - r.start);
+            return Math.round(total);
+        }
+
+        // 5. 辅助函数：生成单个干员槽位
+        const buildSlot = (agent) => {
+            if (!agent) return `<div style="flex:1; aspect-ratio:1/1; border-radius:12px; background:#f8fafc; border:1px dashed #d0d7de;"></div>`;
+            const imgSrc = dataUrlMap[agent.name] || '';
+            return `
+                <div style="flex:1; aspect-ratio:1/1; position:relative; border-radius:12px; overflow:hidden; background:#eaeaea;">
+                    <img src="${imgSrc}" style="width:100%; height:100%; display:block;">
+                    <div style="position:absolute; left:0; right:0; bottom:0; background:linear-gradient(to top, rgba(0,0,0,0.8) 0%, transparent 100%); padding:20px 4px 6px; text-align:center;">
+                        <div style="color:#fff; font-size:13px; font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; text-shadow:0 1px 2px rgba(0,0,0,0.8);">${escapeHtml(agent.name)}</div>
+                    </div>
+                </div>
+            `;
+        };
+        
+        // 6. 辅助函数：生成舱室卡片
+        const buildRoomCard = (key) => {
+            if (roomModes[key] === 'empty') {
+                return `<div style="width:360px; background:#fafafa; border-radius:16px; border:1px solid #e0e0e0; padding:20px; display:flex; justify-content:center; align-items:center; color:#999; font-weight:600;">${roomLabels[key]}（未启用）</div>`;
+            }
+            const data = queues[key];
+            if (!data) return '';
+            
+            const isDouble = (window._doubleRooms || []).includes(key);
+            const r1 = isDouble ? (data.round1 || []) : (data.recommend || []);
+            const r2 = isDouble ? (data.round2 || []) : [];
+            const timingInfo = queues._timingInfo && queues._timingInfo[key];
+            
+            // 获取时间段数据 (包含总控)
+            let badge1 = '', badge2 = '';
+            if (window.DijiangTiming && typeof window.DijiangTiming.getRoomPeriods === 'function') {
+                const p = window.DijiangTiming.getRoomPeriods(key);
+                if (p) {
+                    if (p.round1) {
+                        const h1 = getTotalHours(p.round1);
+                        const str1 = formatExportHourRange(p.round1);
+                        if (str1) badge1 = `<span style="font-size:11px; font-weight:normal; color:#2a5a4a; background:#e0f0ea; border:1px solid #93c8b1; border-radius:12px; padding:1px 8px; margin-left:8px;">${h1}h ${str1}</span>`;
+                    }
+                    if (p.round2) {
+                        const h2 = getTotalHours(p.round2);
+                        const str2 = formatExportHourRange(p.round2);
+                        if (str2) badge2 = `<span style="font-size:11px; font-weight:normal; color:#8a5e00; background:#fff3cd; border:1px solid #f0d98a; border-radius:12px; padding:1px 8px; margin-left:8px;">${h2}h ${str2}</span>`;
+                    }
+                }
+            }
+
+            // ★ 计算加权平均产出
+            let bonusText = '';
+            const hA = timingInfo ? timingInfo.hA : 24;
+            const hB = timingInfo ? timingInfo.hB : 0;
+
+            if (key === 'central') {
+                if (isDouble) {
+                    const b1 = getCentralBonus(r1);
+                    const b2 = getCentralBonus(r2);
+                    const avg = Math.round((b1 * hA + b2 * hB) / 24);
+                    bonusText = `<div style="color:#5cb85c; font-size:14px; text-align:center; margin-bottom:20px; font-weight:500;">24h平均恢复 ${avg}%</div>`;
+                } else {
+                    const b1 = getCentralBonus(r1);
+                    bonusText = `<div style="color:#5cb85c; font-size:14px; text-align:center; margin-bottom:20px; font-weight:500;">24h平均恢复 ${b1}%</div>`;
+                }
+            } else {
+                const calcAvg = (effType) => {
+                    const rawRoom = { manufactA: '制造舱', manufactB: '制造舱', culture: '培养舱', meeting: '会客室' }[key];
+                    let ea = 0, na = 0;
+                    for (const op of r1) { if (op) { na++; (op.mergedTraits||[]).forEach(t => { if(t.舱室===rawRoom && t.类型===effType) ea += t.数值||0; }); } }
+                    let eb = 0, nb = 0;
+                    for (const op of r2) { if (op) { nb++; (op.mergedTraits||[]).forEach(t => { if(t.舱室===rawRoom && t.类型===effType) eb += t.数值||0; }); } }
+                    
+                    const rateA = (1 + ea / 100) * (1 + 0.4 * na);
+                    const rateB = (1 + eb / 100) * (1 + 0.4 * nb);
+                    const weightedRate = (rateA * hA + rateB * hB) / 24;
+                    return Math.round(weightedRate * 100);
+                };
+
+                if (key === 'manufactA' || key === 'manufactB') {
+                    const p = getManufactProducts()[key];
+                    let effType = '';
+                    if (p === 'exp') effType = '干员素材效率';
+                    else if (p === 'weapon') effType = '武器素材效率';
+                    if (!effType) effType = '干员素材效率';
+                    
+                    const prodName = effType === '干员素材效率' ? '干员经验' : '武器经验';
+                    bonusText = `<div style="color:#5cb85c; font-size:14px; text-align:center; margin-bottom:20px; font-weight:500;">24h均产${prodName} ${calcAvg(effType)}%</div>`;
+                } else if (key === 'meeting') {
+                    bonusText = `<div style="color:#5cb85c; font-size:14px; text-align:center; margin-bottom:20px; font-weight:500;">24h均产线索 ${calcAvg('收集线索效率')}%</div>`;
+                } else if (key === 'culture') {
+                    const cultureChecks = getCultureTypes();
+                    const prodMap = { mineral: '矿物', fungi: '菌类', plant: '晶植' };
+                    const effTypeMap = { mineral: '矿物效率', fungi: '菌类效率', plant: '晶植效率' };
+                    const parts = [];
+                    for (const prod of cultureChecks) {
+                        parts.push(`${prodMap[prod]} ${calcAvg(effTypeMap[prod])}%`);
+                    }
+                    bonusText = `<div style="color:#5cb85c; font-size:14px; text-align:center; margin-bottom:20px; font-weight:500;">24h均产${parts.join('/')}</div>`;
+                }
+            }
+            
+            let slotsHtml = '';
+            if (isDouble) {
+                slotsHtml = `
+                    <div style="margin-bottom:24px;">
+                        <div style="display:flex; align-items:center; gap:6px; font-size:14px; color:#2a5a4a; font-weight:700; margin-bottom:12px;">
+                            <div style="width:4px; height:14px; background:#3f7e6b; border-radius:2px;"></div> A班 ${badge1}
+                        </div>
+                        <div style="display:flex; gap:10px;">${[0,1,2].map(i => buildSlot(r1[i])).join('')}</div>
+                    </div>
+                    <div>
+                        <div style="display:flex; align-items:center; gap:6px; font-size:14px; color:#8a5e00; font-weight:700; margin-bottom:12px;">
+                            <div style="width:4px; height:14px; background:#f0b400; border-radius:2px;"></div> B班 ${badge2}
+                        </div>
+                        <div style="display:flex; gap:10px;">${[0,1,2].map(i => buildSlot(r2[i])).join('')}</div>
+                    </div>
+                `;
+            } else {
+                slotsHtml = `
+                    <div>
+                        <div style="display:flex; align-items:center; gap:6px; font-size:14px; color:#2a5a4a; font-weight:700; margin-bottom:12px;">
+                            <div style="width:4px; height:14px; background:#3f7e6b; border-radius:2px;"></div> A班 ${badge1}
+                        </div>
+                        <div style="display:flex; gap:10px;">${[0,1,2].map(i => buildSlot(r1[i])).join('')}</div>
+                    </div>
+                `;
+            }
+            
+            return `
+                <div style="width:360px; background:#fafafa; border-radius:16px; border:1px solid #e0e0e0; padding:24px; box-sizing:border-box;">
+                    <div style="text-align:center; font-size:20px; font-weight:bold; color:#222; margin-bottom:12px;">${roomLabels[key]}</div>
+                    ${bonusText}
+                    ${slotsHtml}
+                </div>
+            `;
+        };
+        
+        // 7. 拼接完整 HTML
+        const topRow = ['central', 'manufactA', 'manufactB'].map(r => buildRoomCard(r)).join('');
+        const bottomRow = ['culture', 'meeting'].map(r => buildRoomCard(r)).join('');
+        
+        const exportContainer = document.createElement('div');
+        exportContainer.style.cssText = `position: fixed; left: -9999px; top: 0; width: 1150px; background: #ffffff; padding: 40px; font-family: system-ui, -apple-system, sans-serif; box-sizing: border-box;`;
+        
+        exportContainer.innerHTML = `
+            <div style="text-align:center; font-size:38px; font-weight:bold; color:#000; margin-bottom:50px;">帝江号排班表</div>
+            
+            <div style="display:flex; gap:40px; justify-content:center; margin-bottom:40px;">
+                ${topRow}
             </div>
-            <div style="font-size:11px;">https://arr-dijiang.top/</div>
-            <div style="font-size:11px;">BiliBili：Courison</div>
+            <div style="display:flex; gap:40px; justify-content:center;">
+                ${bottomRow}
+            </div>
+            
+            <div style="margin-top:60px; border-top:1px solid #ddd; padding-top:16px; font-size:12px; color:#666; position:relative;">
+                <div style="display:flex; justify-content:space-between; align-items:baseline;">
+                    <div>帝江号自动排班小工具　<span style="font-size:11px; color:#999;">生成时间 ${dateStr}</span></div>
+                    <div style="font-size:11px; color:#888;">${escapeHtml(version)}</div>
+                </div>
+                <div style="font-size:11px; margin-top:4px;">https://arr-dijiang.top/</div>
+                <div style="font-size:11px;">BiliBili：Courison</div>
+            </div>
         `;
-        exportContainer.appendChild(footerDiv);
+        
+        document.body.appendChild(exportContainer);
+        
         try {
             const canvas = await html2canvas(exportContainer, {
                 scale: 2, useCORS: true, backgroundColor: '#ffffff',
-                width: 800, height: exportContainer.scrollHeight,
+                width: 1150, height: exportContainer.scrollHeight,
             });
             const link = document.createElement('a');
             link.download = `排班图_${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}.png`;
@@ -2006,7 +2512,7 @@
             if (!operators.length) return { ok: false, msg: '干员库未就绪' };
             let applied = 0;
             for (const op of operators) {
-                const v = config[op.name];
+                const v = getConfigEntryForOperator(config, op);
                 if (!v) { op.eliteLevel = 'none'; op.activatedTalents = emptyTalents(); continue; }
                 const entry = parseConfigEntry(v);
                 op.eliteLevel = entry.elite;
@@ -2027,8 +2533,8 @@
                 const obj = { _version: 2 };
                 for (const op of operators) obj[op.name] = { elite: op.eliteLevel, talents: TALENT_ORDER.filter(tid => op.activatedTalents[tid]) };
                 let manufactProducts = null, cultureProducts = null;
-                try { const raw = sessionStorage.getItem('DijiangDefaultProduct'); if (raw) manufactProducts = JSON.parse(raw); } catch (e) {}
-                try { const raw = sessionStorage.getItem('DijiangManualProduct'); if (raw) { const p = JSON.parse(raw); if (p && p.culture) cultureProducts = p.culture; } } catch (e) {}
+                try { manufactProducts = getManufactProducts(); } catch (e) {}
+                try { cultureProducts = { products: getCultureTypes(), priority: getCulturePriority() }; } catch (e) {}
                 
                 // ★ 修复：实时从 DOM 读取时间，如果没有 DOM 则从缓存读
                 const hEl = document.getElementById('timingStartHour');
@@ -2038,9 +2544,12 @@
 
                 obj._strategy = {
                     doubleRoundRooms: doubleRoundRooms.slice(), roomModes: Object.assign({}, roomModes), centralMode: centralMode,
+                    underfillRoom: underfillRoom,
                     trustedAgentIds: trustedAgentIds.slice(), trustAssignMap: Object.assign({}, trustAssignMap),
                     meetingPriorityEnabled: meetingPriorityEnabled, missingClues: [...missingClues], excludedClues: [...excludedClues],
                     manufactProducts: manufactProducts, cultureProducts: cultureProducts,
+                    materialPriority: materialPriority.slice(),
+                    priorityFillEnabled: priorityFillEnabled,
                     roomPriorityOrderRound1: roomPriorityOrderRound1.slice(), roomPriorityOrderRound2: roomPriorityOrderRound2.slice(),
                     timingStartHour: tH,
                     timingStartMinute: tM
@@ -2062,15 +2571,56 @@
                         if (strategy.roomModes) { for (const k of ALL_ROOMS) { if (['empty', 'single', 'double'].includes(strategy.roomModes[k])) roomModes[k] = strategy.roomModes[k]; } syncDoubleRooms(); renderRoomModesUI(); }
                         else if (Array.isArray(strategy.doubleRoundRooms)) { doubleRoundRooms = strategy.doubleRoundRooms.filter(v => ['central','manufactA','manufactB','culture','meeting'].includes(v)); }
                         if (typeof strategy.centralMode === 'string' && ['normal','empty','trust'].includes(strategy.centralMode)) centralMode = strategy.centralMode;
+                        if (ALL_ROOMS.includes(strategy.underfillRoom)) {
+                            underfillRoom = strategy.underfillRoom;
+                            const us = document.getElementById('underfillRoomSelect');
+                            if (us) us.value = underfillRoom;
+                            sessionStorage.setItem('underfillRoom', underfillRoom);
+                        }
                         if (Array.isArray(strategy.trustedAgentIds)) trustedAgentIds = strategy.trustedAgentIds.filter(id => operators.some(o => o.id === id));
                         trustAssignMap = {};
-                        if (typeof strategy.meetingPriorityEnabled === 'boolean') meetingPriorityEnabled = strategy.meetingPriorityEnabled;
+                        // 会客室优先开关已移除；旧配置字段忽略，线索由材料优先级/PF 处理。
+                        meetingPriorityEnabled = false;
                         if (Array.isArray(strategy.missingClues)) missingClues = new Set(strategy.missingClues.filter(n => n >= 1 && n <= 7));
                         if (Array.isArray(strategy.excludedClues)) excludedClues = new Set(strategy.excludedClues.filter(n => n >= 1 && n <= 7));
-                        if (strategy.manufactProducts) { sessionStorage.setItem('DijiangDefaultProduct', JSON.stringify(strategy.manufactProducts)); }
-                        if (strategy.cultureProducts) { let all = {}; try { const raw = sessionStorage.getItem('DijiangManualProduct'); if (raw) all = JSON.parse(raw) || {}; } catch (e) {} all.culture = strategy.cultureProducts; sessionStorage.setItem('DijiangManualProduct', JSON.stringify(all)); }
+                        syncClueSelectionUI();
+                        if (strategy.manufactProducts) {
+                            const mp = strategy.manufactProducts;
+                            const expCb = document.querySelector('#manufactProducts input[value="exp"]');
+                            const wpCb = document.querySelector('#manufactProducts input[value="weapon"]');
+                            if (expCb) expCb.checked = mp.manufactA === 'exp' || mp.manufactB === 'exp';
+                            if (wpCb) wpCb.checked = mp.manufactA === 'weapon' || mp.manufactB === 'weapon';
+                            sessionStorage.setItem('DijiangDefaultProduct', JSON.stringify(mp));
+                            renderMaterialPriorityUI();
+                        }
+                        if (strategy.cultureProducts) {
+                            let all = {};
+                            try { const raw = sessionStorage.getItem('DijiangManualProduct'); if (raw) all = JSON.parse(raw) || {}; } catch (e) {}
+                            all.culture = strategy.cultureProducts;
+                            sessionStorage.setItem('DijiangManualProduct', JSON.stringify(all));
+                            if (Array.isArray(strategy.cultureProducts.priority)) {
+                                localStorage.setItem('DijiangCulturePriority', JSON.stringify(strategy.cultureProducts.priority));
+                            }
+                        }
                         if (Array.isArray(strategy.roomPriorityOrderRound1)) roomPriorityOrderRound1 = strategy.roomPriorityOrderRound1;
                         if (Array.isArray(strategy.roomPriorityOrderRound2)) roomPriorityOrderRound2 = strategy.roomPriorityOrderRound2;
+                        if (Array.isArray(strategy.materialPriority)) {
+                            materialPriority = strategy.materialPriority.filter(k => Object.prototype.hasOwnProperty.call(MATERIAL_LABELS, k));
+                            for (const k of DEFAULT_MATERIAL_PRIORITY) if (!materialPriority.includes(k)) materialPriority.push(k);
+                            materialPriority = materialPriority.slice(0, 4);
+                            sessionStorage.setItem('DijiangMaterialPriority', JSON.stringify(materialPriority));
+                            renderMaterialPriorityUI();
+                        }
+                        if (typeof strategy.priorityFillEnabled === 'boolean') {
+                            priorityFillEnabled = strategy.priorityFillEnabled;
+                            sessionStorage.setItem('priorityFillEnabled', priorityFillEnabled ? 'true' : 'false');
+                            const t = document.getElementById('priorityFillToggle');
+                            const s = document.getElementById('priorityFillStatus');
+                            if (t) t.classList.toggle('active', priorityFillEnabled);
+                            if (s) s.textContent = priorityFillEnabled ? '开启' : '关闭';
+                            const uf = document.getElementById('underfillSection');
+                            if (uf) uf.style.display = priorityFillEnabled ? 'block' : 'none';
+                        }
 
                         // ★ 新增：恢复起点时间
                         if (strategy.timingStartHour !== undefined) {

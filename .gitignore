@@ -57,3 +57,5 @@ Thumbs.db
 *.bak.*
 *.old
 *.tmp
+# SSH keys used by deployment
+id_ed25519*

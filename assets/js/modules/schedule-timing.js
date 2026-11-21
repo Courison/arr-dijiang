@@ -320,6 +320,7 @@
         // 2. 从可行解开始，计算 t 与 t+1 的效率，直到效率下降或无法循环
         let bestHHigh = firstFeasible;
         let bestOutput = -1;
+        let bestBalance = Infinity;
 
         for (let hHigh = firstFeasible; hHigh <= 23; hHigh++) {
             const hLow = 24 - hHigh;
@@ -336,11 +337,17 @@
             }
 
             const output = rHigh * effHighWork + rLow * effLowWork;
+            const balance = Math.abs(hHigh - 12);
 
-            if (output > bestOutput) {
+            if (output > bestOutput + 1e-9) {
                 bestOutput = output;
                 bestHHigh = hHigh;
-            } else {
+                bestBalance = balance;
+            } else if (Math.abs(output - bestOutput) <= 1e-9 && balance < bestBalance - 1e-9) {
+                // A/B 效率一致时，优先 12/12，避免从较早可行解直接取短班。
+                bestHHigh = hHigh;
+                bestBalance = balance;
+            } else if (output < bestOutput - 1e-9) {
                 break;
             }
         }
@@ -798,6 +805,7 @@
             h.addEventListener('input', () => { 
                 h.dataset.touched = '1'; 
                 sessionStorage.setItem('DijiangTimingStartHour', h.value); 
+                window.dispatchEvent(new CustomEvent('dijiang:config-changed'));
                 run(); 
             });
         }
@@ -805,7 +813,27 @@
             m.addEventListener('input', () => { 
                 m.dataset.touched = '1'; 
                 sessionStorage.setItem('DijiangTimingStartMinute', m.value); 
+                window.dispatchEvent(new CustomEvent('dijiang:config-changed'));
                 run(); 
+            });
+        }
+
+        const nowBtn = document.getElementById('timingNowBtn');
+        if (nowBtn) {
+            nowBtn.addEventListener('click', () => {
+                const t = new Date();
+                if (h) {
+                    h.dataset.touched = '1';
+                    h.value = String(t.getHours()).padStart(2, '0');
+                    sessionStorage.setItem('DijiangTimingStartHour', h.value);
+                }
+                if (m) {
+                    m.dataset.touched = '1';
+                    m.value = String(t.getMinutes()).padStart(2, '0');
+                    sessionStorage.setItem('DijiangTimingStartMinute', m.value);
+                }
+                window.dispatchEvent(new CustomEvent('dijiang:config-changed'));
+                run();
             });
         }
     }

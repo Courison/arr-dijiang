@@ -308,6 +308,37 @@
         return restore;
     }
     
+    function solveManualTiming(rA, rB, cA, cB, cRestHigh, cRestLow) {
+        const highIsA = rA >= rB;
+        const highRate = highIsA ? rA : rB;
+        const lowRate = highIsA ? rB : rA;
+        const highCw = highIsA ? cA : cB;
+        const lowCw = highIsA ? cB : cA;
+        let bestHHigh = 13, bestOutput = -1, bestBalance = Infinity, bestAHours = 0, found = false;
+        for (let hHigh = 1; hHigh <= 23; hHigh++) {
+            const hLow = 24 - hHigh;
+            const effHighWork = Math.min(hHigh, 1 / highCw);
+            const effLowWork = Math.min(hLow, 1 / lowCw);
+            if (effHighWork * highCw > hLow * cRestHigh + 1e-6) continue;
+            if (effLowWork * lowCw > hHigh * cRestLow + 1e-6) continue;
+            const output = highRate * effHighWork + lowRate * effLowWork;
+            const aHours = highIsA ? hHigh : hLow;
+            const balance = Math.abs(aHours - 12);
+            const better = !found || output > bestOutput + 1e-9 ||
+                (Math.abs(output - bestOutput) <= 1e-9 && (balance < bestBalance - 1e-9 ||
+                    (Math.abs(balance - bestBalance) <= 1e-9 && aHours > bestAHours)));
+            if (better) {
+                bestOutput = output;
+                bestHHigh = hHigh;
+                bestBalance = balance;
+                bestAHours = aHours;
+                found = true;
+            }
+        }
+        const hA = highIsA ? bestHHigh : (24 - bestHHigh);
+        return { hA, hB: 24 - hA, found, highIsA };
+    }
+
     function computeOneProduct24h(roomKey, productMeta, hAOverride) {
         const isDouble = manualSchedule.mode === 'double';
         const g1 = calcGroupRate(roomKey, 'round1', productMeta);
@@ -315,6 +346,12 @@
 
         const rateOf = g => (1 + g.eff / 100) * (1 + 0.4 * g.N);
         const cWorkOf = g => C_WORK_BASE * Math.max(0.1, 1 - g.reduce / 100);
+        const pctOf = (hA, hB) => {
+            let weighted = 0;
+            if (g1 && g1.N > 0) weighted += rateOf(g1) * hA;
+            if (isDouble && g2 && g2.N > 0) weighted += rateOf(g2) * hB;
+            return weighted > 0 ? `${((weighted / 24) * 100).toFixed(2)}%` : '—';
+        };
 
         const restore1 = computeCentralRestore('round1');
         const restore2 = isDouble ? computeCentralRestore('round2') : restore1;
@@ -324,70 +361,30 @@
         const cRestLow  = Math.min(cRest1, cRest2);
 
         if (!isDouble || !g2 || g2.N === 0) {
-            if (g1.N === 0) return '—';
-            const r = rateOf(g1);
-            const cw = cWorkOf(g1);
-            const tMax = Math.min(24, 1 / cw, 24 * cRestHigh / (cw + cRestHigh));
-            if (hAOverride != null) {
-                const hA = Math.min(hAOverride, 24);
-                return `+${(r * hA).toFixed(2)}%（${hA}h）`;
-            }
-            return `+${(r * tMax).toFixed(2)}%`;
+            if (!g1 || g1.N === 0) return '—';
+            const hA = hAOverride != null ? Math.min(hAOverride, 24) : 24;
+            if (roomKey !== 'central') saveRoomTiming(roomKey, hA, 24 - hA);
+            return pctOf(hA, 24 - hA);
         }
 
-        const rA = rateOf(g1), rB = rateOf(g2);
         const cA = cWorkOf(g1), cB = cWorkOf(g2);
-
-        if (hAOverride != null) {
-            const hA = hAOverride;
-            const hB = 24 - hA;
-            const output = rA * hA + rB * hB;
-            if (roomKey !== 'central') saveRoomTiming(roomKey, hA, hB);
-            return `+${output.toFixed(2)}%（${hA}h+${hB}h）`;
-        }
-
-        const highIsA = rA >= rB;
-        const highRate = highIsA ? rA : rB;
-        const lowRate  = highIsA ? rB : rA;
-        const highCw   = highIsA ? cA : cB;
-        const lowCw    = highIsA ? cB : cA;
-
-        let bestHHigh = 13;
-        let bestOutput = -1;
-        let found = false;
-
-        for (let hHigh = 1; hHigh <= 23; hHigh++) {
-            const hLow = 24 - hHigh;
-            const effHighWork = Math.min(hHigh, 1 / highCw);
-            const effLowWork  = Math.min(hLow,  1 / lowCw);
-
-            const highConsume = effHighWork * highCw;
-            const highRestore = hLow * cRestHigh;
-            const lowConsume  = effLowWork * lowCw;
-            const lowRestore  = hHigh * cRestLow;
-
-            if (highConsume > highRestore + 1e-6) continue;
-            if (lowConsume  > lowRestore  + 1e-6) continue;
-
-            const output = highRate * effHighWork + lowRate * effLowWork;
-            if (!found || output > bestOutput) {
-                bestOutput = output;
-                bestHHigh = hHigh;
-                found = true;
-            }
-        }
-
-        if (!found) {
-            const tMax = Math.min(24, 1 / highCw, 24 * cRestHigh / (highCw + cRestHigh));
-            return `+${(highRate * tMax).toFixed(2)}%`;
-        }
-
-        const h1 = highIsA ? bestHHigh : (24 - bestHHigh);
-        const h2 = 24 - h1;
-        if (roomKey !== 'central') saveRoomTiming(roomKey, h1, h2);
-        return `+${bestOutput.toFixed(2)}%（${h1}h+${h2}h）`;
+        const solved = solveManualTiming(rateOf(g1), rateOf(g2), cA, cB, cRestHigh, cRestLow);
+        const hA = hAOverride != null ? Math.min(hAOverride, 24) : solved.hA;
+        const hB = 24 - hA;
+        if (roomKey !== 'central') saveRoomTiming(roomKey, hA, hB);
+        return pctOf(hA, hB);
     }
     
+    function getTimingSuffix(roomKey) {
+        try {
+            const raw = sessionStorage.getItem(STORAGE_KEY_OPTIMAL_HA);
+            if (!raw) return '';
+            const t = (JSON.parse(raw) || {})[roomKey];
+            if (!t || !Number.isFinite(Number(t.h1)) || !Number.isFinite(Number(t.h2))) return '';
+            return `（${Number(t.h1)}h+${Number(t.h2)}h）`;
+        } catch (e) { return ''; }
+    }
+
     function compute24hOutput(roomKey) {
         const isDouble = manualSchedule.mode === 'double';
         
@@ -395,9 +392,9 @@
             const r1 = computeCentralRestore('round1');
             if (isDouble) {
                 const r2 = computeCentralRestore('round2');
-                return { text: `一轮 +${r1}%/h · 二轮 +${r2}%/h`, isCentral: true, needProduct: false };
+                return { text: `A班 ${r1}%/h · B班 ${r2}%/h`, isCentral: true, needProduct: false };
             }
-            return { text: `+${r1}%/h`, isCentral: true, needProduct: false };
+            return { text: `${r1}%/h`, isCentral: true, needProduct: false };
         }
         
         const isManufact = roomKey === 'manufactA' || roomKey === 'manufactB';
@@ -427,8 +424,7 @@
                 const numeric = full.replace(/（\d+h\+\d+h）$/, '');
                 pieces.push(`${m.effName}${numeric}`);
             }
-            const timeSuffix = `（${hA}h+${24 - hA}h）`;
-            return { text: pieces.join(' / ') + timeSuffix, isCentral: false, needProduct: false };
+            return { text: pieces.join(' / '), isCentral: false, needProduct: false };
         }
         
         if (isMeeting) {
@@ -454,22 +450,7 @@
         const cA = cWorkOf(g1);
         if (!g2 || g2.N === 0) return Math.min(24, Math.floor(1 / cA));
         const cB = cWorkOf(g2);
-        const rA = rateOf(g1), rB = rateOf(g2);
-        const highIsA = rA >= rB;
-        const highCw   = highIsA ? cA : cB;
-        const lowCw    = highIsA ? cB : cA;
-        let bestHHigh = 13, bestOutput = -1, found = false;
-        for (let hHigh = 1; hHigh <= 23; hHigh++) {
-            const hLow = 24 - hHigh;
-            const effHighWork = Math.min(hHigh, 1 / highCw);
-            const effLowWork  = Math.min(hLow,  1 / lowCw);
-            if (effHighWork * highCw > hLow * cRestHigh + 1e-6) continue;
-            if (effLowWork  * lowCw  > hHigh * cRestLow  + 1e-6) continue;
-            const output = (highIsA ? rA : rB) * effHighWork + (highIsA ? rB : rA) * effLowWork;
-            if (!found || output > bestOutput) { bestOutput = output; bestHHigh = hHigh; found = true; }
-        }
-        if (!found) bestHHigh = 13;
-        return highIsA ? bestHHigh : (24 - bestHHigh);
+        return solveManualTiming(rateOf(g1), rateOf(g2), cA, cB, cRestHigh, cRestLow).hA;
     }
 
     function saveRoomTiming(roomKey, h1, h2) {
@@ -681,10 +662,11 @@
     
     function buildOutputArea(roomKey) {
         const output = compute24hOutput(roomKey);
+        const timingSuffix = getTimingSuffix(roomKey);
         if (output.isCentral) return `<div class="room-output central-output">${escapeHtml(output.text)}</div>`;
         if (roomKey === 'culture') {
             if (output.needProduct) return `<div class="room-product-picker">${buildCultureDropdown()}</div>`;
-            return `<div class="room-output-group">${buildCultureDropdown()}<div class="room-output">24h均产${escapeHtml(output.text)}</div></div>`;
+            return `<div class="room-output-group">${buildCultureDropdown()}<div class="room-output">24h均产${escapeHtml(output.text)}${escapeHtml(timingSuffix)}</div></div>`;
         }
         const opts = PRODUCT_OPTIONS[roomKey];
         if (opts) {
@@ -693,9 +675,9 @@
             if (output.needProduct) {
                 return `<div class="room-product-picker"><select class="product-select" data-room="${roomKey}"><option value="">选择素材</option>${optionHtml}</select></div>`;
             }
-            return `<div class="room-output-group"><select class="product-select inline" data-room="${roomKey}">${optionHtml}</select><div class="room-output">24h均产${escapeHtml(output.text)}</div></div>`;
+            return `<div class="room-output-group"><select class="product-select inline" data-room="${roomKey}">${optionHtml}</select><div class="room-output">24h均产${escapeHtml(output.text)}${escapeHtml(timingSuffix)}</div></div>`;
         }
-        return `<div class="room-output">24h均产${escapeHtml(output.text)}</div>`;
+        return `<div class="room-output">24h均产${escapeHtml(output.text)}${escapeHtml(timingSuffix)}</div>`;
     }
     
     function buildCultureDropdown() {
@@ -730,11 +712,11 @@
         if (!container) return;
         const boxes = container.querySelectorAll('.manual-room-box');
         for (const box of boxes) {
-            const header = box.querySelector('.manual-room-header > span:first-child');
+            const header = box.querySelector('.manual-room-header > span:not(.v2-room-icon)');
             if (!header || header.textContent.trim() !== '培养舱') continue;
             const output = compute24hOutput('culture');
             const outEl = box.querySelector('.room-output');
-            if (outEl) outEl.textContent = output.needProduct ? '' : `24h均产${output.text}`;
+            if (outEl) outEl.textContent = output.needProduct ? '' : `24h均产${output.text}${getTimingSuffix('culture')}`;
             const ddBtn = box.querySelector('.product-dropdown-btn');
             if (ddBtn) {
                 const opts = PRODUCT_OPTIONS.culture;
@@ -1018,7 +1000,7 @@
         const isDouble = manualSchedule.mode === 'double';
         
         exportContainer.innerHTML = `
-          <div style="text-align:center;font-size:26px;font-weight:700;margin-bottom:6px;">帝江号手动排班表${isDouble ? '（二轮）' : ''}</div>
+          <div style="text-align:center;font-size:26px;font-weight:700;margin-bottom:6px;">帝江号手动排班表${isDouble ? '（双班）' : ''}</div>
           <div style="text-align:center;font-size:12px;color:#666;margin-bottom:18px;">生成时间 ${dateStr}</div>
           <div id="manualExportGrid" style="display:flex;flex-direction:column;gap:14px;"></div>
           <div style="margin-top:20px;border-top:1px solid #ddd;padding-top:12px;font-size:11px;color:#888;text-align:center;">https://arr-dijiang.top/manual/</div>
@@ -1054,13 +1036,14 @@
         
         const buildExportRoom = (roomKey) => {
             const output = compute24hOutput(roomKey);
+            const exportLabels = { ...ROOM_LABELS, manufactA: '制造舱 Ⅰ', manufactB: '制造舱 Ⅱ' };
             let outputText = '';
             if (output.isCentral) outputText = `<div style="font-size:11px;color:#8a6d3b;margin-bottom:6px;text-align:center;">${escapeHtml(output.text)}</div>`;
             else if (output.needProduct) outputText = `<div style="font-size:11px;color:#999;margin-bottom:6px;text-align:center;">未选择素材</div>`;
             else outputText = `<div style="font-size:11px;color:#3f7e6b;margin-bottom:6px;text-align:center;">24h均产${escapeHtml(output.text)}</div>`;
             
             let inner = `<div style="border:1px solid #e0e0e0;border-radius:12px;padding:12px;background:#fafafa;">
-                <div style="font-weight:600;font-size:14px;margin-bottom:10px;text-align:center;">${ROOM_LABELS[roomKey]}</div>${outputText}`;
+                <div style="font-weight:600;font-size:14px;margin-bottom:10px;text-align:center;">${exportLabels[roomKey] || ROOM_LABELS[roomKey]}</div>${outputText}`;
                 
             const buildRoundRow = (rnd) => {
                 const slots = manualSchedule.rooms[roomKey][rnd];
@@ -1068,7 +1051,7 @@
             };
             
             if (isDouble) {
-                inner += `<div style="font-size:11px;color:#666;margin-bottom:4px;">一轮</div>${buildRoundRow('round1')}<div style="font-size:11px;color:#666;margin-top:10px;margin-bottom:4px;">二轮</div>${buildRoundRow('round2')}</div>`;
+                inner += `<div style="font-size:11px;color:#666;margin-bottom:4px;">A班</div>${buildRoundRow('round1')}<div style="font-size:11px;color:#666;margin-top:10px;margin-bottom:4px;">B班</div>${buildRoundRow('round2')}</div>`;
             } else {
                 inner += `${buildRoundRow('round1')}</div>`;
             }

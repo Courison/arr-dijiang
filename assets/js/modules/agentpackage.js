@@ -39,7 +39,7 @@
     let rawData = null;
     let operatorOrder = [];
     let config = {};  // { name: { elite, talents: [] } }
-    const filters = { star: 'all', room: 'all', type: 'all', status: 'all' };
+    const filters = { star: 'all', room: 'all', type: 'all', status: 'all', subtype: 'all' };
     // ★ 新增：弹窗内的筛选状态
     let editFilterStar = 'all';
     let editFilterAttr = 'all';
@@ -302,7 +302,69 @@
             if (filters.type !== 'all' && r.typeGroup !== filters.type) return false;
             if (filters.status === 'active' && r.status !== 'active') return false;
             if (filters.status === 'inactive' && r.status === 'active') return false;
+
+            if (filters.subtype !== 'all' && r.trait) {
+                if (filters.type === '效率提升') {
+                    const EFF = {
+                        weapon: '武器素材效率',
+                        operator: '干员素材效率',
+                        plant: '晶植效率',
+                        fungi: '菌类效率',
+                        mineral: '矿物效率',
+                    };
+                    if (r.trait.类型 !== EFF[filters.subtype]) return false;
+                } else if (filters.type === '线索概率提升') {
+                    if (String(r.trait.线索编号) !== filters.subtype) return false;
+                }
+            }
             return true;
+        });
+    }
+
+    // 二级筛选：效率提升 -> 武器/干员/晶植/菌类/矿物；线索概率 -> 线索 1-7
+    function getSubOptions() {
+        if (filters.type === '效率提升') {
+            return [
+                ['weapon', '武器'],
+                ['operator', '干员'],
+                ['plant', '晶植'],
+                ['fungi', '菌类'],
+                ['mineral', '矿物'],
+            ];
+        }
+        if (filters.type === '线索概率提升') {
+            return ['1', '2', '3', '4', '5', '6', '7'].map(function (n) {
+                return [n, '线索 ' + n];
+            });
+        }
+        return [];
+    }
+
+    function renderSubFilters() {
+        const row = document.getElementById('apSubFilterRow');
+        const wrap = document.getElementById('apSubFilterTags');
+        const label = document.getElementById('apSubFilterLabel');
+        if (!row || !wrap) return;
+        const options = getSubOptions();
+        if (!options.length) {
+            row.hidden = true;
+            wrap.innerHTML = '';
+            filters.subtype = 'all';
+            return;
+        }
+        label.textContent = filters.type === '效率提升' ? '效率细分' : '线索编号';
+        row.hidden = false;
+        wrap.innerHTML = '<button class="ap-filter-tag' + (filters.subtype === 'all' ? ' active' : '') + '" data-subtype="all">全部</button>' +
+            options.map(function (item) {
+                return '<button class="ap-filter-tag' + (filters.subtype === item[0] ? ' active' : '') + '" data-subtype="' + item[0] + '">' + item[1] + '</button>';
+            }).join('');
+        wrap.querySelectorAll('[data-subtype]').forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                wrap.querySelectorAll('[data-subtype]').forEach(function (b) { b.classList.remove('active'); });
+                this.classList.add('active');
+                filters.subtype = this.dataset.subtype;
+                render();
+            });
         });
     }
 
@@ -370,6 +432,10 @@
                     });
                     this.classList.add('active');
                     filters[key] = this.dataset.value;
+                    if (key === 'type') {
+                        filters.subtype = 'all';
+                        renderSubFilters();
+                    }
                     render();
                 });
             });
@@ -596,6 +662,7 @@
         }
 
         bindFilters();
+        renderSubFilters();
         render();
 
         // 编辑弹窗绑定

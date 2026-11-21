@@ -1,266 +1,5330 @@
 {
+  "schemaVersion": 2,
   "operator_order": [
-    "骏卫", "黎风", "余烬", "别礼", "艾尔黛拉", "莱万汀", "洁尔佩塔", "伊冯",
-    "汤汤", "洛茜", "庄方宜", "弭弗", "卡缪", "诀", "梨诺", "提弗洛斯", "祀",
-    
-    "陈千语", "大潘", "狼卫", "艾维文娜", "弧光", "佩丽卡", "阿列什", "赛希",
-    "昼雪", "噗切娜",
-    
-    "卡契尔", "秋栗", "安塔尔", "埃特拉", "萤石"
+    "骏卫",
+    "黎风",
+    "余烬",
+    "别礼",
+    "艾尔黛拉",
+    "莱万汀",
+    "洁尔佩塔",
+    "伊冯",
+    "汤汤",
+    "洛茜",
+    "庄方宜",
+    "弭弗",
+    "卡缪",
+    "诀",
+    "梨诺",
+    "提弗洛斯",
+    "祀",
+    "明河",
+    "陈千语",
+    "大潘",
+    "狼卫",
+    "艾维文娜",
+    "弧光",
+    "佩丽卡",
+    "阿列什",
+    "赛希",
+    "昼雪",
+    "噗切娜",
+    "卡契尔",
+    "秋栗",
+    "安塔尔",
+    "埃特拉",
+    "萤石"
   ],
   "骏卫": {
-    "star": "六星", "attribute": "物理",
-    "精一": [{"舱室": "制造舱", "类型": "武器素材效率", "数值": 20, "name": "先利其器·β" }],
-    "精二": [{"舱室": "制造舱", "类型": "心情消耗减少", "数值": 14, "name": "鼓舞士气·β"}],
-    "精三": [{"舱室": "制造舱","类型": "武器素材效率","数值": 30,"name": "先利其器·γ"}],
-    "精四": [{"舱室": "制造舱", "类型": "心情消耗减少", "数值": 18, "name": "鼓舞士气·γ"}]
+    "star": "六星",
+    "attribute": "物理",
+    "charId": "chr_0029_pograni",
+    "engName": "Pogranichnik",
+    "rarity": 6,
+    "profession": {
+      "id": 7,
+      "name": "先锋",
+      "icon": "icon_profession_7"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "战斗中，通过自身技能每恢复{atb_gain:0}点技力后，获得持续{duration:0}秒的士气激昂。\n士气激昂效果：攻击力+{atk_up:0%}，源石技艺强度+{physpell_up:0}。\n该效果最多叠加3层，每层单独计算时间。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "战斗中，通过自身技能每恢复{atb_gain:0}点技力后，获得持续{duration:0}秒的士气激昂。\n士气激昂效果：攻击力+{atk_up:0%}，源石技艺强度+{physpell_up:0}。\n该效果最多叠加3层，每层单独计算时间。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "当任意干员触发终结技盾卫旗队，上前的后续效果后，也会获得持续{duration:0}秒的士气激昂。\n需要激活天赋活着的旗帜。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "当任意干员触发终结技盾卫旗队，上前的后续效果后，也会获得持续{duration:0}秒的士气激昂。\n需要激活天赋活着的旗帜。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0029_pograni_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "先利其器·β",
+        "talentName": "先利其器",
+        "desc": "进驻制造舱时，武器经验素材的生产效率提升20%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "武器素材效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.20000000298023224,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0029_pograni_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "先利其器·γ",
+        "talentName": "先利其器",
+        "desc": "进驻制造舱时，武器经验素材的生产效率提升30%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "武器素材效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.30000001192092896,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0029_pograni_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "鼓舞士气·β",
+        "talentName": "鼓舞士气",
+        "desc": "进驻制造舱时，舱室内干员心情消耗降低14%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0029_pograni_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "鼓舞士气·γ",
+        "talentName": "鼓舞士气",
+        "desc": "进驻制造舱时，舱室内干员心情消耗降低18%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 18.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_power_consume",
+        "params": [
+          0.18000000715255737
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_power_consume.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "制造舱",
+        "类型": "武器素材效率",
+        "name": "先利其器·β",
+        "数值": 20
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "制造舱",
+        "类型": "心情消耗减少",
+        "name": "鼓舞士气·β",
+        "数值": 14
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "制造舱",
+        "类型": "武器素材效率",
+        "name": "先利其器·γ",
+        "数值": 30
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "制造舱",
+        "类型": "心情消耗减少",
+        "name": "鼓舞士气·γ",
+        "数值": 18
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0029_pograni_1_1",
+      "精二": "spaceship_skill_chr_0029_pograni_2_1",
+      "精三": "spaceship_skill_chr_0029_pograni_1_2",
+      "精四": "spaceship_skill_chr_0029_pograni_2_2"
+    }
   },
   "黎风": {
     "star": "六星",
     "attribute": "物理",
-    "精一": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 12, "name": "少年意气·β"}],
-    "精二": [{"舱室": "会客室", "类型": "线索概率小幅提升", "线索编号": 3, "name": "小大人·α"}],
-    "精三": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 16, "name": "少年意气·γ"}],
-    "精四": [{"舱室": "会客室", "类型": "线索概率提升", "线索编号": 3, "name": "小大人·β"}]
+    "charId": "chr_0015_lifeng",
+    "engName": "Lifeng",
+    "rarity": 6,
+    "profession": {
+      "id": 0,
+      "name": "近卫",
+      "icon": "icon_profession_0"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "每点智识和意志都会使攻击力额外+{atk_up:0.00%}。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "每点智识和意志都会使攻击力额外+{atk_up:0.00%}。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "每当自身造成倒地时，额外造成攻击力{atk_scale_talent2:0%}的物理伤害。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "每当自身造成倒地时，额外造成攻击力{atk_scale_talent2:0%}的物理伤害。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0015_lifeng_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "少年意气·β",
+        "talentName": "少年意气",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升12%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 12.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.11999999731779099
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0015_lifeng_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "少年意气·γ",
+        "talentName": "少年意气",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升16%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 16.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.1599999964237213
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0015_lifeng_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "小大人·α",
+        "talentName": "小大人",
+        "desc": "进驻会客室时，干员收集到线索3——宏山科学院的概率小幅提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率小幅提升",
+        "value": null,
+        "clue": 3.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          3.0,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0015_lifeng_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "小大人·β",
+        "talentName": "小大人",
+        "desc": "进驻会客室时，干员收集到线索3——宏山科学院的概率提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率提升",
+        "value": null,
+        "clue": 3.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          3.0,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "少年意气·β",
+        "数值": 12
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率小幅提升",
+        "name": "小大人·α",
+        "线索编号": 3
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "少年意气·γ",
+        "数值": 16
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率提升",
+        "name": "小大人·β",
+        "线索编号": 3
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0015_lifeng_1_1",
+      "精二": "spaceship_skill_chr_0015_lifeng_2_1",
+      "精三": "spaceship_skill_chr_0015_lifeng_1_2",
+      "精四": "spaceship_skill_chr_0015_lifeng_2_2"
+    }
   },
   "余烬": {
     "star": "六星",
     "attribute": "灼热",
-    "精一": [{"舱室": "制造舱", "类型": "干员素材效率", "数值": 20, "name": "北地特训·β"}],
-    "精二": [{"舱室": "会客室", "类型": "线索概率小幅提升", "线索编号": 4, "name": "同袍相系·α"}],
-    "精三": [{"舱室": "制造舱", "类型": "干员素材效率", "数值": 30, "name": "北地特训·γ"}],
-    "精四": [{"舱室": "会客室", "类型": "线索概率提升", "线索编号": 4, "name": "同袍相系·β"}]
+    "charId": "chr_0009_azrila",
+    "engName": "Ember",
+    "rarity": 6,
+    "profession": {
+      "id": 2,
+      "name": "重装",
+      "icon": "icon_profession_2"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "战技进军和连携技前线援护的施放过程中获得{shelterrate:0%}庇护，且更不容易被打断。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "战技进军和连携技前线援护的施放过程中获得{shelterrate:0%}庇护，且更不容易被打断。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "受到来自敌人的伤害后，攻击力+{attack:0%}，持续{duration:0}秒，该效果最多叠加3层。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "受到来自敌人的伤害后，攻击力+{attack:0%}，持续{duration:0}秒，该效果最多叠加3层。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0009_azrila_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "北地特训·β",
+        "talentName": "北地特训",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升20%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.20000000298023224,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0009_azrila_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "北地特训·γ",
+        "talentName": "北地特训",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升30%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.30000001192092896,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0009_azrila_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "同袍相系·α",
+        "talentName": "同袍相系",
+        "desc": "进驻会客室时，干员收集到线索4——铁誓军的概率小幅提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率小幅提升",
+        "value": null,
+        "clue": 4.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          4.0,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0009_azrila_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "同袍相系·β",
+        "talentName": "同袍相系",
+        "desc": "进驻会客室时，干员收集到线索4——铁誓军的概率提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率提升",
+        "value": null,
+        "clue": 4.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          4.0,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "北地特训·β",
+        "数值": 20
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率小幅提升",
+        "name": "同袍相系·α",
+        "线索编号": 4
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "北地特训·γ",
+        "数值": 30
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率提升",
+        "name": "同袍相系·β",
+        "线索编号": 4
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0009_azrila_1_1",
+      "精二": "spaceship_skill_chr_0009_azrila_2_1",
+      "精三": "spaceship_skill_chr_0009_azrila_1_2",
+      "精四": "spaceship_skill_chr_0009_azrila_2_2"
+    }
   },
   "别礼": {
     "star": "六星",
     "attribute": "寒冷",
-    "精一": [{"舱室": "培养舱", "类型": "晶植效率", "数值": 20, "name": "墓地园艺·β"}],
-    "精二": [{"舱室": "会客室", "类型": "线索概率小幅提升", "线索编号": 7, "name": "王庭盛名·α"}],
-    "精三": [{"舱室": "培养舱", "类型": "晶植效率", "数值": 30, "name": "墓地园艺·γ"}],
-    "精四": [{"舱室": "会客室", "类型": "线索概率提升", "线索编号": 7, "name": "王庭盛名·β"}]
+    "charId": "chr_0026_lastrite",
+    "engName": "Last Rite",
+    "rarity": 6,
+    "profession": {
+      "id": 8,
+      "name": "突击",
+      "icon": "icon_profession_8"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "当别礼消耗任何法术附着后，对该目标施加寒冷脆弱，效果为被消耗的法术附着层数×{crystal_up:0%}，持续{duration:0}秒，该效果无法叠加。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "当别礼消耗任何法术附着后，对该目标施加寒冷脆弱，效果为被消耗的法术附着层数×{crystal_up:0%}，持续{duration:0}秒，该效果无法叠加。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "终结技临终别礼造成伤害时，如果敌人处于寒冷脆弱状态，将其寒冷脆弱的效果视为原本的{rate:0.0}倍。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "终结技临终别礼造成伤害时，如果敌人处于寒冷脆弱状态，将其寒冷脆弱的效果视为原本的{rate:0.0}倍。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0026_lastrite_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "墓地园艺·β",
+        "talentName": "墓地园艺",
+        "desc": "进驻培养舱时，晶植质料的培养速度提升20%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "晶植效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_flower",
+        "params": [
+          0.20000000298023224,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_flower.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0026_lastrite_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "墓地园艺·γ",
+        "talentName": "墓地园艺",
+        "desc": "进驻培养舱时，晶植质料的培养速度提升30%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "晶植效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_flower",
+        "params": [
+          0.30000001192092896,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_flower.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0026_lastrite_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "王庭盛名·α",
+        "talentName": "王庭盛名",
+        "desc": "进驻会客室时，干员收集到线索7——塞什卡的概率小幅提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率小幅提升",
+        "value": null,
+        "clue": 7.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          7.0,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0026_lastrite_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "王庭盛名·β",
+        "talentName": "王庭盛名",
+        "desc": "进驻会客室时，干员收集到线索7——塞什卡的概率提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率提升",
+        "value": null,
+        "clue": 7.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          7.0,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "培养舱",
+        "类型": "晶植效率",
+        "name": "墓地园艺·β",
+        "数值": 20
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率小幅提升",
+        "name": "王庭盛名·α",
+        "线索编号": 7
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "培养舱",
+        "类型": "晶植效率",
+        "name": "墓地园艺·γ",
+        "数值": 30
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率提升",
+        "name": "王庭盛名·β",
+        "线索编号": 7
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0026_lastrite_1_1",
+      "精二": "spaceship_skill_chr_0026_lastrite_2_1",
+      "精三": "spaceship_skill_chr_0026_lastrite_1_2",
+      "精四": "spaceship_skill_chr_0026_lastrite_2_2"
+    }
   },
   "艾尔黛拉": {
     "star": "六星",
     "attribute": "自然",
-    "精一": [{"舱室": "会客室", "类型": "收集线索效率", "数值": 20, "name": "大地的故事·β"}],
-    "精二": [{"舱室": "会客室", "类型": "心情消耗减少", "数值": 14, "name": "多利先生的游戏·β"}],
-    "精三": [{"舱室": "会客室", "类型": "收集线索效率", "数值": 30, "name": "大地的故事·γ"}],
-    "精四": [{"舱室": "会客室", "类型": "心情消耗减少", "数值": 18, "name": "多利先生的游戏·γ"}]
+    "charId": "chr_0025_ardelia",
+    "engName": "Ardelia",
+    "rarity": 6,
+    "profession": {
+      "id": 4,
+      "name": "辅助",
+      "icon": "icon_profession_4"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "战技奔腾的多利命中敌人后生成{sheep_num:0}个多利先生的影子，终结技毛茸茸派对散射的多利先生的分身落地时有{effect_prob:0%}概率生成多利先生的影子。主控干员触碰多利先生的影子后，艾尔黛拉为其回复[{heal_value:0}+意志×{heal_scale:0.00}]点生命值。\n主控干员生命值已满时，将转而治疗小队中生命值百分比最低的干员。\n多利先生的影子持续10秒，最多同时存在10个。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "战技奔腾的多利命中敌人后生成{sheep_num:0}个多利先生的影子，终结技毛茸茸派对散射的多利先生的分身落地时有{effect_prob:0%}概率生成多利先生的影子。主控干员触碰多利先生的影子后，艾尔黛拉为其回复[{heal_value:0}+意志×{heal_scale:0.00}]点生命值。\n主控干员生命值已满时，将转而治疗小队中生命值百分比最低的干员。\n多利先生的影子持续10秒，最多同时存在10个。"
+      },
+      {
+        "slot": 1,
+        "level": 3,
+        "title": "天赋1·③",
+        "descPlain": "战技奔腾的多利命中敌人后生成{sheep_num:0}个多利先生的影子，终结技毛茸茸派对散射的多利先生的分身落地时有{effect_prob:0%}概率生成多利先生的影子。主控干员触碰多利先生的影子后，艾尔黛拉为其回复[{heal_value:0}+意志×{heal_scale:0.00}]点生命值。\n主控干员生命值已满时，将转而治疗小队中生命值百分比最低的干员。\n多利先生的影子持续10秒，最多同时存在10个。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "当艾尔黛拉的战技奔腾的多利成功触发额外效果后，若附近存在其他处于腐蚀状态的敌人，会立即再对其发动一次战技。\n每次主动施放战技只会触发一次该效果。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0025_ardelia_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "大地的故事·β",
+        "talentName": "大地的故事",
+        "desc": "进驻会客室时，干员收集线索的效率提升20%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 4,
+        "effect": "收集线索效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_efficiency",
+        "params": [
+          0.20000000298023224
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_efficiency.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0025_ardelia_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "大地的故事·γ",
+        "talentName": "大地的故事",
+        "desc": "进驻会客室时，干员收集线索的效率提升30%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 4,
+        "effect": "收集线索效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_efficiency",
+        "params": [
+          0.30000001192092896
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_efficiency.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0025_ardelia_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "多利先生的游戏·β",
+        "talentName": "多利先生的游戏",
+        "desc": "进驻会客室时，舱室内干员心情消耗降低14%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0025_ardelia_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "多利先生的游戏·γ",
+        "talentName": "多利先生的游戏",
+        "desc": "进驻会客室时，舱室内干员心情消耗降低18%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 18.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_power_consume",
+        "params": [
+          0.18000000715255737
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_power_consume.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "会客室",
+        "类型": "收集线索效率",
+        "name": "大地的故事·β",
+        "数值": 20
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "会客室",
+        "类型": "心情消耗减少",
+        "name": "多利先生的游戏·β",
+        "数值": 14
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "会客室",
+        "类型": "收集线索效率",
+        "name": "大地的故事·γ",
+        "数值": 30
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "会客室",
+        "类型": "心情消耗减少",
+        "name": "多利先生的游戏·γ",
+        "数值": 18
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0025_ardelia_1_1",
+      "精二": "spaceship_skill_chr_0025_ardelia_2_1",
+      "精三": "spaceship_skill_chr_0025_ardelia_1_2",
+      "精四": "spaceship_skill_chr_0025_ardelia_2_2"
+    }
   },
   "莱万汀": {
     "star": "六星",
     "attribute": "灼热",
-    "精一": [{"舱室": "制造舱", "类型": "干员素材效率", "数值": 20, "name": "记忆熔炉·β"}],
-    "精二": [{"舱室": "制造舱", "类型": "心情消耗减少", "数值": 14, "name": "不熄炎火·β"}],
-    "精三": [{"舱室": "制造舱", "类型": "干员素材效率", "数值": 30, "name": "记忆熔炉·γ"}],
-    "精四": [{"舱室": "制造舱", "类型": "心情消耗减少", "数值": 18, "name": "不熄炎火·γ"}]
+    "charId": "chr_0016_laevat",
+    "engName": "Laevatain",
+    "rarity": 6,
+    "profession": {
+      "id": 8,
+      "name": "突击",
+      "icon": "icon_profession_8"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "主控干员重击或处决命中后，莱万汀会吸收周围敌人的灼热附着。\n每吸收一层灼热附着，自身获得一层熔火，最多叠加{max_stack:0}层。\n达到{max_stack:0}层后，莱万汀造成的伤害无视敌人{-ignore_fire_resist:0}点灼热抗性，持续{ignore_fire_resist_duration:0}秒。\n附近敌人被击败时，身上的灼热附着也会被吸收。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "主控干员重击或处决命中后，莱万汀会吸收周围敌人的灼热附着。\n每吸收一层灼热附着，自身获得一层熔火，最多叠加{max_stack:0}层。\n达到{max_stack:0}层后，莱万汀造成的伤害无视敌人{-ignore_fire_resist:0}点灼热抗性，持续{ignore_fire_resist_duration:0}秒。\n附近敌人被击败时，身上的灼热附着也会被吸收。"
+      },
+      {
+        "slot": 1,
+        "level": 3,
+        "title": "天赋1·③",
+        "descPlain": "主控干员重击或处决命中后，莱万汀会吸收周围敌人的灼热附着。\n每吸收一层灼热附着，自身获得一层熔火，最多叠加{max_stack:0}层。\n达到{max_stack:0}层后，莱万汀造成的伤害无视敌人{-ignore_fire_resist:0}点灼热抗性，持续{ignore_fire_resist_duration:0}秒。\n附近敌人被击败时，身上的灼热附着也会被吸收。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "当生命值低于{hp_threshold:0%}时，获得{shelter:0%}庇护，并每秒回复{heal_max_hp:0%}最大生命值，持续{duration:0}秒。该效果每{cd:0}秒最多触发一次。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "当生命值低于{hp_threshold:0%}时，获得{shelter:0%}庇护，并每秒回复{heal_max_hp:0%}最大生命值，持续{duration:0}秒。该效果每{cd:0}秒最多触发一次。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0016_laevat_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "记忆熔炉·β",
+        "talentName": "记忆熔炉",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升20%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.20000000298023224,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0016_laevat_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "记忆熔炉·γ",
+        "talentName": "记忆熔炉",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升30%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.30000001192092896,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0016_laevat_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "不熄炎火·β",
+        "talentName": "不熄炎火",
+        "desc": "进驻制造舱时，舱室内干员心情消耗降低14%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0016_laevat_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "不熄炎火·γ",
+        "talentName": "不熄炎火",
+        "desc": "进驻制造舱时，舱室内干员心情消耗降低18%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 18.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_power_consume",
+        "params": [
+          0.18000000715255737
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_power_consume.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "记忆熔炉·β",
+        "数值": 20
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "制造舱",
+        "类型": "心情消耗减少",
+        "name": "不熄炎火·β",
+        "数值": 14
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "记忆熔炉·γ",
+        "数值": 30
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "制造舱",
+        "类型": "心情消耗减少",
+        "name": "不熄炎火·γ",
+        "数值": 18
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0016_laevat_1_1",
+      "精二": "spaceship_skill_chr_0016_laevat_2_1",
+      "精三": "spaceship_skill_chr_0016_laevat_1_2",
+      "精四": "spaceship_skill_chr_0016_laevat_2_2"
+    }
   },
   "洁尔佩塔": {
     "star": "六星",
     "attribute": "自然",
-    "精一": [{"舱室": "制造舱", "类型": "心情消耗减少", "数值": 14, "name": "信使的加工艺术·β"}],
-    "精二": [{"舱室": "制造舱", "类型": "武器素材效率", "数值": 20, "name": "信使的武器知识·β"}],
-    "精三": [{"舱室": "制造舱", "类型": "心情消耗减少", "数值": 18, "name": "信使的加工艺术·γ"}],
-    "精四": [{"舱室": "制造舱", "类型": "武器素材效率", "数值": 30, "name": "信使的武器知识·γ"}]
+    "charId": "chr_0013_aglina",
+    "engName": "Gilberta",
+    "rarity": 6,
+    "profession": {
+      "id": 4,
+      "name": "辅助",
+      "icon": "icon_profession_4"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "在场时，使小队内所有友方近卫、术师和辅助干员终结技充能效率+{add:0%}。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "在场时，使小队内所有友方近卫、术师和辅助干员终结技充能效率+{add:0%}。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "战技秘杖·引力模式、连携技秘杖·矩阵位移效果加强：战技秘杖·引力模式最后一击或连携技秘杖·矩阵位移命中至少两个敌人后，回复主控干员[{heal_const:0}+智识×{heal_scale:0.00}]生命值。\n主控干员生命值已满时，将转而治疗小队中生命值百分比最低的干员。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "战技秘杖·引力模式、连携技秘杖·矩阵位移效果加强：战技秘杖·引力模式最后一击或连携技秘杖·矩阵位移命中至少两个敌人后，回复主控干员[{heal_const:0}+智识×{heal_scale:0.00}]生命值。\n主控干员生命值已满时，将转而治疗小队中生命值百分比最低的干员。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0013_aglina_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "信使的加工艺术·β",
+        "talentName": "信使的加工艺术",
+        "desc": "进驻制造舱时，舱室内干员心情消耗降低14%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0013_aglina_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "信使的加工艺术·γ",
+        "talentName": "信使的加工艺术",
+        "desc": "进驻制造舱时，舱室内干员心情消耗降低18%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 18.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_power_consume",
+        "params": [
+          0.18000000715255737
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0013_aglina_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "信使的武器知识·β",
+        "talentName": "信使的武器知识",
+        "desc": "进驻制造舱时，武器经验素材的生产效率提升20%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "武器素材效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.20000000298023224,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0013_aglina_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "信使的武器知识·γ",
+        "talentName": "信使的武器知识",
+        "desc": "进驻制造舱时，武器经验素材的生产效率提升30%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "武器素材效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.30000001192092896,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 2
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "制造舱",
+        "类型": "心情消耗减少",
+        "name": "信使的加工艺术·β",
+        "数值": 14
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "制造舱",
+        "类型": "武器素材效率",
+        "name": "信使的武器知识·β",
+        "数值": 20
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "制造舱",
+        "类型": "心情消耗减少",
+        "name": "信使的加工艺术·γ",
+        "数值": 18
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "制造舱",
+        "类型": "武器素材效率",
+        "name": "信使的武器知识·γ",
+        "数值": 30
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0013_aglina_1_1",
+      "精二": "spaceship_skill_chr_0013_aglina_2_1",
+      "精三": "spaceship_skill_chr_0013_aglina_1_2",
+      "精四": "spaceship_skill_chr_0013_aglina_2_2"
+    }
   },
   "伊冯": {
     "star": "六星",
     "attribute": "寒冷",
-    "精一": [{"舱室": "培养舱", "类型": "菌类效率", "数值": 20, "name": "菌类颜料提取·β"}],
-    "精二": [{"舱室": "培养舱", "类型": "心情消耗减少", "数值": 14, "name": "时尚达人·β"}],
-    "精三": [{"舱室": "培养舱", "类型": "菌类效率", "数值": 30, "name": "菌类颜料提取·γ"}],
-    "精四": [{"舱室": "培养舱", "类型": "心情消耗减少", "数值": 18, "name": "时尚达人·γ"}]
+    "charId": "chr_0017_yvonne",
+    "engName": "Yvonne",
+    "rarity": 6,
+    "profession": {
+      "id": 8,
+      "name": "突击",
+      "icon": "icon_profession_8"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "战技冰冰弹·β型成功施加冻结后，下一次普通攻击直接施放重击。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "战技冰冰弹·β型成功施加冻结后，下一次普通攻击直接施放重击，且此次重击造成的伤害+{dmg_up:0%}。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "对处于寒冷附着状态的敌人造成的暴击伤害+{inflict_up:0%}；对处于冻结状态的敌人效果加倍。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "对处于寒冷附着状态的敌人造成的暴击伤害+{inflict_up:0%}；对处于冻结状态的敌人效果加倍。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0017_yvonne_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "菌类颜料提取·β",
+        "talentName": "菌类颜料提取",
+        "desc": "进驻培养舱时，菌类质料的培养速度提升20%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "菌类效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_fungus",
+        "params": [
+          0.20000000298023224,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_fungus.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0017_yvonne_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "菌类颜料提取·γ",
+        "talentName": "菌类颜料提取",
+        "desc": "进驻培养舱时，菌类质料的培养速度提升30%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "菌类效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_fungus",
+        "params": [
+          0.30000001192092896,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_fungus.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0017_yvonne_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "时尚达人·β",
+        "talentName": "时尚达人",
+        "desc": "进驻培养舱时，舱室内干员心情消耗降低14%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0017_yvonne_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "时尚达人·γ",
+        "talentName": "时尚达人",
+        "desc": "进驻培养舱时，舱室内干员心情消耗降低18%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 18.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_power_consume",
+        "params": [
+          0.18000000715255737
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_power_consume.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "培养舱",
+        "类型": "菌类效率",
+        "name": "菌类颜料提取·β",
+        "数值": 20
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "培养舱",
+        "类型": "心情消耗减少",
+        "name": "时尚达人·β",
+        "数值": 14
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "培养舱",
+        "类型": "菌类效率",
+        "name": "菌类颜料提取·γ",
+        "数值": 30
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "培养舱",
+        "类型": "心情消耗减少",
+        "name": "时尚达人·γ",
+        "数值": 18
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0017_yvonne_1_1",
+      "精二": "spaceship_skill_chr_0017_yvonne_2_1",
+      "精三": "spaceship_skill_chr_0017_yvonne_1_2",
+      "精四": "spaceship_skill_chr_0017_yvonne_2_2"
+    }
   },
   "汤汤": {
     "star": "六星",
     "attribute": "寒冷",
-    "精一": [{"舱室": "培养舱", "类型": "心情消耗减少", "数值": 14, "name": "大当家·β"}],
-    "精二": [{"舱室": "培养舱", "类型": "晶植效率", "数值": 20, "name": "河流的女儿·β"}],
-    "精三": [{"舱室": "培养舱", "类型": "心情消耗减少", "数值": 18, "name": "大当家·γ"}],
-    "精四": [{"舱室": "培养舱", "类型": "晶植效率", "数值": 30, "name": "河流的女儿·γ"}]
+    "charId": "chr_0027_tangtang",
+    "engName": "Tangtang",
+    "rarity": 6,
+    "profession": {
+      "id": 5,
+      "name": "术师",
+      "icon": "icon_profession_5"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "涡流附近{range_talent1buff:0}米范围内，友方干员获得{ratio_speed:0%}加速，敌人受到{ratio_speedreduction:0%}缓速，离开范围后该效果持续{duration_talent1buff:0}秒。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "涡流附近{range_talent1buff:0}米范围内，友方干员获得{ratio_speed:0%}加速，敌人受到{ratio_speedreduction:0%}缓速，离开范围后该效果持续{duration_talent1buff:0}秒。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "主控干员在古老图形中进行下落攻击，提前结束演化时，形成一个水龙卷，并消耗附近所有涡流使其形成额外的水龙卷。\n此次形成的水龙卷效果同战技踏潮卷浪！，造成的伤害+{dmg_up_water_ult:0%}。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "主控干员在古老图形中进行下落攻击，提前结束演化时，形成一个水龙卷，并消耗附近所有涡流使其形成额外的水龙卷。\n此次形成的水龙卷效果同战技踏潮卷浪！，造成的伤害+{dmg_up_water_ult:0%}。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0027_tangtang_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "大当家·β",
+        "talentName": "大当家",
+        "desc": "进驻培养舱时，舱室内干员心情消耗降低14%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0027_tangtang_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "大当家·γ",
+        "talentName": "大当家",
+        "desc": "进驻培养舱时，舱室内干员心情消耗降低18%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 18.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_power_consume",
+        "params": [
+          0.18000000715255737
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0027_tangtang_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "河流的女儿·β",
+        "talentName": "河流的女儿",
+        "desc": "进驻培养舱时，晶植质料的培养速度提升20%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "晶植效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_flower",
+        "params": [
+          0.20000000298023224,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_flower.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0027_tangtang_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "河流的女儿·γ",
+        "talentName": "河流的女儿",
+        "desc": "进驻培养舱时，晶植质料的培养速度提升30%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "晶植效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_flower",
+        "params": [
+          0.30000001192092896,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_flower.png",
+        "effectSub": 2
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "培养舱",
+        "类型": "心情消耗减少",
+        "name": "大当家·β",
+        "数值": 14
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "培养舱",
+        "类型": "晶植效率",
+        "name": "河流的女儿·β",
+        "数值": 20
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "培养舱",
+        "类型": "心情消耗减少",
+        "name": "大当家·γ",
+        "数值": 18
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "培养舱",
+        "类型": "晶植效率",
+        "name": "河流的女儿·γ",
+        "数值": 30
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0027_tangtang_1_1",
+      "精二": "spaceship_skill_chr_0027_tangtang_2_1",
+      "精三": "spaceship_skill_chr_0027_tangtang_1_2",
+      "精四": "spaceship_skill_chr_0027_tangtang_2_2"
+    }
   },
   "洛茜": {
     "star": "六星",
     "attribute": "物理",
-    "精一": [{"舱室": "会客室", "类型": "心情消耗减少", "数值": 14, "name": "氏族的礼仪·β"}],
-    "精二": [{"舱室": "会客室", "类型": "收集线索效率", "数值": 20, "name": "狩猎嗅觉·β"}],
-    "精三": [{"舱室": "会客室", "类型": "心情消耗减少", "数值": 18, "name": "氏族的礼仪·γ"}],
-    "精四": [{"舱室": "会客室", "类型": "收集线索效率", "数值": 30, "name": "狩猎嗅觉·γ"}]
+    "charId": "chr_0028_wulfa",
+    "engName": "Rossi",
+    "rarity": 6,
+    "profession": {
+      "id": 0,
+      "name": "近卫",
+      "icon": "icon_profession_0"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "战技的狼之珀造成伤害后，会对目标施加爪印斫痕状态，持续{duration_bleed:0}秒，该效果无法叠加。\n爪印斫痕持续期间，目标每秒受到洛茜攻击力{atk_scale_bleed:0%}的物理伤害，且受到的物理伤害和灼热伤害+{damage_up:0%}。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "战技的狼之珀造成伤害后，会对目标施加爪印斫痕状态，持续{duration_bleed:0}秒，该效果无法叠加。\n爪印斫痕持续期间，目标每秒受到洛茜攻击力{atk_scale_bleed:0%}的物理伤害，且受到的物理伤害和灼热伤害+{damage_up:0%}。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "洛茜对处于爪印斫痕状态的敌人施放技能造成暴击伤害时，会额外触发一次攻击力{bleed_critical_damage_scale:0%}的灼热伤害，并且为自身回复[智识×{heal_scale:0.00}]点生命值。若目标同时处于燃烧状态，则上述伤害和治疗效果提升至{talent2_burning_damage_scale:0.0}倍。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "洛茜对处于爪印斫痕状态的敌人施放技能造成暴击伤害时，会额外触发一次攻击力{bleed_critical_damage_scale:0%}的灼热伤害，并且为自身回复[智识×{heal_scale:0.00}]点生命值。若目标同时处于燃烧状态，则上述伤害和治疗效果提升至{talent2_burning_damage_scale:0.0}倍。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0028_wulfa_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "氏族的礼仪·β",
+        "talentName": "氏族的礼仪",
+        "desc": "进驻会客室时，舱室内干员心情消耗降低14%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0028_wulfa_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "氏族的礼仪·γ",
+        "talentName": "氏族的礼仪",
+        "desc": "进驻会客室时，舱室内干员心情消耗降低18%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 18.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_power_consume",
+        "params": [
+          0.18000000715255737
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0028_wulfa_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "狩猎嗅觉·β",
+        "talentName": "狩猎嗅觉",
+        "desc": "进驻会客室时，干员收集线索的效率提升20%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 4,
+        "effect": "收集线索效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_efficiency",
+        "params": [
+          0.20000000298023224
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_efficiency.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0028_wulfa_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "狩猎嗅觉·γ",
+        "talentName": "狩猎嗅觉",
+        "desc": "进驻会客室时，干员收集线索的效率提升30%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 4,
+        "effect": "收集线索效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_efficiency",
+        "params": [
+          0.30000001192092896
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_efficiency.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "会客室",
+        "类型": "心情消耗减少",
+        "name": "氏族的礼仪·β",
+        "数值": 14
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "会客室",
+        "类型": "收集线索效率",
+        "name": "狩猎嗅觉·β",
+        "数值": 20
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "会客室",
+        "类型": "心情消耗减少",
+        "name": "氏族的礼仪·γ",
+        "数值": 18
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "会客室",
+        "类型": "收集线索效率",
+        "name": "狩猎嗅觉·γ",
+        "数值": 30
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0028_wulfa_1_1",
+      "精二": "spaceship_skill_chr_0028_wulfa_2_1",
+      "精三": "spaceship_skill_chr_0028_wulfa_1_2",
+      "精四": "spaceship_skill_chr_0028_wulfa_2_2"
+    }
   },
   "庄方宜": {
     "star": "六星",
     "attribute": "电磁",
-    "精一": [{"舱室": "制造舱", "类型": "心情消耗减少", "数值": 14, "name": "管代经验·β"}],
-    "精二": [{"舱室": "制造舱", "类型": "干员素材效率", "数值": 20, "name": "天师养气法·β"}],
-    "精三": [{"舱室": "制造舱", "类型": "心情消耗减少", "数值": 18, "name": "管代经验·γ"}],
-    "精四": [{"舱室": "制造舱", "类型": "干员素材效率", "数值": 30, "name": "天师养气法·γ"}]
+    "charId": "chr_0030_zhuangfy",
+    "engName": "Zhuang Fangyi",
+    "rarity": 6,
+    "profession": {
+      "id": 8,
+      "name": "突击",
+      "icon": "icon_profession_8"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "施放战技惊霆诀时对自身施加{base_rate:0%}电磁增幅，持续{duration:0}秒。\n战技的雷击命中时使该效果+{enhance_rate:0%}。\n每次施放战技惊霆诀时，该电磁增幅效果重置。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "施放战技惊霆诀时对自身施加{base_rate:0%}电磁增幅，持续{duration:0}秒。\n战技的雷击命中时使该效果+{enhance_rate:0%}。\n每次施放战技惊霆诀时，该电磁增幅效果重置。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "有{base_rate:0%}的概率免疫受到的伤害，附近每存在1柄青霆剑，此概率+{sword_rate:0%}。\n触发伤害免疫效果后，回复自身{heal:0%}最大生命值，每{duration:0}秒最多回复1次生命值。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "有{base_rate:0%}的概率免疫受到的伤害，附近每存在1柄青霆剑，此概率+{sword_rate:0%}。\n触发伤害免疫效果后，回复自身{heal:0%}最大生命值，每{duration:0}秒最多回复1次生命值。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0030_zhuangfy_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "管代经验·β",
+        "talentName": "管代经验",
+        "desc": "进驻制造舱时，舱室内干员心情消耗降低14%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0030_zhuangfy_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "管代经验·γ",
+        "talentName": "管代经验",
+        "desc": "进驻制造舱时，舱室内干员心情消耗降低18%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 18.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_power_consume",
+        "params": [
+          0.18000000715255737
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0030_zhuangfy_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "天师养气法·β",
+        "talentName": "天师养气法",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升20%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.20000000298023224,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0030_zhuangfy_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "天师养气法·γ",
+        "talentName": "天师养气法",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升30%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.30000001192092896,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "制造舱",
+        "类型": "心情消耗减少",
+        "name": "管代经验·β",
+        "数值": 14
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "天师养气法·β",
+        "数值": 20
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "制造舱",
+        "类型": "心情消耗减少",
+        "name": "管代经验·γ",
+        "数值": 18
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "天师养气法·γ",
+        "数值": 30
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0030_zhuangfy_1_1",
+      "精二": "spaceship_skill_chr_0030_zhuangfy_2_1",
+      "精三": "spaceship_skill_chr_0030_zhuangfy_1_2",
+      "精四": "spaceship_skill_chr_0030_zhuangfy_2_2"
+    }
   },
   "弭弗": {
     "star": "六星",
     "attribute": "物理",
-    "精一": [{"舱室": "会客室", "类型": "线索概率小幅提升", "线索编号": 3, "name": "暗桩眼线·α"}],
-    "精二": [{"舱室": "培养舱", "类型": "菌类效率", "数值": 20, "name": "草药偏方·β"}],
-    "精三": [{"舱室": "会客室", "类型": "线索概率提升", "线索编号": 3, "name": "暗桩眼线·β"}],
-    "精四": [{"舱室": "培养舱", "类型": "菌类效率", "数值": 30, "name": "草药偏方·γ"}]
+    "charId": "chr_0031_mifu",
+    "engName": "Mifu",
+    "rarity": 6,
+    "profession": {
+      "id": 0,
+      "name": "近卫",
+      "icon": "icon_profession_0"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "战技开天命中时，若目标处于物理脆弱或失衡状态，伤害倍率提升至原本的{crushmultiadd_talent+1}倍。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "战技开天命中时，若目标处于物理脆弱或失衡状态，伤害倍率提升至原本的{crushmultiadd_talent+1}倍。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "施放连携技后获得{talent_shield_hppercent:0%}最大生命值的护盾，持续期间更难被打断，持续{talent_shield_duration}秒。\n该效果每{talent_shield_cd}秒最多触发一次。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "施放连携技后获得{talent_shield_hppercent:0%}最大生命值的护盾，持续期间更难被打断，持续{talent_shield_duration}秒。\n该效果每{talent_shield_cd}秒最多触发一次。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0031_mifu_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "暗桩眼线·α",
+        "talentName": "暗桩眼线",
+        "desc": "进驻会客室时，干员收集到线索3——宏山科学院的概率小幅提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率小幅提升",
+        "value": null,
+        "clue": 3.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          3.0,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0031_mifu_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "暗桩眼线·β",
+        "talentName": "暗桩眼线",
+        "desc": "进驻会客室时，干员收集到线索3——宏山科学院的概率提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率提升",
+        "value": null,
+        "clue": 3.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          3.0,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0031_mifu_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "草药偏方·β",
+        "talentName": "草药偏方",
+        "desc": "进驻培养舱时，菌类质料的培养速度提升20%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "菌类效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_fungus",
+        "params": [
+          0.20000000298023224,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_fungus.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0031_mifu_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "草药偏方·γ",
+        "talentName": "草药偏方",
+        "desc": "进驻培养舱时，菌类质料的培养速度提升30%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "菌类效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_fungus",
+        "params": [
+          0.30000001192092896,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_fungus.png",
+        "effectSub": 1
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率小幅提升",
+        "name": "暗桩眼线·α",
+        "线索编号": 3
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "培养舱",
+        "类型": "菌类效率",
+        "name": "草药偏方·β",
+        "数值": 20
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率提升",
+        "name": "暗桩眼线·β",
+        "线索编号": 3
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "培养舱",
+        "类型": "菌类效率",
+        "name": "草药偏方·γ",
+        "数值": 30
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0031_mifu_1_1",
+      "精二": "spaceship_skill_chr_0031_mifu_2_1",
+      "精三": "spaceship_skill_chr_0031_mifu_1_2",
+      "精四": "spaceship_skill_chr_0031_mifu_2_2"
+    }
   },
   "卡缪": {
     "star": "六星",
     "attribute": "灼热",
-    "精一": [{"舱室": "培养舱", "类型": "晶植效率", "数值": 20, "name": "血晶层析·β"}],
-    "精二": [{"舱室": "制造舱", "类型": "干员素材效率", "数值": 20, "name": "看护人手册·β"}],
-    "精三": [{"舱室": "培养舱", "类型": "晶植效率", "数值": 30, "name": "血晶层析·γ"}],
-    "精四": [{"舱室": "制造舱", "类型": "干员素材效率", "数值": 30, "name": "看护人手册·γ"}]
+    "charId": "chr_0033_camille",
+    "engName": "Camille",
+    "rarity": 6,
+    "profession": {
+      "id": 7,
+      "name": "先锋",
+      "icon": "icon_profession_7"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "连携技锥心之棘效果加强：当命中衔火血翼盘桓的敌人时，回复自身[{heal_base:0}+智识×{heal_sub_multi:0.##}]点生命值并获得连击，持续{combo_duration}秒，施放追猎时目标无需被盘桓，即可触发上述效果。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "连携技锥心之棘效果加强：当命中衔火血翼盘桓的敌人时，回复自身[{heal_base:0}+智识×{heal_sub_multi:0.##}]点生命值并获得连击，持续{combo_duration}秒，施放追猎时目标无需被盘桓，即可触发上述效果。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "每当通过技能回复自身生命值时，获得灼热伤害+{atk_up:0%}（最多5层），持续{duration:0}秒，小队内其他干员获得该效果的{teammate_rate:0%}。该效果最多叠加5层。\n如果自身生命值已满，每次触发可获得2层效果。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "每当通过技能回复自身生命值时，获得灼热伤害+{atk_up:0%}（最多5层），持续{duration:0}秒，小队内其他干员获得该效果的{teammate_rate:0%}。该效果最多叠加5层。\n如果自身生命值已满，每次触发可获得2层效果。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0033_camille_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "血晶层析·β",
+        "talentName": "血晶层析",
+        "desc": "进驻培养舱时，晶植质料的培养速度提升20%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "晶植效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_flower",
+        "params": [
+          0.20000000298023224,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_flower.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0033_camille_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "血晶层析·γ",
+        "talentName": "血晶层析",
+        "desc": "进驻培养舱时，晶植质料的培养速度提升30%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "晶植效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_flower",
+        "params": [
+          0.30000001192092896,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_flower.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0033_camille_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "看护人手册·β",
+        "talentName": "看护人手册",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升20%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.20000000298023224,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0033_camille_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "看护人手册·γ",
+        "talentName": "看护人手册",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升30%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.30000001192092896,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "培养舱",
+        "类型": "晶植效率",
+        "name": "血晶层析·β",
+        "数值": 20
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "看护人手册·β",
+        "数值": 20
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "培养舱",
+        "类型": "晶植效率",
+        "name": "血晶层析·γ",
+        "数值": 30
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "看护人手册·γ",
+        "数值": 30
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0033_camille_1_1",
+      "精二": "spaceship_skill_chr_0033_camille_2_1",
+      "精三": "spaceship_skill_chr_0033_camille_1_2",
+      "精四": "spaceship_skill_chr_0033_camille_2_2"
+    }
   },
   "诀": {
     "star": "六星",
     "attribute": "自然",
-    "精一": [{"舱室": "培养舱", "类型": "矿物效率", "数值": 20, "name": "摘山煮海·β"}],
-    "精二": [{"舱室": "培养舱", "类型": "晶植效率", "数值": 20, "name": "多识草木·β"}],
-    "精三": [{"舱室": "培养舱", "类型": "矿物效率", "数值": 30, "name": "摘山煮海·γ"}],
-    "精四": [{"舱室": "培养舱", "类型": "晶植效率", "数值": 30, "name": "多识草木·γ"}]
+    "charId": "chr_0032_lizhiyan",
+    "engName": "Arcane",
+    "rarity": 6,
+    "profession": {
+      "id": 5,
+      "name": "术师",
+      "icon": "icon_profession_5"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "当自身智识值≥意志值时，技能形态切换为阵诀·智，反之技能形态切换为阵诀·意。\n两种阵诀的能力值要求只受干员等级提升、天赋、潜能、装备和武器提供的面板能力值影响。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "当自身智识值≥意志值时，技能形态切换为阵诀·智，反之技能形态切换为阵诀·意。\n终结技破晦效果加强：\n阵诀·智：\n- 终结技期间，自身获得{enhance_rate:0%}法术增幅。\n阵诀·意：\n- 终结技一段破晦阵和二段破晦诀明对敌人造成伤害时，会施加[意志×{spell_vul_rate_per_will:0.00%}]自然脆弱和寒冷脆弱（最多{spell_vul_rate:0.0%}），持续{duration:0}秒，该效果无法叠加。\n两种阵诀的能力值要求只受干员等级提升、天赋、潜能、装备和武器提供的面板能力值影响。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "自身施加的腐蚀效果持续时间+{duration_add:0}秒，且降低的最大抗性提升至原本的{1+corrupt_rate:0.00}倍。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "自身施加的腐蚀效果持续时间+{duration_add:0}秒，且降低的最大抗性提升至原本的{1+corrupt_rate:0.0}倍。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0032_lizhiyan_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "摘山煮海·β",
+        "talentName": "摘山煮海",
+        "desc": "进驻培养舱时，矿物质料的培养速度提升20%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "矿物效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_mineral",
+        "params": [
+          0.20000000298023224,
+          3.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_mineral.png",
+        "effectSub": 3
+      },
+      {
+        "id": "spaceship_skill_chr_0032_lizhiyan_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "摘山煮海·γ",
+        "talentName": "摘山煮海",
+        "desc": "进驻培养舱时，矿物质料的培养速度提升30%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "矿物效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_mineral",
+        "params": [
+          0.30000001192092896,
+          3.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_mineral.png",
+        "effectSub": 3
+      },
+      {
+        "id": "spaceship_skill_chr_0032_lizhiyan_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "多识草木·β",
+        "talentName": "多识草木",
+        "desc": "进驻培养舱时，晶植质料的培养速度提升20%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "晶植效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_flower",
+        "params": [
+          0.20000000298023224,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_flower.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0032_lizhiyan_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "多识草木·γ",
+        "talentName": "多识草木",
+        "desc": "进驻培养舱时，晶植质料的培养速度提升30%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "晶植效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_flower",
+        "params": [
+          0.30000001192092896,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_flower.png",
+        "effectSub": 2
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "培养舱",
+        "类型": "矿物效率",
+        "name": "摘山煮海·β",
+        "数值": 20
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "培养舱",
+        "类型": "晶植效率",
+        "name": "多识草木·β",
+        "数值": 20
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "培养舱",
+        "类型": "矿物效率",
+        "name": "摘山煮海·γ",
+        "数值": 30
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "培养舱",
+        "类型": "晶植效率",
+        "name": "多识草木·γ",
+        "数值": 30
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0032_lizhiyan_1_1",
+      "精二": "spaceship_skill_chr_0032_lizhiyan_2_1",
+      "精三": "spaceship_skill_chr_0032_lizhiyan_1_2",
+      "精四": "spaceship_skill_chr_0032_lizhiyan_2_2"
+    }
   },
   "梨诺": {
     "star": "六星",
     "attribute": "电磁",
-    "精一": [{"舱室": "会客室", "类型": "心情消耗减少", "数值": 14, "name": "偶像的热忱·β"}],
-    "精二": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 12, "name": "演出余韵·β"}],
-    "精三": [{"舱室": "会客室", "类型": "心情消耗减少", "数值": 18, "name": "偶像的热忱·γ"}],
-    "精四": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 16, "name": "演出余韵·γ"}]
+    "charId": "chr_0035_liino",
+    "engName": "Liino",
+    "rarity": 6,
+    "profession": {
+      "id": 4,
+      "name": "辅助",
+      "icon": "icon_profession_4"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "演唱姿态和高歌姿态持续期间，范围内的干员受治疗加成+{healtaken_rate:0%}，受到的伤害{shelter:0%}, 离开范围后该效果持续{shelter_duration:0}秒。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "演唱姿态和高歌姿态持续期间，范围内的干员受治疗加成+{healtaken_rate:0%}，受到的伤害{shelter:0%}, 离开范围后该效果持续{shelter_duration:0}秒。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "施放连携技悦心音调后，队伍中电磁或自然属性的干员下次施放战技时，返还{atb_return:0}技力。该效果持续{atb_return_duration:0}秒，无法叠加，触发后效果结束。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "施放连携技悦心音调后，队伍中电磁或自然属性的干员下次施放战技时，返还{atb_return:0}技力。该效果持续{atb_return_duration:0}秒，无法叠加，触发后效果结束。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0035_liino_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "偶像的热忱·β",
+        "talentName": "偶像的热忱",
+        "desc": "进驻会客室时，舱室内干员心情消耗降低14%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0035_liino_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "偶像的热忱·γ",
+        "talentName": "偶像的热忱",
+        "desc": "进驻会客室时，舱室内干员心情消耗降低18%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 18.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_power_consume",
+        "params": [
+          0.18000000715255737
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0035_liino_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "演出余韵·β",
+        "talentName": "演出余韵",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升12%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 12.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.11999999731779099
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0035_liino_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "演出余韵·γ",
+        "talentName": "演出余韵",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升16%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 16.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.1599999964237213
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "会客室",
+        "类型": "心情消耗减少",
+        "name": "偶像的热忱·β",
+        "数值": 14
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "演出余韵·β",
+        "数值": 12
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "会客室",
+        "类型": "心情消耗减少",
+        "name": "偶像的热忱·γ",
+        "数值": 18
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "演出余韵·γ",
+        "数值": 16
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0035_liino_1_1",
+      "精二": "spaceship_skill_chr_0035_liino_2_1",
+      "精三": "spaceship_skill_chr_0035_liino_1_2",
+      "精四": "spaceship_skill_chr_0035_liino_2_2"
+    }
   },
   "提弗洛斯": {
     "star": "六星",
     "attribute": "自然",
-    "精一": [{"舱室": "培养舱", "类型": "矿物效率", "数值": 20, "name": "晶石低语·β"}],
-    "精二": [{"舱室": "培养舱", "类型": "菌类效率", "数值": 20, "name": "孢子生灵·β"}],
-    "精三": [{"舱室": "培养舱", "类型": "矿物效率", "数值": 30, "name": "晶石低语·γ"}],
-    "精四": [{"舱室": "培养舱", "类型": "菌类效率", "数值": 30, "name": "孢子生灵·γ"}]
+    "charId": "chr_0034_typhoea",
+    "engName": "Typhoeus",
+    "rarity": 6,
+    "profession": {
+      "id": 8,
+      "name": "突击",
+      "icon": "icon_profession_8"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "每当敌人触发自然爆发的时候，获得1点启示。消耗猎矢强化的攻击，造成的伤害提升至原本的{atk_scale_enhence:0.0}倍。\n进入战斗时，立刻获得{energy_enterfight:0}点启示。\n猎矢上限为4枚，启示上限为8点。\n同一时间内多名敌人受到自然爆发时，仅视为单个敌人受到自然爆发，并获得对应数量的启示。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "每当敌人触发自然爆发的时候，获得1点启示。消耗猎矢强化的攻击，造成的伤害提升至原本的{atk_scale_enhence:0.0}倍。\n进入战斗时，立刻获得{energy_enterfight:0}点启示。\n猎矢上限为4枚，启示上限为8点。\n同一时间内多名敌人受到自然爆发时，仅视为单个敌人受到自然爆发，并获得对应数量的启示。"
+      },
+      {
+        "slot": 1,
+        "level": 3,
+        "title": "天赋1·③",
+        "descPlain": "每当敌人触发自然爆发的时候，获得1点启示。消耗猎矢强化的攻击，造成的伤害提升至原本的{atk_scale_enhence:0.0}倍。\n进入战斗时，立刻获得{energy_enterfight:0}点启示。\n猎矢上限为4枚，启示上限为8点。\n同一时间内多名敌人受到自然爆发时，仅视为单个敌人受到自然爆发，并获得对应数量的启示。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "每次进入浮空状态时，持续期间内激活防御护罩，使自身受到的伤害-{damage_resist:0%}且更难被打断，在受到伤害时防御护罩会被击碎，且{sheild_cd:0}秒内无法再次激活。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "每次进入浮空状态时，持续期间内激活防御护罩，使自身受到的伤害-{damage_resist:0%}且更难被打断，在受到伤害时防御护罩会被击碎，且{sheild_cd:0}秒内无法再次激活。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0034_typhoea_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "晶石低语·β",
+        "talentName": "晶石低语",
+        "desc": "进驻培养舱时，矿物质料的培养速度提升20%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "矿物效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_mineral",
+        "params": [
+          0.20000000298023224,
+          3.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_mineral.png",
+        "effectSub": 3
+      },
+      {
+        "id": "spaceship_skill_chr_0034_typhoea_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "晶石低语·γ",
+        "talentName": "晶石低语",
+        "desc": "进驻培养舱时，矿物质料的培养速度提升30%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "矿物效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_mineral",
+        "params": [
+          0.30000001192092896,
+          3.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_mineral.png",
+        "effectSub": 3
+      },
+      {
+        "id": "spaceship_skill_chr_0034_typhoea_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "孢子生灵·β",
+        "talentName": "孢子生灵",
+        "desc": "进驻培养舱时，菌类质料的培养速度提升20%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "菌类效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_fungus",
+        "params": [
+          0.20000000298023224,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_fungus.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0034_typhoea_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "孢子生灵·γ",
+        "talentName": "孢子生灵",
+        "desc": "进驻培养舱时，菌类质料的培养速度提升30%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "菌类效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_fungus",
+        "params": [
+          0.30000001192092896,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_fungus.png",
+        "effectSub": 1
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "培养舱",
+        "类型": "矿物效率",
+        "name": "晶石低语·β",
+        "数值": 20
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "培养舱",
+        "类型": "菌类效率",
+        "name": "孢子生灵·β",
+        "数值": 20
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "培养舱",
+        "类型": "矿物效率",
+        "name": "晶石低语·γ",
+        "数值": 30
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "培养舱",
+        "类型": "菌类效率",
+        "name": "孢子生灵·γ",
+        "数值": 30
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0034_typhoea_1_1",
+      "精二": "spaceship_skill_chr_0034_typhoea_2_1",
+      "精三": "spaceship_skill_chr_0034_typhoea_1_2",
+      "精四": "spaceship_skill_chr_0034_typhoea_2_2"
+    }
   },
   "祀": {
     "star": "六星",
     "attribute": "寒冷",
-    "精一": [{"舱室": "会客室", "类型": "收集线索效率", "数值": 20, "name": "点器为伥·β"}],
-    "精二": [{"舱室": "会客室", "类型": "心情消耗减少", "数值": 14, "name": "墨魉代劳·β"}],
-    "精三": [{"舱室": "会客室", "类型": "收集线索效率", "数值": 30, "name": "点器为伥·γ"}],
-    "精四": [{"舱室": "会客室", "类型": "心情消耗减少", "数值": 18, "name": "墨魉代劳·γ"}]
+    "charId": "chr_0036_jsspsi",
+    "engName": "Si",
+    "rarity": 6,
+    "profession": {
+      "id": 4,
+      "name": "辅助",
+      "icon": "icon_profession_4"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "施放终结技谁都不许扫兴后，小队内01号位干员连携技剩余冷却时间{coolDown:0}秒。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "施放终结技谁都不许扫兴后，小队内01号位干员连携技剩余冷却时间{coolDown:0}秒。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "墨魂消失时，友方干员获得{ratio_speed:0%}加速，持续{duration_speedup:0}秒。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "墨魂消失时，友方干员获得{ratio_speed:0%}加速，持续{duration_speedup:0}秒。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0036_jsspsi_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "点器为伥·β",
+        "talentName": "点器为伥",
+        "desc": "进驻会客室时，干员收集线索的效率提升20%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 4,
+        "effect": "收集线索效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_efficiency",
+        "params": [
+          0.20000000298023224
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_efficiency.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0036_jsspsi_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "点器为伥·γ",
+        "talentName": "点器为伥",
+        "desc": "进驻会客室时，干员收集线索的效率提升30%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 4,
+        "effect": "收集线索效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_efficiency",
+        "params": [
+          0.30000001192092896
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_efficiency.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0036_jsspsi_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "墨魉代劳·β",
+        "talentName": "墨魉代劳",
+        "desc": "进驻会客室时，舱室内干员心情消耗降低14%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0036_jsspsi_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "墨魉代劳·γ",
+        "talentName": "墨魉代劳",
+        "desc": "进驻会客室时，舱室内干员心情消耗降低18%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 18.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_power_consume",
+        "params": [
+          0.18000000715255737
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_power_consume.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "会客室",
+        "类型": "收集线索效率",
+        "name": "点器为伥·β",
+        "数值": 20
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "会客室",
+        "类型": "心情消耗减少",
+        "name": "墨魉代劳·β",
+        "数值": 14
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "会客室",
+        "类型": "收集线索效率",
+        "name": "点器为伥·γ",
+        "数值": 30
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "会客室",
+        "类型": "心情消耗减少",
+        "name": "墨魉代劳·γ",
+        "数值": 18
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0036_jsspsi_1_1",
+      "精二": "spaceship_skill_chr_0036_jsspsi_2_1",
+      "精三": "spaceship_skill_chr_0036_jsspsi_1_2",
+      "精四": "spaceship_skill_chr_0036_jsspsi_2_2"
+    }
+  },
+  "明河": {
+    "star": "六星",
+    "attribute": "电磁",
+    "charId": "chr_0037_minghe",
+    "engName": "Argent Flow",
+    "rarity": 6,
+    "profession": {
+      "id": 0,
+      "name": "近卫",
+      "icon": "icon_profession_0"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "明河施加导电时，本次导电效果使目标受到的所有类型伤害都得到提高，并对目标施加殷雷，层数等同于本次导电的异常等级，最多可叠加{max_stack:0}层，殷雷状态持续{duration:0}秒。\n处于殷雷状态的目标受到猛击伤害时，本次猛击伤害提升至原本的{crush_damage+1:0.0}倍，同时引爆目标的所有殷雷，对目标造成[殷雷层数×{atk_scale:0%}攻击力]的电磁伤害，对目标周围其他敌人只造成{other_damage_percent:0%}伤害。\n当殷雷伤害波及其他处于殷雷状态的敌人时，会同时引爆该敌人身上所有殷雷。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "明河施加导电时，本次导电效果使目标受到的所有类型伤害都得到提高，并对目标施加殷雷，层数等同于本次导电的异常等级，最多可叠加{max_stack:0}层，殷雷状态持续{duration:0}秒。\n处于殷雷状态的目标受到猛击伤害时，本次猛击伤害提升至原本的{crush_damage+1:0.0}倍，同时引爆目标的所有殷雷，对目标造成[殷雷层数×{atk_scale:0%}攻击力]的电磁伤害，对目标周围其他敌人只造成{other_damage_percent:0%}伤害。\n当殷雷伤害波及其他处于殷雷状态的敌人时，会同时引爆该敌人身上所有殷雷。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "施放战技奔霆时，全队源石技艺强度+{yuanshi_add:0}，持续{duration:0}秒。\n自身每点源石技艺强度额外提升{damage_up:0.0%}殷雷引爆伤害。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "施放战技奔霆时，全队源石技艺强度+{yuanshi_add:0}，持续{duration:0}秒。\n自身每点源石技艺强度额外提升{damage_up:0.0%}殷雷引爆伤害。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0037_minghe_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "百兵一理·β",
+        "talentName": "百兵一理",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升20%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.20000000298023224,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0037_minghe_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "百兵一理·γ",
+        "talentName": "百兵一理",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升30%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.30000001192092896,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0037_minghe_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "因势应物·β",
+        "talentName": "因势应物",
+        "desc": "进驻制造舱时，舱室内干员心情消耗降低14%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0037_minghe_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "因势应物·γ",
+        "talentName": "因势应物",
+        "desc": "进驻制造舱时，舱室内干员心情消耗降低18%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 18.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_power_consume",
+        "params": [
+          0.18000000715255737
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_power_consume.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "百兵一理·β",
+        "数值": 20
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "制造舱",
+        "类型": "心情消耗减少",
+        "name": "因势应物·β",
+        "数值": 14
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "百兵一理·γ",
+        "数值": 30
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "制造舱",
+        "类型": "心情消耗减少",
+        "name": "因势应物·γ",
+        "数值": 18
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0037_minghe_1_1",
+      "精二": "spaceship_skill_chr_0037_minghe_2_1",
+      "精三": "spaceship_skill_chr_0037_minghe_1_2",
+      "精四": "spaceship_skill_chr_0037_minghe_2_2"
+    }
   },
   "陈千语": {
     "star": "五星",
     "attribute": "物理",
-    "精一": [{"舱室": "制造舱", "类型": "武器素材效率", "数值": 10, "name": "名剑选评·α"}],
-    "精二": [{"舱室": "培养舱", "类型": "矿物效率", "数值": 20, "name": "琢玉·β"}],
-    "精三": [{"舱室": "制造舱", "类型": "武器素材效率", "数值": 20, "name": "名剑选评·β"}],
-    "精四": [{"舱室": "培养舱", "类型": "矿物效率", "数值": 30, "name": "琢玉·γ"}]
+    "charId": "chr_0005_chen",
+    "engName": "Chen Qianyu",
+    "rarity": 5,
+    "profession": {
+      "id": 0,
+      "name": "近卫",
+      "icon": "icon_profession_0"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "技能每次命中敌人后，攻击力+{atk:0%}，持续{duration:0}秒，该效果最多叠加{max_stack:0}层。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "技能每次命中敌人后，攻击力+{atk:0%}，持续{duration:0}秒，该效果最多叠加{max_stack:0}层。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "技能打断敌人蓄力时，额外对其造成{poise:0}点失衡。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "技能打断敌人蓄力时，额外对其造成{poise:0}点失衡。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0005_chen_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "名剑选评·α",
+        "talentName": "名剑选评",
+        "desc": "进驻制造舱时，武器经验素材的生产效率提升10%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "武器素材效率",
+        "value": 10.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.10000000149011612,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0005_chen_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "名剑选评·β",
+        "talentName": "名剑选评",
+        "desc": "进驻制造舱时，武器经验素材的生产效率提升20%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "武器素材效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.20000000298023224,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0005_chen_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "琢玉·β",
+        "talentName": "琢玉",
+        "desc": "进驻培养舱时，矿物质料的培养速度提升20%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "矿物效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_mineral",
+        "params": [
+          0.20000000298023224,
+          3.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_mineral.png",
+        "effectSub": 3
+      },
+      {
+        "id": "spaceship_skill_chr_0005_chen_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "琢玉·γ",
+        "talentName": "琢玉",
+        "desc": "进驻培养舱时，矿物质料的培养速度提升30%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "矿物效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_mineral",
+        "params": [
+          0.30000001192092896,
+          3.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_mineral.png",
+        "effectSub": 3
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "制造舱",
+        "类型": "武器素材效率",
+        "name": "名剑选评·α",
+        "数值": 10
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "培养舱",
+        "类型": "矿物效率",
+        "name": "琢玉·β",
+        "数值": 20
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "制造舱",
+        "类型": "武器素材效率",
+        "name": "名剑选评·β",
+        "数值": 20
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "培养舱",
+        "类型": "矿物效率",
+        "name": "琢玉·γ",
+        "数值": 30
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0005_chen_1_1",
+      "精二": "spaceship_skill_chr_0005_chen_2_1",
+      "精三": "spaceship_skill_chr_0005_chen_1_2",
+      "精四": "spaceship_skill_chr_0005_chen_2_2"
+    }
   },
   "大潘": {
     "star": "五星",
     "attribute": "物理",
-    "精一": [{"舱室": "培养舱", "类型": "菌类效率", "数值": 10, "name": "擅烹山珍·α"}],
-    "精二": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 12, "name": "人情练达·β"}],
-    "精三": [{"舱室": "培养舱", "类型": "菌类效率", "数值": 20, "name": "擅烹山珍·β"}],
-    "精四": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 16, "name": "人情练达·γ"}]
+    "charId": "chr_0018_dapan",
+    "engName": "Da Pan",
+    "rarity": 5,
+    "profession": {
+      "id": 8,
+      "name": "突击",
+      "icon": "icon_profession_8"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "每消耗1层破防后，造成的物理伤害+{dmg_up:0%}，持续{duration:0}秒，该效果最多叠加{stack:0}层。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "每消耗1层破防后，造成的物理伤害+{dmg_up:0%}，持续{duration:0}秒，该效果最多叠加{stack:0}层。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "终结技切丝入锅！的最后一击每命中一个敌人，获得一层备料状态，持续{talent_1_duration:0}秒，最多叠加{talent_1_stack:0}层。当处于备料状态时，连携技命中敌人后立即恢复{talent_1_cd_reduce:0%}冷却时间并消耗一层备料状态。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "终结技切丝入锅！的最后一击每命中一个敌人，获得一层备料状态，持续{talent_1_duration:0}秒，最多叠加{talent_1_stack:0}层。当处于备料状态时，连携技命中敌人后立即恢复{talent_1_cd_reduce:0%}冷却时间并消耗一层备料状态。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0018_dapan_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "擅烹山珍·α",
+        "talentName": "擅烹山珍",
+        "desc": "进驻培养舱时，菌类质料的培养速度提升10%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "菌类效率",
+        "value": 10.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_fungus",
+        "params": [
+          0.10000000149011612,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_fungus.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0018_dapan_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "擅烹山珍·β",
+        "talentName": "擅烹山珍",
+        "desc": "进驻培养舱时，菌类质料的培养速度提升20%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "菌类效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_fungus",
+        "params": [
+          0.20000000298023224,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_fungus.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0018_dapan_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "人情练达·β",
+        "talentName": "人情练达",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升12%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 12.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.11999999731779099
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0018_dapan_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "人情练达·γ",
+        "talentName": "人情练达",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升16%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 16.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.1599999964237213
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "培养舱",
+        "类型": "菌类效率",
+        "name": "擅烹山珍·α",
+        "数值": 10
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "人情练达·β",
+        "数值": 12
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "培养舱",
+        "类型": "菌类效率",
+        "name": "擅烹山珍·β",
+        "数值": 20
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "人情练达·γ",
+        "数值": 16
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0018_dapan_1_1",
+      "精二": "spaceship_skill_chr_0018_dapan_2_1",
+      "精三": "spaceship_skill_chr_0018_dapan_1_2",
+      "精四": "spaceship_skill_chr_0018_dapan_2_2"
+    }
   },
   "狼卫": {
     "star": "五星",
     "attribute": "灼热",
-    "精一": [{"舱室": "制造舱", "类型": "干员素材效率", "数值": 10, "name": "狼群的技巧·α"}],
-    "精二": [{"舱室": "培养舱", "类型": "矿物效率", "数值": 20, "name": "荒野卓识·β"}],
-    "精三": [{"舱室": "制造舱", "类型": "干员素材效率", "数值": 20, "name": "狼群的技巧·β"}],
-    "精四": [{"舱室": "培养舱", "类型": "矿物效率", "数值": 30, "name": "荒野卓识·γ"}]
+    "charId": "chr_0006_wolfgd",
+    "engName": "Wulfgard",
+    "rarity": 5,
+    "profession": {
+      "id": 5,
+      "name": "术师",
+      "icon": "icon_profession_5"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "每次施加燃烧后，获得灼热獠牙状态，持续{duration:0}秒，该状态无法叠加。状态持续期间，自身造成的灼热伤害+{add:0%}。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "每次施加燃烧后，获得灼热獠牙状态，持续{duration:0}秒，该状态无法叠加。状态持续期间，自身造成的灼热伤害+{add:0%}。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "战技灼热弹痕成功消耗法术异常时，返还{returnskillpower:0}点技力。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "战技灼热弹痕成功消耗法术异常时，返还{returnskillpower:0}点技力。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0006_wolfgd_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "狼群的技巧·α",
+        "talentName": "狼群的技巧",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升10%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 10.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.10000000149011612,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0006_wolfgd_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "狼群的技巧·β",
+        "talentName": "狼群的技巧",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升20%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.20000000298023224,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0006_wolfgd_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "荒野卓识·β",
+        "talentName": "荒野卓识",
+        "desc": "进驻培养舱时，矿物质料的培养速度提升20%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "矿物效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_mineral",
+        "params": [
+          0.20000000298023224,
+          3.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_mineral.png",
+        "effectSub": 3
+      },
+      {
+        "id": "spaceship_skill_chr_0006_wolfgd_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "荒野卓识·γ",
+        "talentName": "荒野卓识",
+        "desc": "进驻培养舱时，矿物质料的培养速度提升30%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "矿物效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_mineral",
+        "params": [
+          0.30000001192092896,
+          3.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_mineral.png",
+        "effectSub": 3
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "狼群的技巧·α",
+        "数值": 10
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "培养舱",
+        "类型": "矿物效率",
+        "name": "荒野卓识·β",
+        "数值": 20
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "狼群的技巧·β",
+        "数值": 20
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "培养舱",
+        "类型": "矿物效率",
+        "name": "荒野卓识·γ",
+        "数值": 30
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0006_wolfgd_1_1",
+      "精二": "spaceship_skill_chr_0006_wolfgd_2_1",
+      "精三": "spaceship_skill_chr_0006_wolfgd_1_2",
+      "精四": "spaceship_skill_chr_0006_wolfgd_2_2"
+    }
   },
   "艾维文娜": {
     "star": "五星",
     "attribute": "电磁",
-    "精一": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 8, "name": "居家顾问·α"}],
-    "精二": [{"舱室": "会客室", "类型": "线索概率小幅提升", "线索编号": 2, "name": "信使的秘密·α"}],
-    "精三": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 12, "name": "居家顾问·β"}],
-    "精四": [{"舱室": "会客室", "类型": "线索概率提升", "线索编号": 2, "name": "信使的秘密·β"}]
+    "charId": "chr_0012_avywen",
+    "engName": "Avywenna",
+    "rarity": 5,
+    "profession": {
+      "id": 8,
+      "name": "突击",
+      "icon": "icon_profession_8"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "掷出、召回雷枪、强雷枪命中敌人后，获得{talent0_usp:0}点终结技能量。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "掷出、召回雷枪、强雷枪命中敌人后，获得{talent0_usp:0}点终结技能量。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "终结技雷枪·决颤命中敌人时对其施加{pulse_vul_rate:0%}电磁脆弱，持续{pulse_vul_duration:0}秒。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "终结技雷枪·决颤命中敌人时对其施加{pulse_vul_rate:0%}电磁脆弱，持续{pulse_vul_duration:0}秒。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0012_avywen_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "居家顾问·α",
+        "talentName": "居家顾问",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升8%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 8.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.07999999821186066
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0012_avywen_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "居家顾问·β",
+        "talentName": "居家顾问",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升12%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 12.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.11999999731779099
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0012_avywen_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "信使的秘密·α",
+        "talentName": "信使的秘密",
+        "desc": "进驻会客室时，干员收集到线索2——环塔商会的概率小幅提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率小幅提升",
+        "value": null,
+        "clue": 2.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          2.0,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0012_avywen_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "信使的秘密·β",
+        "talentName": "信使的秘密",
+        "desc": "进驻会客室时，干员收集到线索2——环塔商会的概率提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率提升",
+        "value": null,
+        "clue": 2.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          2.0,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "居家顾问·α",
+        "数值": 8
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率小幅提升",
+        "name": "信使的秘密·α",
+        "线索编号": 2
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "居家顾问·β",
+        "数值": 12
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率提升",
+        "name": "信使的秘密·β",
+        "线索编号": 2
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0012_avywen_1_1",
+      "精二": "spaceship_skill_chr_0012_avywen_2_1",
+      "精三": "spaceship_skill_chr_0012_avywen_1_2",
+      "精四": "spaceship_skill_chr_0012_avywen_2_2"
+    }
   },
   "弧光": {
     "star": "五星",
     "attribute": "电磁",
-    "精一": [{"舱室": "制造舱", "类型": "武器素材效率", "数值": 10, "name": "荒野锋刃·α"}],
-    "精二": [{"舱室": "会客室", "类型": "线索概率小幅提升", "线索编号": 6, "name": "歌谣传唱·α"}],
-    "精三": [{"舱室": "制造舱", "类型": "武器素材效率", "数值": 20, "name": "荒野锋刃·β"}],
-    "精四": [{"舱室": "会客室", "类型": "线索概率提升", "线索编号": 6, "name": "歌谣传唱·β"}]
+    "charId": "chr_0007_ikut",
+    "engName": "Arclight",
+    "rarity": 5,
+    "profession": {
+      "id": 7,
+      "name": "先锋",
+      "icon": "icon_profession_7"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "使用战技疾风迅雷成功触发{count:0}次额外效果后，根据自身的智识，提升全队造成的电磁伤害，每点智识+{pulse_up:0.00%}，持续{duration:0}秒，该效果无法叠加。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "使用战技疾风迅雷成功触发{count:0}次额外效果后，根据自身的智识，提升全队造成的电磁伤害，每点智识+{pulse_up:0.00%}，持续{duration:0}秒，该效果无法叠加。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "被施加法术附着时，有{prob:0%}的概率忽略该效果。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "被施加法术附着时，有{prob:0%}的概率忽略该效果。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0007_ikut_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "荒野锋刃·α",
+        "talentName": "荒野锋刃",
+        "desc": "进驻制造舱时，武器经验素材的生产效率提升10%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "武器素材效率",
+        "value": 10.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.10000000149011612,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0007_ikut_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "荒野锋刃·β",
+        "talentName": "荒野锋刃",
+        "desc": "进驻制造舱时，武器经验素材的生产效率提升20%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "武器素材效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.20000000298023224,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0007_ikut_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "歌谣传唱·α",
+        "talentName": "歌谣传唱",
+        "desc": "进驻会客室时，干员收集到线索6——众生长地的概率小幅提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率小幅提升",
+        "value": null,
+        "clue": 6.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          6.0,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0007_ikut_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "歌谣传唱·β",
+        "talentName": "歌谣传唱",
+        "desc": "进驻会客室时，干员收集到线索6——众生长地的概率提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率提升",
+        "value": null,
+        "clue": 6.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          6.0,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "制造舱",
+        "类型": "武器素材效率",
+        "name": "荒野锋刃·α",
+        "数值": 10
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率小幅提升",
+        "name": "歌谣传唱·α",
+        "线索编号": 6
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "制造舱",
+        "类型": "武器素材效率",
+        "name": "荒野锋刃·β",
+        "数值": 20
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率提升",
+        "name": "歌谣传唱·β",
+        "线索编号": 6
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0007_ikut_1_1",
+      "精二": "spaceship_skill_chr_0007_ikut_2_1",
+      "精三": "spaceship_skill_chr_0007_ikut_1_2",
+      "精四": "spaceship_skill_chr_0007_ikut_2_2"
+    }
   },
   "佩丽卡": {
     "star": "五星",
     "attribute": "电磁",
-    "精一": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 8, "name": "监督·α"}],
-    "精二": [{"舱室": "制造舱", "类型": "武器素材效率", "数值": 20, "name": "协议调度·β"}],
-    "精三": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 12, "name": "监督·β"}],
-    "精四": [{"舱室": "制造舱", "类型": "武器素材效率", "数值": 30, "name": "协议调度·γ"}]
+    "charId": "chr_0004_pelica",
+    "engName": "Perlica",
+    "rarity": 5,
+    "profession": {
+      "id": 5,
+      "name": "术师",
+      "icon": "icon_profession_5"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "对失衡的敌人造成的伤害+{dmg:0%}。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "对失衡的敌人造成的伤害+{dmg:0%}。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "连携技即时协议·闪链命中处于破防状态的敌人时，还会弹射1次。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "连携技即时协议·闪链命中处于破防状态的敌人时，还会弹射1次。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0004_pelica_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "监督·α",
+        "talentName": "监督",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升8%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 8.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.07999999821186066
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0004_pelica_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "监督·β",
+        "talentName": "监督",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升12%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 12.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.11999999731779099
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0004_pelica_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "协议调度·β",
+        "talentName": "协议调度",
+        "desc": "进驻制造舱时，武器经验素材的生产效率提升20%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "武器素材效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.20000000298023224,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0004_pelica_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "协议调度·γ",
+        "talentName": "协议调度",
+        "desc": "进驻制造舱时，武器经验素材的生产效率提升30%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "武器素材效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.30000001192092896,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 2
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "监督·α",
+        "数值": 8
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "制造舱",
+        "类型": "武器素材效率",
+        "name": "协议调度·β",
+        "数值": 20
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "监督·β",
+        "数值": 12
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "制造舱",
+        "类型": "武器素材效率",
+        "name": "协议调度·γ",
+        "数值": 30
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0004_pelica_1_1",
+      "精二": "spaceship_skill_chr_0004_pelica_2_1",
+      "精三": "spaceship_skill_chr_0004_pelica_1_2",
+      "精四": "spaceship_skill_chr_0004_pelica_2_2"
+    }
   },
   "阿列什": {
     "star": "五星",
     "attribute": "寒冷",
-    "精一": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 8, "name": "悠闲垂钓·α"}],
-    "精二": [{"舱室": "会客室", "类型": "线索概率小幅提升", "线索编号": 1, "name": "钓友情报网·α"}],
-    "精三": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 12, "name": "悠闲垂钓·β"}],
-    "精四": [{"舱室": "会客室", "类型": "线索概率提升", "线索编号": 1, "name": "钓友情报网·β"}]
+    "charId": "chr_0024_deepfin",
+    "engName": "Alesh",
+    "rarity": 5,
+    "profession": {
+      "id": 7,
+      "name": "先锋",
+      "icon": "icon_profession_7"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "附近有敌人被冻结或被附着源石结晶后，自身获得{usp:0}点终结技能量。自身造成冻结触发上述效果时，额外获得{usp_self:0}点终结技能量。该效果每3秒内最多触发一次。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "附近有敌人被冻结或被附着源石结晶后，自身获得{usp:0}点终结技能量。自身造成冻结触发上述效果时，额外获得{usp_self:0}点终结技能量。该效果每3秒内最多触发一次。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "每{rate:0}点智识会使连携技凿孔底钓术钓起珍鳞的概率+{prob_add:0.0%}，最多+{prob_max:0%}。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "每{rate:0}点智识会使连携技凿孔底钓术钓起珍鳞的概率+{prob_add:0.0%}，最多+{prob_max:0%}。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0024_deepfin_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "悠闲垂钓·α",
+        "talentName": "悠闲垂钓",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升8%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 8.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.07999999821186066
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0024_deepfin_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "悠闲垂钓·β",
+        "talentName": "悠闲垂钓",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升12%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 12.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.11999999731779099
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0024_deepfin_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "钓友情报网·α",
+        "talentName": "钓友情报网",
+        "desc": "进驻会客室时，干员收集到线索1——联盟工团的概率小幅提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率小幅提升",
+        "value": null,
+        "clue": 1.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          1.0,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0024_deepfin_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "钓友情报网·β",
+        "talentName": "钓友情报网",
+        "desc": "进驻会客室时，干员收集到线索1——联盟工团的概率提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率提升",
+        "value": null,
+        "clue": 1.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          1.0,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "悠闲垂钓·α",
+        "数值": 8
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率小幅提升",
+        "name": "钓友情报网·α",
+        "线索编号": 1
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "悠闲垂钓·β",
+        "数值": 12
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率提升",
+        "name": "钓友情报网·β",
+        "线索编号": 1
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0024_deepfin_1_1",
+      "精二": "spaceship_skill_chr_0024_deepfin_2_1",
+      "精三": "spaceship_skill_chr_0024_deepfin_1_2",
+      "精四": "spaceship_skill_chr_0024_deepfin_2_2"
+    }
   },
   "赛希": {
     "star": "五星",
     "attribute": "寒冷",
-    "精一": [{"舱室": "制造舱", "类型": "干员素材效率", "数值": 10, "name": "标准化编译·α"}],
-    "精二": [{"舱室": "会客室", "类型": "线索概率小幅提升", "线索编号": 5, "name": "会话与细语·α"}],
-    "精三": [{"舱室": "制造舱", "类型": "干员素材效率", "数值": 20, "name": "标准化编译·β"}],
-    "精四": [{"舱室": "会客室", "类型": "线索概率提升", "线索编号": 5, "name": "会话与细语·β"}]
+    "charId": "chr_0011_seraph",
+    "engName": "Xaihi",
+    "rarity": 5,
+    "profession": {
+      "id": 4,
+      "name": "辅助",
+      "icon": "icon_profession_4"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "连携技压力测试命中敌人时，如果目标已经处于寒冷附着或冻结状态，还会使目标受到的寒冷伤害+{cryst_up:0%}，持续{duration:0}秒，该效果无法叠加。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "连携技压力测试命中敌人时，如果目标已经处于寒冷附着或冻结状态，还会使目标受到的寒冷伤害+{cryst_up:0%}，持续{duration:0}秒，该效果无法叠加。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "终结技栈溢出会额外净化全队的寒冷附着和冻结状态。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "终结技栈溢出会额外净化全队的寒冷附着和冻结状态。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0011_seraph_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "标准化编译·α",
+        "talentName": "标准化编译",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升10%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 10.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.10000000149011612,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0011_seraph_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "标准化编译·β",
+        "talentName": "标准化编译",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升20%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.20000000298023224,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0011_seraph_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "会话与细语·α",
+        "talentName": "会话与细语",
+        "desc": "进驻会客室时，干员收集到线索5——寂语修会的概率小幅提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率小幅提升",
+        "value": null,
+        "clue": 5.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          5.0,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0011_seraph_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "会话与细语·β",
+        "talentName": "会话与细语",
+        "desc": "进驻会客室时，干员收集到线索5——寂语修会的概率提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率提升",
+        "value": null,
+        "clue": 5.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          5.0,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "标准化编译·α",
+        "数值": 10
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率小幅提升",
+        "name": "会话与细语·α",
+        "线索编号": 5
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "标准化编译·β",
+        "数值": 20
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率提升",
+        "name": "会话与细语·β",
+        "线索编号": 5
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0011_seraph_1_1",
+      "精二": "spaceship_skill_chr_0011_seraph_2_1",
+      "精三": "spaceship_skill_chr_0011_seraph_1_2",
+      "精四": "spaceship_skill_chr_0011_seraph_2_2"
+    }
   },
   "昼雪": {
     "star": "五星",
     "attribute": "寒冷",
-    "精一": [{"舱室": "制造舱", "类型": "心情消耗减少", "数值": 10, "name": "救援者的恒心·α"}],
-    "精二": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 12, "name": "乐天派·β"}],
-    "精三": [{"舱室": "制造舱", "类型": "心情消耗减少", "数值": 14, "name": "救援者的恒心·β"}],
-    "精四": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 16, "name": "乐天派·γ"}]
+    "charId": "chr_0014_aurora",
+    "engName": "Snowshine",
+    "rarity": 5,
+    "profession": {
+      "id": 2,
+      "name": "重装",
+      "icon": "icon_profession_2"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "对生命值不高于{rate:0%}的目标，治疗效果+{heal_up:0%}。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "对生命值不高于{rate:0%}的目标，治疗效果+{heal_up:0%}。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "战技饱和性防御成功格挡攻击后，额外获得{talent_2_sup:0}终结技能量。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "战技饱和性防御成功格挡攻击后，额外获得{talent_2_sup:0}终结技能量。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0014_aurora_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "救援者的恒心·α",
+        "talentName": "救援者的恒心",
+        "desc": "进驻制造舱时，舱室内干员心情消耗降低10%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 10.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_power_consume",
+        "params": [
+          0.10000000149011612
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0014_aurora_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "救援者的恒心·β",
+        "talentName": "救援者的恒心",
+        "desc": "进驻制造舱时，舱室内干员心情消耗降低14%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0014_aurora_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "乐天派·β",
+        "talentName": "乐天派",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升12%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 12.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.11999999731779099
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0014_aurora_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "乐天派·γ",
+        "talentName": "乐天派",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升16%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 16.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.1599999964237213
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "制造舱",
+        "类型": "心情消耗减少",
+        "name": "救援者的恒心·α",
+        "数值": 10
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "乐天派·β",
+        "数值": 12
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "制造舱",
+        "类型": "心情消耗减少",
+        "name": "救援者的恒心·β",
+        "数值": 14
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "乐天派·γ",
+        "数值": 16
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0014_aurora_1_1",
+      "精二": "spaceship_skill_chr_0014_aurora_2_1",
+      "精三": "spaceship_skill_chr_0014_aurora_1_2",
+      "精四": "spaceship_skill_chr_0014_aurora_2_2"
+    }
   },
   "噗切娜": {
     "star": "五星",
     "attribute": "物理",
-    "精一": [{"舱室": "会客室", "类型": "线索概率小幅提升", "线索编号": 2, "name": "形象代言人·α"}],
-    "精二": [{"舱室": "制造舱", "类型": "干员素材效率", "数值": 20, "name": "任务后的点心·β"}],
-    "精三": [{"舱室": "会客室", "类型": "线索概率提升", "线索编号": 2, "name": "形象代言人·β"}],
-    "精四": [{"舱室": "制造舱", "类型": "干员素材效率", "数值": 30, "name": "任务后的点心·γ"}]
+    "charId": "chr_0038_purrche",
+    "engName": "Purrchena",
+    "rarity": 5,
+    "profession": {
+      "id": 2,
+      "name": "重装",
+      "icon": "icon_profession_2"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "战技我没有睡着！首次成功格挡敌人攻击后，额外获得{talent_1_usp:0}点终结技能量，并提升{talent1_prob_up:0%}下一次终结技不许干坏事！开出代言人的特殊赠礼的概率，该效果最多叠加{talent_1_stack:0}层。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "战技我没有睡着！首次成功格挡敌人攻击后，额外获得{talent_1_usp:0}点终结技能量，并提升{talent1_prob_up:0%}下一次终结技不许干坏事！开出代言人的特殊赠礼的概率，该效果最多叠加{talent_1_stack:0}层。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "在场时，使小队内所有生命值已满的干员下一次受到的伤害降低{dmg_down:0%}。\n每名干员每{cd:0}秒最多触发一次该效果。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "在场时，使小队内所有生命值已满的干员下一次受到的伤害降低{dmg_down:0%}。\n每名干员每{cd:0}秒最多触发一次该效果。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0038_purrche_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "形象代言人·α",
+        "talentName": "形象代言人",
+        "desc": "进驻会客室时，干员收集到线索2——环塔商会的概率小幅提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率小幅提升",
+        "value": null,
+        "clue": 2.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          2.0,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0038_purrche_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "形象代言人·β",
+        "talentName": "形象代言人",
+        "desc": "进驻会客室时，干员收集到线索2——环塔商会的概率提升（进驻即生效，同类不可叠加）",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 6,
+        "effect": "线索概率提升",
+        "value": null,
+        "clue": 2.0,
+        "icon": "facskill_spaceship_guestroom_clue",
+        "params": [
+          2.0,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_clue.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0038_purrche_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "任务后的点心·β",
+        "talentName": "任务后的点心",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升20%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.20000000298023224,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      },
+      {
+        "id": "spaceship_skill_chr_0038_purrche_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "任务后的点心·γ",
+        "talentName": "任务后的点心",
+        "desc": "进驻制造舱时，干员经验素材的生产效率提升30%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "干员素材效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.30000001192092896,
+          1.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 1
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率小幅提升",
+        "name": "形象代言人·α",
+        "线索编号": 2
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "任务后的点心·β",
+        "数值": 20
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "会客室",
+        "类型": "线索概率提升",
+        "name": "形象代言人·β",
+        "线索编号": 2
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "制造舱",
+        "类型": "干员素材效率",
+        "name": "任务后的点心·γ",
+        "数值": 30
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0038_purrche_1_1",
+      "精二": "spaceship_skill_chr_0038_purrche_2_1",
+      "精三": "spaceship_skill_chr_0038_purrche_1_2",
+      "精四": "spaceship_skill_chr_0038_purrche_2_2"
+    }
   },
   "卡契尔": {
     "star": "四星",
     "attribute": "物理",
-    "精一": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 8, "name": "缄默关怀·α"}],
-    "精二": [{"舱室": "培养舱", "类型": "心情消耗减少", "数值": 14, "name": "务实心态·β"}],
-    "精三": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 12, "name": "缄默关怀·β"}],
-    "精四": [{"舱室": "培养舱", "类型": "心情消耗减少", "数值": 18, "name": "务实心态·γ"}]
+    "charId": "chr_0020_meurs",
+    "engName": "Catcher",
+    "rarity": 4,
+    "profession": {
+      "id": 2,
+      "name": "重装",
+      "icon": "icon_profession_2"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "每有10点意志，防御力+{rate:0.0}。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "每有10点意志，防御力+{rate:0.0}。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "终结技教科书式猛攻的最后一击产生{talent_1+1:0}次冲击波，每次冲击波造成攻击力{atk_scale_shockwave:0%}的物理伤害。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "终结技教科书式猛攻的最后一击产生{talent_1+1:0}次冲击波，每次冲击波造成攻击力{atk_scale_shockwave:0%}的物理伤害。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0020_meurs_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "缄默关怀·α",
+        "talentName": "缄默关怀",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升8%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 8.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.07999999821186066
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0020_meurs_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "缄默关怀·β",
+        "talentName": "缄默关怀",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升12%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 12.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.11999999731779099
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0020_meurs_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "务实心态·β",
+        "talentName": "务实心态",
+        "desc": "进驻培养舱时，舱室内干员心情消耗降低14%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0020_meurs_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "务实心态·γ",
+        "talentName": "务实心态",
+        "desc": "进驻培养舱时，舱室内干员心情消耗降低18%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 18.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_power_consume",
+        "params": [
+          0.18000000715255737
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_power_consume.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "缄默关怀·α",
+        "数值": 8
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "培养舱",
+        "类型": "心情消耗减少",
+        "name": "务实心态·β",
+        "数值": 14
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "缄默关怀·β",
+        "数值": 12
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "培养舱",
+        "类型": "心情消耗减少",
+        "name": "务实心态·γ",
+        "数值": 18
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0020_meurs_1_1",
+      "精二": "spaceship_skill_chr_0020_meurs_2_1",
+      "精三": "spaceship_skill_chr_0020_meurs_1_2",
+      "精四": "spaceship_skill_chr_0020_meurs_2_2"
+    }
   },
   "秋栗": {
     "star": "四星",
     "attribute": "灼热",
-    "精一": [{"舱室": "制造舱", "类型": "心情消耗减少", "数值": 10, "name": "咖啡或茶·α"}],
-    "精二": [{"舱室": "会客室", "类型": "心情消耗减少", "数值": 14, "name": "破冰游戏·β"}],
-    "精三": [{"舱室": "制造舱", "类型": "心情消耗减少", "数值": 14, "name": "咖啡或茶·β"}],
-    "精四": [{"舱室": "会客室", "类型": "心情消耗减少", "数值": 18, "name": "破冰游戏·γ"}]
+    "charId": "chr_0019_karin",
+    "engName": "Akekuri",
+    "rarity": 4,
+    "profession": {
+      "id": 7,
+      "name": "先锋",
+      "icon": "icon_profession_7"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "每{rate:0}点智识会使连携技快闪冲击的技力恢复量+{sub_ratio:0.0%}，最多提高{max_ratio:0%}。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "每{rate:0}点智识会使连携技快闪冲击的技力恢复量+{sub_ratio:0.0%}，最多提高{max_ratio:0%}。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "施放终结技小队，集结！期间，获得连击。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0019_karin_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "咖啡或茶·α",
+        "talentName": "咖啡或茶",
+        "desc": "进驻制造舱时，舱室内干员心情消耗降低10%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 10.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_power_consume",
+        "params": [
+          0.10000000149011612
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0019_karin_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "咖啡或茶·β",
+        "talentName": "咖啡或茶",
+        "desc": "进驻制造舱时，舱室内干员心情消耗降低14%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0019_karin_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "破冰游戏·β",
+        "talentName": "破冰游戏",
+        "desc": "进驻会客室时，舱室内干员心情消耗降低14%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0019_karin_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "破冰游戏·γ",
+        "talentName": "破冰游戏",
+        "desc": "进驻会客室时，舱室内干员心情消耗降低18%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 18.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_power_consume",
+        "params": [
+          0.18000000715255737
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_power_consume.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "制造舱",
+        "类型": "心情消耗减少",
+        "name": "咖啡或茶·α",
+        "数值": 10
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "会客室",
+        "类型": "心情消耗减少",
+        "name": "破冰游戏·β",
+        "数值": 14
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "制造舱",
+        "类型": "心情消耗减少",
+        "name": "咖啡或茶·β",
+        "数值": 14
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "会客室",
+        "类型": "心情消耗减少",
+        "name": "破冰游戏·γ",
+        "数值": 18
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0019_karin_1_1",
+      "精二": "spaceship_skill_chr_0019_karin_2_1",
+      "精三": "spaceship_skill_chr_0019_karin_1_2",
+      "精四": "spaceship_skill_chr_0019_karin_2_2"
+    }
   },
   "安塔尔": {
     "star": "四星",
     "attribute": "电磁",
-    "精一": [{"舱室": "制造舱", "类型": "武器素材效率", "数值": 10, "name": "实验性施术单元·α"}],
-    "精二": [{"舱室": "培养舱", "类型": "心情消耗减少", "数值": 14, "name": "冷笑话学习·β"}],
-    "精三": [{"舱室": "制造舱", "类型": "武器素材效率", "数值": 20, "name": "实验性施术单元·β"}],
-    "精四": [{"舱室": "培养舱", "类型": "心情消耗减少", "数值": 18, "name": "冷笑话学习·γ"}]
+    "charId": "chr_0023_antal",
+    "engName": "Antal",
+    "rarity": 4,
+    "profession": {
+      "id": 4,
+      "name": "辅助",
+      "icon": "icon_profession_4"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "队伍中处于增幅状态的干员造成技能伤害后，安塔尔为其回复[{healvalue:0}+力量×{multiplier:0.0}]点生命值，每个干员每{cd:0}秒最多受到1次该回复效果。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "队伍中处于增幅状态的干员造成技能伤害后，安塔尔为其回复[{healvalue:0}+力量×{multiplier:0.0}]点生命值，每个干员每{cd:0}秒最多受到1次该回复效果。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "有{probability:0%}的概率免疫物理伤害，并回复自身[{healvalue:0}+力量×{heal_scale:0.00}]点生命值。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "有{probability:0%}的概率免疫物理伤害，并回复自身[{healvalue:0}+力量×{heal_scale:0.00}]点生命值。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0023_antal_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "实验性施术单元·α",
+        "talentName": "实验性施术单元",
+        "desc": "进驻制造舱时，武器经验素材的生产效率提升10%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "武器素材效率",
+        "value": 10.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.10000000149011612,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0023_antal_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "实验性施术单元·β",
+        "talentName": "实验性施术单元",
+        "desc": "进驻制造舱时，武器经验素材的生产效率提升20%",
+        "roomType": 1,
+        "room": "制造舱",
+        "effectType": 7,
+        "effect": "武器素材效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_manufacture_efficiency",
+        "params": [
+          0.20000000298023224,
+          2.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_manufacture_efficiency.png",
+        "effectSub": 2
+      },
+      {
+        "id": "spaceship_skill_chr_0023_antal_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "冷笑话学习·β",
+        "talentName": "冷笑话学习",
+        "desc": "进驻培养舱时，舱室内干员心情消耗降低14%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 14.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_power_consume",
+        "params": [
+          0.14000000059604645
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_power_consume.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0023_antal_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "冷笑话学习·γ",
+        "talentName": "冷笑话学习",
+        "desc": "进驻培养舱时，舱室内干员心情消耗降低18%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 1,
+        "effect": "心情消耗减少",
+        "value": 18.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_power_consume",
+        "params": [
+          0.18000000715255737
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_power_consume.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "制造舱",
+        "类型": "武器素材效率",
+        "name": "实验性施术单元·α",
+        "数值": 10
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "培养舱",
+        "类型": "心情消耗减少",
+        "name": "冷笑话学习·β",
+        "数值": 14
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "制造舱",
+        "类型": "武器素材效率",
+        "name": "实验性施术单元·β",
+        "数值": 20
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "培养舱",
+        "类型": "心情消耗减少",
+        "name": "冷笑话学习·γ",
+        "数值": 18
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0023_antal_1_1",
+      "精二": "spaceship_skill_chr_0023_antal_2_1",
+      "精三": "spaceship_skill_chr_0023_antal_1_2",
+      "精四": "spaceship_skill_chr_0023_antal_2_2"
+    }
   },
   "埃特拉": {
     "star": "四星",
     "attribute": "寒冷",
-    "精一": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 8, "name": "碎片化休息·α"}],
-    "精二": [{"舱室": "会客室", "类型": "收集线索效率", "数值": 20, "name": "监听频段·β"}],
-    "精三": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 12, "name": "碎片化休息·β"}],
-    "精四": [{"舱室": "会客室", "类型": "收集线索效率", "数值": 30, "name": "监听频段·γ"}]
+    "charId": "chr_0021_whiten",
+    "engName": "Estella",
+    "rarity": 4,
+    "profession": {
+      "id": 0,
+      "name": "近卫",
+      "icon": "icon_profession_0"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "每当触发碎冰效果后，下一次战技凝声会返还{atb:0.0}技力，该效果无法叠加。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "每当触发碎冰效果后，下一次战技凝声会返还{atb:0}技力，该效果无法叠加。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "不会被寒冷附着，且受到的寒冷伤害{dmg_down:0%} 。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "不会被寒冷附着，且受到的寒冷伤害{dmg_down:0%} 。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0021_whiten_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "碎片化休息·α",
+        "talentName": "碎片化休息",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升8%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 8.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.07999999821186066
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0021_whiten_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "碎片化休息·β",
+        "talentName": "碎片化休息",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升12%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 12.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.11999999731779099
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0021_whiten_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "监听频段·β",
+        "talentName": "监听频段",
+        "desc": "进驻会客室时，干员收集线索的效率提升20%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 4,
+        "effect": "收集线索效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_efficiency",
+        "params": [
+          0.20000000298023224
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_efficiency.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0021_whiten_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "监听频段·γ",
+        "talentName": "监听频段",
+        "desc": "进驻会客室时，干员收集线索的效率提升30%",
+        "roomType": 5,
+        "room": "会客室",
+        "effectType": 4,
+        "effect": "收集线索效率",
+        "value": 30.0,
+        "clue": null,
+        "icon": "facskill_spaceship_guestroom_efficiency",
+        "params": [
+          0.30000001192092896
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_guestroom_efficiency.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "碎片化休息·α",
+        "数值": 8
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "会客室",
+        "类型": "收集线索效率",
+        "name": "监听频段·β",
+        "数值": 20
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "碎片化休息·β",
+        "数值": 12
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "会客室",
+        "类型": "收集线索效率",
+        "name": "监听频段·γ",
+        "数值": 30
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0021_whiten_1_1",
+      "精二": "spaceship_skill_chr_0021_whiten_2_1",
+      "精三": "spaceship_skill_chr_0021_whiten_1_2",
+      "精四": "spaceship_skill_chr_0021_whiten_2_2"
+    }
   },
   "萤石": {
     "star": "四星",
     "attribute": "自然",
-    "精一": [{"舱室": "培养舱", "类型": "矿物效率", "数值": 10, "name": "荒芜行者·α"}],
-    "精二": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 12, "name": "知人所想·β"}],
-    "精三": [{"舱室": "培养舱", "类型": "矿物效率", "数值": 20, "name": "荒芜行者·β"}],
-    "精四": [{"舱室": "总控中枢", "类型": "心情恢复提升", "数值": 16, "name": "知人所想·γ"}]
+    "charId": "chr_0022_bounda",
+    "engName": "Fluorite",
+    "rarity": 4,
+    "profession": {
+      "id": 5,
+      "name": "术师",
+      "icon": "icon_profession_5"
+    },
+    "talents": [
+      {
+        "slot": 1,
+        "level": 1,
+        "title": "天赋1·①",
+        "descPlain": "萤石对处于缓速状态的目标造成的伤害+{dmg_up:0%} 。"
+      },
+      {
+        "slot": 1,
+        "level": 2,
+        "title": "天赋1·②",
+        "descPlain": "萤石对处于缓速状态的目标造成的伤害+{dmg_up:0%} 。"
+      },
+      {
+        "slot": 2,
+        "level": 1,
+        "title": "天赋2·①",
+        "descPlain": "有{probability:0%}的概率免疫法术伤害，之后使自身攻击力+{atk_up:0%}，持续{duration:0}秒，该效果无法叠加。"
+      },
+      {
+        "slot": 2,
+        "level": 2,
+        "title": "天赋2·②",
+        "descPlain": "有{probability:0%}的概率免疫法术伤害，之后使自身攻击力+{atk_up:0%}，持续{duration:0}秒，该效果无法叠加。"
+      }
+    ],
+    "baseSkills": [
+      {
+        "id": "spaceship_skill_chr_0022_bounda_1_1",
+        "slot": 0,
+        "level": 1,
+        "name": "荒芜行者·α",
+        "talentName": "荒芜行者",
+        "desc": "进驻培养舱时，矿物质料的培养速度提升10%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "矿物效率",
+        "value": 10.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_mineral",
+        "params": [
+          0.10000000149011612,
+          3.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_mineral.png",
+        "effectSub": 3
+      },
+      {
+        "id": "spaceship_skill_chr_0022_bounda_1_2",
+        "slot": 0,
+        "level": 2,
+        "name": "荒芜行者·β",
+        "talentName": "荒芜行者",
+        "desc": "进驻培养舱时，矿物质料的培养速度提升20%",
+        "roomType": 2,
+        "room": "培养舱",
+        "effectType": 3,
+        "effect": "矿物效率",
+        "value": 20.0,
+        "clue": null,
+        "icon": "facskill_spaceship_plant_mineral",
+        "params": [
+          0.20000000298023224,
+          3.0
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_plant_mineral.png",
+        "effectSub": 3
+      },
+      {
+        "id": "spaceship_skill_chr_0022_bounda_2_1",
+        "slot": 1,
+        "level": 1,
+        "name": "知人所想·β",
+        "talentName": "知人所想",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升12%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 12.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.11999999731779099
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      },
+      {
+        "id": "spaceship_skill_chr_0022_bounda_2_2",
+        "slot": 1,
+        "level": 2,
+        "name": "知人所想·γ",
+        "talentName": "知人所想",
+        "desc": "进驻总控中枢时，所有干员心情恢复提升16%",
+        "roomType": 0,
+        "room": "总控中枢",
+        "effectType": 0,
+        "effect": "心情恢复提升",
+        "value": 16.0,
+        "clue": null,
+        "icon": "facskill_spaceship_physical_power",
+        "params": [
+          0.1599999964237213
+        ],
+        "iconFile": "factory_skill/facskill_spaceship_physical_power.png",
+        "effectSub": null
+      }
+    ],
+    "精一": [
+      {
+        "舱室": "培养舱",
+        "类型": "矿物效率",
+        "name": "荒芜行者·α",
+        "数值": 10
+      }
+    ],
+    "精二": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "知人所想·β",
+        "数值": 12
+      }
+    ],
+    "精三": [
+      {
+        "舱室": "培养舱",
+        "类型": "矿物效率",
+        "name": "荒芜行者·β",
+        "数值": 20
+      }
+    ],
+    "精四": [
+      {
+        "舱室": "总控中枢",
+        "类型": "心情恢复提升",
+        "name": "知人所想·γ",
+        "数值": 16
+      }
+    ],
+    "eliteSlots": {
+      "精一": "spaceship_skill_chr_0022_bounda_1_1",
+      "精二": "spaceship_skill_chr_0022_bounda_2_1",
+      "精三": "spaceship_skill_chr_0022_bounda_1_2",
+      "精四": "spaceship_skill_chr_0022_bounda_2_2"
+    }
   }
 }

@@ -1,0 +1,56 @@
+{
+  "source": "配色：dijiang/Talent/*.webp 主色采样；图标：dijiang_new/new_resource/*.png（白色透明，按主色着色）",
+  "generatedAt": "2026-10-28",
+  "rooms": {
+    "central": {
+      "label": "总控中枢",
+      "talentType": "心情恢复提升",
+      "icon": "central_physical_power.webp",
+      "roomIcon": "icon_sapceship_room_icon_control_console.png",
+      "color": "#47C1E7",
+      "rgb": [71, 193, 231],
+      "soft": "rgba(71, 193, 231, 0.14)",
+      "line": "rgba(71, 193, 231, 0.38)"
+    },
+    "manufactA": {
+      "label": "制造舱 A",
+      "talentType": "干员/武器素材效率",
+      "icon": "manufact_efficiency.webp",
+      "roomIcon": "icon_sapceship_room_icon_manufacturing_station.png",
+      "color": "#F4CC15",
+      "rgb": [244, 204, 21],
+      "soft": "rgba(244, 204, 21, 0.13)",
+      "line": "rgba(244, 204, 21, 0.36)"
+    },
+    "manufactB": {
+      "label": "制造舱 B",
+      "talentType": "干员/武器素材效率",
+      "icon": "manufact_efficiency.webp",
+      "roomIcon": "icon_sapceship_room_icon_manufacturing_station.png",
+      "color": "#F4CC15",
+      "rgb": [244, 204, 21],
+      "soft": "rgba(244, 204, 21, 0.13)",
+      "line": "rgba(244, 204, 21, 0.36)"
+    },
+    "culture": {
+      "label": "培养舱",
+      "talentType": "矿物/菌类/晶植效率",
+      "icon": "culture_plant_efficiency.webp",
+      "roomIcon": "icon_sapceship_room_icon_grow_cabin.png",
+      "color": "#ACD84C",
+      "rgb": [172, 216, 76],
+      "soft": "rgba(172, 216, 76, 0.14)",
+      "line": "rgba(172, 216, 76, 0.38)"
+    },
+    "meeting": {
+      "label": "会客室",
+      "talentType": "收集线索效率 / 线索概率",
+      "icon": "meeting_clue_efficiency.webp",
+      "roomIcon": "icon_sapceship_room_icon_guest_room_clue.png",
+      "color": "#A08EF6",
+      "rgb": [160, 142, 246],
+      "soft": "rgba(160, 142, 246, 0.14)",
+      "line": "rgba(160, 142, 246, 0.38)"
+    }
+  }
+}

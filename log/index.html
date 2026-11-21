@@ -136,8 +136,15 @@
             #logContent h2 { font-size: 1.02rem; }
         }
     </style>
+
+  <!-- 帝江号 v2（由本地服务器注入，不修改原 HTML） -->
+  <meta name="theme-color" content="#3F7E6B">
+  <meta name="view-transition" content="same-origin">
+  <link rel="stylesheet" href="/v2/css/tokens.css">
+  <link rel="stylesheet" href="/v2/css/rooms.css">
+  <link rel="stylesheet" href="/v2/css/theme.css">
 </head>
-<body>
+<body><script id="dj-v2-early">document.documentElement.classList.add('dj-v2');document.body.classList.add('dj-v2');</script>
 
 <!-- ========== 顶部栏 ========== -->
 <header class="app-header">
@@ -268,5 +275,8 @@
 </script>
 <script src="/assets/js/modules/pet.js?v=202610021200"></script>
 <script src="/assets/js/modules/page-pet.js?v=202610021200"></script>
+<script src="/assets/js/modules/particle-bg.js?v=202610261200"></script>
+
+  <script type="module" src="/v2/js/shell.js"></script>
 </body>
 </html>

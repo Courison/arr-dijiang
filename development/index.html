@@ -16,7 +16,7 @@
     <link rel="stylesheet" href="/assets/css/11-account.css?v=2026090271700">
     <link rel="stylesheet" href="/assets/css/13-sidebar.css?v=202610021200">
     <link rel="stylesheet" href="/assets/css/14-page-common.css?v=202610021200">
-    <link rel="stylesheet" href="/assets/css/15-development.css?v=202610021200">
+    <link rel="stylesheet" href="/assets/css/15-development.css?v=202611101350">
     
     <!-- 顶配推荐样式 -->
     <style>
@@ -156,6 +156,86 @@
             box-shadow: 0 2px 4px rgba(255,152,0,0.3);
         }
         .dev-top-card.maxed .badge { display: none; }
+        .dev-top-card .dev-plan-card-meta {
+            font-size: 0.62rem;
+            color: #6b7b73;
+            line-height: 1.35;
+            margin-top: 3px;
+            white-space: normal;
+        }
+        .dev-top-grid .dev-top-card { width: 140px; }
+        .dev-plan-tooltip {
+            display: none;
+            position: absolute;
+            z-index: 20;
+            left: 50%;
+            bottom: calc(100% + 8px);
+            transform: translateX(-50%);
+            width: 230px;
+            background: #26352f;
+            color: #eef6f2;
+            border-radius: 8px;
+            padding: 8px 10px;
+            font-size: 0.68rem;
+            line-height: 1.55;
+            text-align: left;
+            white-space: normal;
+            box-shadow: 0 6px 18px rgba(0,0,0,.18);
+            pointer-events: none;
+        }
+        .dev-top-card:hover .dev-plan-tooltip { display: block; }
+        .dev-plan-tooltip .tip-title { color: #9ed6bf; font-weight: 700; margin-bottom: 2px; }
+        .dev-plan-tooltip .tip-line { color: #dfece6; }
+        .dev-plan-tooltip .tip-talent { display:flex; align-items:flex-start; gap:6px; margin-top:3px; }
+        .dev-plan-tooltip .tip-talent-icon { width:18px; height:18px; flex:0 0 18px; border-radius:4px; object-fit:cover; background:#eef6f2; }
+        .dev-plan-tooltip .tip-talent-placeholder { width:18px; height:18px; flex:0 0 18px; }
+        .dev-plan-tooltip .tip-talent-body { flex:1; min-width:0; }
+        .dev-plan-tooltip .tip-talent-name { color:#eef6f2; font-weight:600; line-height:1.35; }
+        .dev-plan-tooltip .tip-talent-effect { color:#9fb8ac; line-height:1.35; margin-top:1px; }
+        .dev-loading-spinner {
+            width: 26px; height: 26px; margin: 4px auto 9px;
+            border: 3px solid #dfe8e2; border-top-color: #3f7e6b;
+            border-radius: 50%; animation: dev-spin .8s linear infinite;
+        }
+        @keyframes dev-spin { to { transform: rotate(360deg); } }
+        .dev-plan-loading {
+            width:100%;
+            display:flex;
+            flex-direction:column;
+            align-items:center;
+            justify-content:center;
+            text-align:center;
+            color:#6b7b73;
+            font-size:0.8rem;
+            padding:12px 0;
+        }
+        .dev-simple-schedule .dev-plan-loading { grid-column:1/-1; }
+        #devTopGrid .dev-plan-loading { flex:1 0 100%; }
+        .dev-plan-actions { display:none; align-items:center; gap:8px; flex-wrap:wrap; margin:0 0 14px; }
+        .dev-plan-actions.show { display:flex; }
+        .dev-plan-actions button {
+            border:1px solid #cddfd5; background:#fff; color:#2f5f4d; border-radius:7px;
+            padding:6px 10px; font-size:0.78rem; cursor:pointer;
+        }
+        .dev-plan-actions button.primary { background:#3f7e6b; border-color:#3f7e6b; color:#fff; font-weight:600; }
+        .dev-plan-actions .plan-selected-count { color:#6b7b73; font-size:0.76rem; margin-left:auto; }
+        .dev-top-card.selected img { border-color:#3f7e6b !important; box-shadow:0 0 0 2px rgba(63,126,107,.2); }
+        .dev-top-card .dev-select-check {
+            position:absolute; top:-6px; left:-6px; width:20px; height:20px; border-radius:50%;
+            background:#fff; border:2px solid #cddfd5; color:transparent; font-size:12px;
+            display:flex; align-items:center; justify-content:center; z-index:3;
+        }
+        .dev-top-card.selected .dev-select-check { background:#3f7e6b; border-color:#3f7e6b; color:#fff; }
+        .dev-unactivated { margin-top:18px; background:#fff; border:1px solid #e8ecf0; border-radius:12px; padding:0 14px 12px; }
+        .dev-unactivated summary { cursor:pointer; padding:12px 0; font-weight:700; color:#2a5a4a; font-size:0.9rem; }
+        .dev-unactivated-filters { display:flex; gap:6px; flex-wrap:wrap; margin:2px 0 10px; }
+        .dev-unactivated-filters button { border:1px solid #dbe7e1; background:#f8fbf9; color:#3f6b59; border-radius:6px; padding:4px 9px; font-size:0.72rem; cursor:pointer; }
+        .dev-unactivated-filters button.active { background:#3f7e6b; border-color:#3f7e6b; color:#fff; }
+        .dev-unactivated-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:7px; }
+        .dev-unactivated-item { display:flex; align-items:center; gap:8px; border:1px solid #edf2ef; border-radius:7px; padding:6px 8px; font-size:0.75rem; }
+        .dev-unactivated-item img { width:28px; height:28px; border-radius:50%; object-fit:cover; }
+        .dev-unactivated-item .u-name { font-weight:600; color:#334; }
+        .dev-unactivated-item .u-meta { color:#7b8981; font-size:0.68rem; }
     </style>
 </head>
 <body>
@@ -230,20 +310,21 @@
 <main id="mainContent">
     <div class="page-shell">
         <h1 class="page-shell-title">🔬 提升建议</h1>
-        <p class="page-shell-subtitle">根据你的干员库分析，推荐可提升的干员和天赋</p>
+        <p class="page-shell-subtitle">按当前练度计算最小代价路线；只提升真正影响最终排班的天赋</p>
 
         <div class="dev-overview" id="devOverview"></div>
 
         <!-- ★ 顶配排班推荐区 -->
         <div class="dev-top-recommend" id="devTopRecommend">
-            <h2>🏆 顶配排班模拟（已拥有干员）</h2>
+            <h2>🏆 最小代价提升路线（同自动排班策略）</h2>
             
             <!-- 简易排班图 -->
             <div class="dev-simple-schedule" id="devSimpleSchedule">
                 <p class="dev-loading" style="grid-column:1/-1;">正在计算顶配排班…</p>
             </div>
 
-            <h3 style="margin-top:10px; margin-bottom:12px; font-size:0.95rem; color:#555;">建议培养的干员（点击可一键满练）</h3>
+            <h3 style="margin-top:10px; margin-bottom:12px; font-size:0.95rem; color:#555;">真正需要培养的干员（点击选择，最后统一应用）</h3>
+            <div class="dev-plan-actions" id="devPlanActions"></div>
             <div class="dev-top-grid" id="devTopGrid">
                 <!-- 动态渲染干员 -->
             </div>
@@ -260,6 +341,11 @@
         <div id="devContent">
             <p class="dev-loading">加载中…</p>
         </div>
+
+        <details class="dev-unactivated" id="devUnactivated" hidden>
+            <summary>一览未点天赋技能 <span id="devUnactivatedCount"></span></summary>
+            <div id="devUnactivatedBody"></div>
+        </details>
     </div>
     <footer class="site-footer">
     <div class="footer-author">网页素材来源于森空岛wiki | 网页作者：B站 @courison</div>
@@ -282,6 +368,7 @@
 <script src="/assets/js/modules/header-actions.js?v=202610021200"></script>
 <script src="/assets/js/modules/pet.js?v=202610021200"></script>
 <script src="/assets/js/modules/page-pet.js?v=202610021200"></script>
-<script src="/assets/js/modules/dev.js?v=202610200100"></script>
+<script src="/assets/js/modules/dev.js?v=202611101350"></script>
+<script src="/assets/js/modules/particle-bg.js?v=202610261200"></script>
 </body>
 </html>

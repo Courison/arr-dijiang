@@ -6,10 +6,17 @@
     font-family: system-ui, 'Segoe UI', 'Roboto', sans-serif;
 }
 
-body {
+/* ★ 新增：把底层的白底交给 html */
+html {
     background: #ffffff;
+}
+
+/* ★ 修改：把 body 设为透明，让背后的粒子透出来 */
+body {
+    background: transparent;
     margin: 0;
     padding: 0;
     color: #222;
     min-height: 100vh;
+    position: relative; /* 确保内部元素层级计算正常 */
 }

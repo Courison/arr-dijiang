@@ -339,41 +339,45 @@
     return { r1Segs: splitVisual(r1), r2Segs: splitVisual(r2) };
   }
   function renderShiftAxis(rk) {
-    const W = 1000, H = 52, unit = W / 24;
+    const W = 1000, H = 68, unit = W / 24;
     const { r1Segs, r2Segs } = calcShiftSegments(rk);
     const r1Continuous = r1Segs.length === 1, r2Continuous = r2Segs.length === 1;
-    let svg = `<svg class="shift-axis" data-room="${rk}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg">`;
-    svg += `<rect x="0" y="12" width="${W}" height="22" fill="#f0f2f5" rx="3"/>`;
+    let svg = `<svg class="shift-axis" data-room="${rk}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="舱室时间轴，起点 ${pad2(state.startHour)}:00">`;
+    svg += `<rect x="0" y="17" width="${W}" height="28" fill="#eef2f0" rx="5"/>`;
     for (const [a, b] of r1Segs) {
-      svg += `<rect class="axis-seg-green${r1Continuous ? ' axis-seg-draggable' : ''}" data-room="${rk}" data-seg="round1" x="${(a*unit).toFixed(1)}" y="12" width="${((b-a)*unit).toFixed(1)}" height="22" fill="#93c8b1" rx="3"/>`;
+      svg += `<rect class="axis-seg-green${r1Continuous ? ' axis-seg-draggable' : ''}" data-room="${rk}" data-seg="round1" x="${(a*unit).toFixed(1)}" y="17" width="${((b-a)*unit).toFixed(1)}" height="28" fill="#93c8b1" rx="5"/>`;
     }
     for (const [a, b] of r2Segs) {
-      svg += `<rect class="axis-seg-yellow${r2Continuous ? ' axis-seg-draggable' : ''}" data-room="${rk}" data-seg="round2" x="${(a*unit).toFixed(1)}" y="12" width="${((b-a)*unit).toFixed(1)}" height="22" fill="#f0d98a" rx="3"/>`;
-    }
-    for (const [a, b] of r1Segs) {
-      const cx = ((a+b)/2)*unit; const txt = (b-a) >= 3 ? `一轮 ${b-a}h` : '一轮';
-      svg += `<text class="axis-label" x="${cx.toFixed(1)}" y="27" text-anchor="middle" style="font-size:10px;fill:#2a5a4a;pointer-events:none;">${txt}</text>`;
-    }
-    for (const [a, b] of r2Segs) {
-      const cx = ((a+b)/2)*unit; const txt = (b-a) >= 3 ? `二轮 ${b-a}h` : '二轮';
-      svg += `<text class="axis-label" x="${cx.toFixed(1)}" y="27" text-anchor="middle" style="font-size:10px;fill:#8a5e00;pointer-events:none;">${txt}</text>`;
+      svg += `<rect class="axis-seg-yellow${r2Continuous ? ' axis-seg-draggable' : ''}" data-room="${rk}" data-seg="round2" x="${(a*unit).toFixed(1)}" y="17" width="${((b-a)*unit).toFixed(1)}" height="28" fill="#f0d98a" rx="5"/>`;
     }
     const rx = state.startHour * unit;
-    svg += `<line x1="${rx.toFixed(1)}" y1="6" x2="${rx.toFixed(1)}" y2="44" stroke="#c0392b" stroke-width="2"/>`;
-    svg += `<circle cx="${rx.toFixed(1)}" cy="6" r="3" fill="#c0392b"/>`;
-    svg += `<text x="${rx.toFixed(1)}" y="${H-2}" font-size="10" fill="#c0392b" text-anchor="middle" font-weight="600">起点 ${pad2(state.startHour)}:00</text>`;
-    for (let h = 0; h <= 24; h += 3) {
-      const x = h * unit;
-      svg += `<line x1="${x.toFixed(1)}" y1="36" x2="${x.toFixed(1)}" y2="40" stroke="#aaa"/>`;
-      svg += `<text class="axis-tick" x="${x.toFixed(1)}" y="49" text-anchor="middle">${h}h</text>`;
+    svg += `<line x1="${rx.toFixed(1)}" y1="10" x2="${rx.toFixed(1)}" y2="50" stroke="#c0392b" stroke-width="2.2"/>`;
+    svg += `<circle cx="${rx.toFixed(1)}" cy="10" r="3.4" fill="#c0392b"/>`;
+    svg += '</svg>';
+
+    // 文字用 HTML 覆盖层，避免 SVG preserveAspectRatio=none 把字体横向压扁
+    let labels = '';
+    for (const [a, b] of r1Segs) {
+      const pct = ((a + b) / 2) / 24 * 100;
+      labels += `<span class="axis-html-label axis-html-green" style="left:${pct.toFixed(2)}%">A班</span>`;
     }
-    svg += '</svg>'; return svg;
+    for (const [a, b] of r2Segs) {
+      const pct = ((a + b) / 2) / 24 * 100;
+      labels += `<span class="axis-html-label axis-html-yellow" style="left:${pct.toFixed(2)}%">B班</span>`;
+    }
+    let ticks = '';
+    for (let h = 0; h <= 24; h += 6) {
+      const pct = h / 24 * 100;
+      ticks += `<span class="axis-html-tick" style="left:${pct.toFixed(2)}%">${h}h</span>`;
+    }
+    const startPct = state.startHour / 24 * 100;
+    return `<div class="shift-axis-shell" title="起点 ${pad2(state.startHour)}:00">${svg}<div class="axis-html-overlay">${labels}${ticks}<span class="axis-html-start" style="left:${startPct.toFixed(2)}%">${pad2(state.startHour)}:00</span></div></div>`;
   }
   function renderAxisInfo(rk) {
     const { r1, r2 } = calcLogicalSegments(rk);
-    const fmtEnd = b => b === 24 ? '24:00' : b > 24 ? pad2(b-24) + ':00（次日）' : pad2(b) + ':00';
+    const fmtEnd = b => b === 24 ? '24:00' : b > 24 ? pad2(b-24) + ':00' : pad2(b) + ':00';
     const fmtSeg = seg => `${pad2(seg[0] % 24)}:00-${fmtEnd(seg[1])}`;
-    return `一轮 ${fmtSeg(r1)}，二轮 ${fmtSeg(r2)}`;
+    return `A班 ${fmtSeg(r1)}，B班 ${fmtSeg(r2)}`;
   }
 
   // ============ 渲染舱室配置 ============
@@ -914,7 +918,13 @@
       } else rates[rk] = { _total: calcRoomRate(rk) };
     }
     state.history.push({ tSec, moods, workings, rates, activeRounds });
-    if (state.history.length > 20000) state.history.shift();
+    // 超长模拟（如 1s 采样 × 96h）不能从头 shift，否则曲线开头会丢失。
+    // 改为对“较早的样本”做 2:1 抽稀，保留 0 点与最新点。
+    if (state.history.length > 60000) {
+      const last = state.history[state.history.length - 1];
+      state.history = state.history.filter((_, i) => i % 2 === 0);
+      if (state.history[state.history.length - 1] !== last) state.history.push(last);
+    }
   }
   function checkSimulationEnd() {
     if (state.ended) return false;
@@ -1084,10 +1094,10 @@
     }
     for (let i = 0; i <= 4; i++) {
       const v = (rateMax / 4) * i, y = ysRate(v);
-      const txt = isCentral ? v.toFixed(0) : v.toFixed(1);
+      const txt = isCentral ? v.toFixed(0) : `${(v * 100).toFixed(0)}%`;
       svg += `<text class="chart-label chart-label-rate" x="${padL + pw + 4}" y="${(y + 3).toFixed(1)}" text-anchor="start">${txt}</text>`;
     }
-    svg += `<text class="chart-label chart-label-rate" x="${W - 4}" y="${padT + 8}" text-anchor="end" style="font-size:9px;fill:#e08a2c;">${isCentral ? '%/h' : '产率'}</text>`;
+    svg += `<text class="chart-label chart-label-rate" x="${W - 4}" y="${padT + 8}" text-anchor="end" style="font-size:9px;fill:#e08a2c;">${isCentral ? '%/h' : '产率%'}</text>`;
     for (const ev of state.log) {
       if (ev.type === 'switch' && ev.room === rk) {
         const x = xs(ev.tSec);
@@ -1125,8 +1135,8 @@
     let legendRate = '';
     if (isCulture) for (const p of cultureProducts) {
       const color = PRODUCT_COLORS[p] || '#e08a2c';
-      legendRate += `<span class="legend-item"><span class="legend-line-rate" style="background:${color};height:2px;width:16px;display:inline-block;"></span>${PRODUCT_LABELS[p] || p}产率</span>`;
-    } else legendRate = `<span class="legend-item"><span class="legend-line-rate total" style="height:2px;width:16px;display:inline-block;background:#e08a2c;"></span>${isCentral ? '恢复值' : '产率'}</span>`;
+      legendRate += `<span class="legend-item"><span class="legend-line-rate" style="background:${color};height:2px;width:16px;display:inline-block;"></span>${PRODUCT_LABELS[p] || p}产率%</span>`;
+    } else legendRate = `<span class="legend-item"><span class="legend-line-rate total" style="height:2px;width:16px;display:inline-block;background:#e08a2c;"></span>${isCentral ? '恢复值' : '产率%'}</span>`;
     return `<div class="mood-chart-card" data-room="${rk}"><div class="mood-chart-title">${ROOM_LABELS[rk]}</div><div class="mood-chart-svg">${svg}</div><div class="mood-chart-legend">${legendMood}${legendRate}</div></div>`;
   }
 
@@ -1175,7 +1185,7 @@
       }
     } else {
       const v = rates._total != null ? rates._total : 0;
-      html += `<div class="chart-tooltip-row"><span class="label">${isCentral ? '恢复值' : '产率'}</span><span class="val chart-tooltip-rate">${isCentral ? '+' + v.toFixed(0) + '%/h' : v.toFixed(2)}</span></div>`;
+      html += `<div class="chart-tooltip-row"><span class="label">${isCentral ? '恢复值' : '产率'}</span><span class="val chart-tooltip-rate">${isCentral ? v.toFixed(0) + '%/h' : (v * 100).toFixed(0) + '%'}</span></div>`;
     }
     html += `<div style="margin-top:4px;border-top:1px solid rgba(255,255,255,0.15);padding-top:4px;">`;
     const sampleActiveRound = (sample.activeRounds && sample.activeRounds[rk]) || null;
@@ -1220,20 +1230,20 @@
         return `<div class="op-row"><img class="op-avatar ${aCls}" src="${getAvatar(op.name)}" onerror="this.style.display='none';" alt=""><span class="op-name">${esc(op.name)}${rTag}</span><div class="op-mood-bar"><div class="op-mood-fill ${mCls}" style="width:${mPct.toFixed(2)}%"></div></div><span class="op-mood-text">${mPct.toFixed(1)}%</span><span class="op-status ${sCls}">${sTxt}</span></div>`;
       }).join('');
       let footer = '';
-      if (rk === 'central') footer = `<span>总控恢复 <span class="stat-val">+${calcCentralBonus()}%</span>/h</span>`;
+      if (rk === 'central') footer = `<span>总控恢复 <span class="stat-val">${calcCentralBonus()}%</span>/h</span>`;
       else if (rk === 'culture') {
         const c2 = roomConfigs[rk], parts = [];
         for (const p of (c2.products || [])) {
           const r = calcRoomRateByProduct(rk, p);
           const cum = (state.output[rk] && state.output[rk][p]) || 0;
-          parts.push(`${PRODUCT_LABELS[p] || p} <span class="stat-val">${r.toFixed(2)}</span>/h，累计 <span class="stat-val">${cum.toFixed(2)}</span>`);
+          parts.push(`${PRODUCT_LABELS[p] || p} <span class="stat-val">${(r * 100).toFixed(0)}%</span>，累计 <span class="stat-val">${cum.toFixed(2)}</span>`);
         }
         footer = parts.join(' · ') + `<span>有效 <span class="stat-val">${fmtDur(state.workTimeSec[rk])}</span></span>`;
       } else {
         const rate = calcRoomRate(rk);
         const workH = state.workTimeSec[rk] / 3600;
         const avg = workH > 0 ? state.output[rk] / workH : 0;
-        footer = `<span>产率 <span class="stat-val">${rate.toFixed(2)}</span></span><span>累计 <span class="stat-val">${state.output[rk].toFixed(2)}</span></span><span>均产 <span class="stat-val">${avg.toFixed(2)}</span>/h</span><span>有效 <span class="stat-val">${fmtDur(state.workTimeSec[rk])}</span></span>`;
+        footer = `<span>产率 <span class="stat-val">${(rate * 100).toFixed(0)}%</span></span><span>累计 <span class="stat-val">${state.output[rk].toFixed(2)}</span></span><span>均产 <span class="stat-val">${(avg * 100).toFixed(0)}%</span></span><span>有效 <span class="stat-val">${fmtDur(state.workTimeSec[rk])}</span></span>`;
       }
       html += `<div class="room-card ${pausedCls}"><div class="room-card-header"><div><span class="room-card-title">${ROOM_LABELS[rk]}</span>${room.shiftEnabled ? `<span class="room-card-round ${roundCls}">${roundL}</span>` : '<span class="room-card-round">不轮班</span>'}</div></div>${rows || '<div style="font-size:0.72rem;color:#999;text-align:center;padding:6px 0;">空舱</div>'}<div class="room-card-footer">${footer}</div></div>`;
     }
@@ -1258,19 +1268,19 @@
     let rows = '';
     for (const rk of ROOM_KEYS) {
       const room = state.rooms[rk]; if (!room) continue;
-      if (rk === 'central') rows += `<tr><td>${ROOM_LABELS[rk]}</td><td class="num">—</td><td class="num">—</td><td class="num">+${calcCentralBonus()}%/h</td><td class="num">${fmtDur(state.workTimeSec[rk] || 0)}</td></tr>`;
+      if (rk === 'central') rows += `<tr><td>${ROOM_LABELS[rk]}</td><td class="num">—</td><td class="num">—</td><td class="num">${calcCentralBonus()}%/h</td><td class="num">${fmtDur(state.workTimeSec[rk] || 0)}</td></tr>`;
       else if (rk === 'culture') {
         const c2 = roomConfigs[rk], workH = state.workTimeSec[rk] / 3600, lines = [];
         for (const p of (c2.products || [])) {
           const cum = (state.output[rk] && state.output[rk][p]) || 0;
           const avg = workH > 0 ? cum / workH : 0;
-          lines.push(`${PRODUCT_LABELS[p] || p}：${cum.toFixed(2)}（${avg.toFixed(2)}/h）`);
+          lines.push(`${PRODUCT_LABELS[p] || p}：${cum.toFixed(2)}（${(avg * 100).toFixed(0)}%）`);
         }
         rows += `<tr><td>${ROOM_LABELS[rk]}</td><td class="num" colspan="2">${lines.join('<br>')}</td><td class="num">—</td><td class="num">${fmtDur(state.workTimeSec[rk])}</td></tr>`;
       } else {
         const total = state.output[rk], workH = state.workTimeSec[rk] / 3600;
         const avg = workH > 0 ? total / workH : 0;
-        rows += `<tr><td>${ROOM_LABELS[rk]}</td><td class="num">${total.toFixed(2)}</td><td class="num">${avg.toFixed(2)}/h</td><td class="num">—</td><td class="num">${fmtDur(state.workTimeSec[rk])}</td></tr>`;
+        rows += `<tr><td>${ROOM_LABELS[rk]}</td><td class="num">${total.toFixed(2)}</td><td class="num">${(avg * 100).toFixed(0)}%</td><td class="num">—</td><td class="num">${fmtDur(state.workTimeSec[rk])}</td></tr>`;
       }
     }
     let opRows = '';
